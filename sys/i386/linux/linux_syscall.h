@@ -4,6 +4,7 @@
  * DO NOT EDIT-- this file is automatically @generated.
  */
 
+				/* 0 is unimplemented setup */
 #define	LINUX_SYS_linux_exit	1
 #define	LINUX_SYS_linux_fork	2
 #define	LINUX_SYS_read	3
@@ -20,6 +21,7 @@
 #define	LINUX_SYS_linux_mknod	14
 #define	LINUX_SYS_linux_chmod	15
 #define	LINUX_SYS_linux_lchown16	16
+				/* 17 is unimplemented break */
 #define	LINUX_SYS_linux_stat	18
 #define	LINUX_SYS_linux_lseek	19
 #define	LINUX_SYS_linux_getpid	20
@@ -30,10 +32,14 @@
 #define	LINUX_SYS_linux_stime	25
 #define	LINUX_SYS_linux_ptrace	26
 #define	LINUX_SYS_linux_alarm	27
+				/* 28 is unimplemented fstat */
 #define	LINUX_SYS_linux_pause	29
 #define	LINUX_SYS_linux_utime	30
+				/* 31 is unimplemented stty */
+				/* 32 is unimplemented gtty */
 #define	LINUX_SYS_linux_access	33
 #define	LINUX_SYS_linux_nice	34
+				/* 35 is unimplemented ftime */
 #define	LINUX_SYS_sync	36
 #define	LINUX_SYS_linux_kill	37
 #define	LINUX_SYS_linux_rename	38
@@ -42,6 +48,7 @@
 #define	LINUX_SYS_dup	41
 #define	LINUX_SYS_linux_pipe	42
 #define	LINUX_SYS_linux_times	43
+				/* 44 is unimplemented prof */
 #define	LINUX_SYS_linux_brk	45
 #define	LINUX_SYS_linux_setgid16	46
 #define	LINUX_SYS_linux_getgid16	47
@@ -50,9 +57,12 @@
 #define	LINUX_SYS_linux_getegid16	50
 #define	LINUX_SYS_acct	51
 #define	LINUX_SYS_linux_umount	52
+				/* 53 is unimplemented lock */
 #define	LINUX_SYS_linux_ioctl	54
 #define	LINUX_SYS_linux_fcntl	55
+				/* 56 is unimplemented mpx */
 #define	LINUX_SYS_setpgid	57
+				/* 58 is unimplemented ulimit */
 #define	LINUX_SYS_linux_olduname	59
 #define	LINUX_SYS_umask	60
 #define	LINUX_SYS_chroot	61
@@ -92,6 +102,7 @@
 #define	LINUX_SYS_fchown	95
 #define	LINUX_SYS_linux_getpriority	96
 #define	LINUX_SYS_setpriority	97
+				/* 98 is unimplemented profil */
 #define	LINUX_SYS_linux_statfs	99
 #define	LINUX_SYS_linux_fstatfs	100
 #define	LINUX_SYS_linux_ioperm	101
@@ -105,6 +116,7 @@
 #define	LINUX_SYS_linux_uname	109
 #define	LINUX_SYS_linux_iopl	110
 #define	LINUX_SYS_linux_vhangup	111
+				/* 112 is unimplemented idle */
 #define	LINUX_SYS_linux_vm86old	113
 #define	LINUX_SYS_linux_wait4	114
 #define	LINUX_SYS_linux_swapoff	115
@@ -119,14 +131,17 @@
 #define	LINUX_SYS_linux_adjtimex	124
 #define	LINUX_SYS_linux_mprotect	125
 #define	LINUX_SYS_linux_sigprocmask	126
+				/* 127 is unimplemented create_module */
 #define	LINUX_SYS_linux_init_module	128
 #define	LINUX_SYS_linux_delete_module	129
+				/* 130 is unimplemented get_kernel_syms */
 #define	LINUX_SYS_linux_quotactl	131
 #define	LINUX_SYS_getpgid	132
 #define	LINUX_SYS_fchdir	133
 #define	LINUX_SYS_linux_bdflush	134
 #define	LINUX_SYS_linux_sysfs	135
 #define	LINUX_SYS_linux_personality	136
+				/* 137 is unimplemented afs_syscall */
 #define	LINUX_SYS_linux_setfsuid16	138
 #define	LINUX_SYS_linux_setfsgid16	139
 #define	LINUX_SYS_linux_llseek	140
@@ -156,7 +171,9 @@
 #define	LINUX_SYS_linux_setresuid16	164
 #define	LINUX_SYS_linux_getresuid16	165
 #define	LINUX_SYS_linux_vm86	166
+				/* 167 is unimplemented query_module */
 #define	LINUX_SYS_linux_poll	168
+				/* 169 is unimplemented nfsservctl */
 #define	LINUX_SYS_linux_setresgid16	170
 #define	LINUX_SYS_linux_getresgid16	171
 #define	LINUX_SYS_linux_prctl	172
@@ -175,6 +192,8 @@
 #define	LINUX_SYS_linux_capset	185
 #define	LINUX_SYS_linux_sigaltstack	186
 #define	LINUX_SYS_linux_sendfile	187
+				/* 188 is unimplemented getpmsg */
+				/* 189 is unimplemented putpmsg */
 #define	LINUX_SYS_linux_vfork	190
 #define	LINUX_SYS_linux_getrlimit	191
 #define	LINUX_SYS_linux_mmap2	192
@@ -206,7 +225,10 @@
 #define	LINUX_SYS_linux_madvise	219
 #define	LINUX_SYS_linux_getdents64	220
 #define	LINUX_SYS_linux_fcntl64	221
+				/* 222 is unimplemented nil */
+				/* 223 is unimplemented nil */
 #define	LINUX_SYS_linux_gettid	224
+				/* 225 is unimplemented linux_readahead */
 #define	LINUX_SYS_linux_setxattr	226
 #define	LINUX_SYS_linux_lsetxattr	227
 #define	LINUX_SYS_linux_fsetxattr	228
@@ -226,7 +248,13 @@
 #define	LINUX_SYS_linux_sched_getaffinity	242
 #define	LINUX_SYS_linux_set_thread_area	243
 #define	LINUX_SYS_linux_get_thread_area	244
+				/* 245 is unimplemented linux_io_setup */
+				/* 246 is unimplemented linux_io_destroy */
+				/* 247 is unimplemented linux_io_getevents */
+				/* 248 is unimplemented linux_io_submit */
+				/* 249 is unimplemented linux_io_cancel */
 #define	LINUX_SYS_linux_fadvise64	250
+				/* 251 is unimplemented nil */
 #define	LINUX_SYS_linux_exit_group	252
 #define	LINUX_SYS_linux_lookup_dcookie	253
 #define	LINUX_SYS_linux_epoll_create	254
@@ -248,6 +276,7 @@
 #define	LINUX_SYS_linux_tgkill	270
 #define	LINUX_SYS_linux_utimes	271
 #define	LINUX_SYS_linux_fadvise64_64	272
+				/* 273 is unimplemented vserver */
 #define	LINUX_SYS_linux_mbind	274
 #define	LINUX_SYS_linux_get_mempolicy	275
 #define	LINUX_SYS_linux_set_mempolicy	276
@@ -259,6 +288,7 @@
 #define	LINUX_SYS_linux_mq_getsetattr	282
 #define	LINUX_SYS_linux_kexec_load	283
 #define	LINUX_SYS_linux_waitid	284
+				/* 285 is unimplemented nil */
 #define	LINUX_SYS_linux_add_key	286
 #define	LINUX_SYS_linux_request_key	287
 #define	LINUX_SYS_linux_keyctl	288
@@ -360,6 +390,12 @@
 #define	LINUX_SYS_linux_arch_prctl	384
 #define	LINUX_SYS_linux_io_pgetevents	385
 #define	LINUX_SYS_linux_rseq	386
+				/* 387 is unimplemented nosys */
+				/* 388 is unimplemented nosys */
+				/* 389 is unimplemented nosys */
+				/* 390 is unimplemented nosys */
+				/* 391 is unimplemented nosys */
+				/* 392 is unimplemented nosys */
 #define	LINUX_SYS_linux_semget	393
 #define	LINUX_SYS_linux_semctl	394
 #define	LINUX_SYS_linux_shmget	395
@@ -382,6 +418,7 @@
 #define	LINUX_SYS_linux_utimensat_time64	412
 #define	LINUX_SYS_linux_pselect6_time64	413
 #define	LINUX_SYS_linux_ppoll_time64	414
+				/* 415 is unimplemented nosys */
 #define	LINUX_SYS_linux_io_pgetevents_time64	416
 #define	LINUX_SYS_linux_recvmmsg_time64	417
 #define	LINUX_SYS_linux_mq_timedsend_time64	418

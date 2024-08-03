@@ -1729,7 +1729,7 @@ struct linux_cachestat_args {
 struct linux_fchmodat2_args {
 	syscallarg_t dummy;
 };
-int	linux_exit(struct thread *, struct linux_exit_args *);
+void	linux_exit(struct thread *, struct linux_exit_args *);
 int	linux_fork(struct thread *, struct linux_fork_args *);
 int	linux_write(struct thread *, struct linux_write_args *);
 int	linux_open(struct thread *, struct linux_open_args *);
@@ -1892,7 +1892,7 @@ int	linux_mincore(struct thread *, struct linux_mincore_args *);
 int	linux_madvise(struct thread *, struct linux_madvise_args *);
 int	linux_getdents64(struct thread *, struct linux_getdents64_args *);
 int	linux_fcntl64(struct thread *, struct linux_fcntl64_args *);
-int	linux_gettid(struct thread *, struct linux_gettid_args *);
+long	linux_gettid(struct thread *, struct linux_gettid_args *);
 int	linux_setxattr(struct thread *, struct linux_setxattr_args *);
 int	linux_lsetxattr(struct thread *, struct linux_lsetxattr_args *);
 int	linux_fsetxattr(struct thread *, struct linux_fsetxattr_args *);

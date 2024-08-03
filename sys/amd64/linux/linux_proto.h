@@ -1490,7 +1490,7 @@ int	linux_clone(struct thread *, struct linux_clone_args *);
 int	linux_fork(struct thread *, struct linux_fork_args *);
 int	linux_vfork(struct thread *, struct linux_vfork_args *);
 int	linux_execve(struct thread *, struct linux_execve_args *);
-int	linux_exit(struct thread *, struct linux_exit_args *);
+void	linux_exit(struct thread *, struct linux_exit_args *);
 int	linux_wait4(struct thread *, struct linux_wait4_args *);
 int	linux_kill(struct thread *, struct linux_kill_args *);
 int	linux_newuname(struct thread *, struct linux_newuname_args *);

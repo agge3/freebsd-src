@@ -95,8 +95,10 @@
 				/* 88 is old sethostname */
 #define	SYS_getdtablesize	89
 #define	SYS_dup2	90
+				/* 91 is reserved */
 #define	SYS_fcntl	92
 #define	SYS_select	93
+				/* 94 is reserved */
 #define	SYS_fsync	95
 #define	SYS_setpriority	96
 #define	SYS_socket	97
@@ -121,6 +123,7 @@
 #define	SYS_gettimeofday	116
 #define	SYS_getrusage	117
 #define	SYS_getsockopt	118
+				/* 119 is reserved */
 #define	SYS_readv	120
 #define	SYS_writev	121
 #define	SYS_settimeofday	122
@@ -152,11 +155,15 @@
 #define	SYS_quotactl	148
 				/* 149 is old quota */
 				/* 150 is old getsockname */
+				/* 151 is reserved */
+				/* 152 is reserved */
+				/* 153 is reserved */
 #define	SYS_nlm_syscall	154
 #define	SYS_nfssvc	155
 				/* 156 is old getdirentries */
 				/* 157 is freebsd4 statfs */
 				/* 158 is freebsd4 fstatfs */
+				/* 159 is reserved */
 #define	SYS_lgetfh	160
 #define	SYS_getfh	161
 				/* 162 is freebsd4 getdomainname */
@@ -164,13 +171,20 @@
 				/* 164 is freebsd4 uname */
 #define	SYS_sysarch	165
 #define	SYS_rtprio	166
+				/* 167 is reserved */
+				/* 168 is reserved */
 #define	SYS_semsys	169
 #define	SYS_msgsys	170
 #define	SYS_shmsys	171
+				/* 172 is reserved */
 				/* 173 is freebsd6 pread */
 				/* 174 is freebsd6 pwrite */
 #define	SYS_setfib	175
 #define	SYS_ntp_adjtime	176
+				/* 177 is reserved */
+				/* 178 is reserved */
+				/* 179 is reserved */
+				/* 180 is reserved */
 #define	SYS_setgid	181
 #define	SYS_setegid	182
 #define	SYS_seteuid	183
@@ -183,6 +197,7 @@
 #define	SYS_freebsd11_lstat	190
 #define	SYS_pathconf	191
 #define	SYS_fpathconf	192
+				/* 193 is reserved */
 #define	SYS_getrlimit	194
 #define	SYS_setrlimit	195
 #define	SYS_freebsd11_getdirentries	196
@@ -197,6 +212,7 @@
 #define	SYS_undelete	205
 #define	SYS_futimes	206
 #define	SYS_getpgid	207
+				/* 208 is reserved */
 #define	SYS_poll	209
 #define	SYS_freebsd7___semctl	220
 #define	SYS_semget	221
@@ -223,8 +239,11 @@
 #define	SYS_ffclock_setestimate	242
 #define	SYS_ffclock_getestimate	243
 #define	SYS_clock_nanosleep	244
+				/* 245 is reserved */
+				/* 246 is reserved */
 #define	SYS_clock_getcpuclockid2	247
 #define	SYS_ntp_gettime	248
+				/* 249 is reserved */
 #define	SYS_minherit	250
 #define	SYS_rfork	251
 				/* 252 is obsolete openbsd_poll */
@@ -233,7 +252,22 @@
 #define	SYS_aio_read	255
 #define	SYS_aio_write	256
 #define	SYS_lio_listio	257
+				/* 258 is reserved */
+				/* 259 is reserved */
+				/* 260 is reserved */
+				/* 261 is reserved */
+				/* 262 is reserved */
+				/* 263 is reserved */
+				/* 264 is reserved */
+				/* 265 is reserved */
+				/* 266 is reserved */
+				/* 267 is reserved */
+				/* 268 is reserved */
+				/* 269 is reserved */
+				/* 270 is reserved */
+				/* 271 is reserved */
 #define	SYS_freebsd11_getdents	272
+				/* 273 is reserved */
 #define	SYS_lchmod	274
 				/* 275 is obsolete netbsd_lchown */
 #define	SYS_lutimes	276
@@ -241,8 +275,22 @@
 #define	SYS_freebsd11_nstat	278
 #define	SYS_freebsd11_nfstat	279
 #define	SYS_freebsd11_nlstat	280
+				/* 281 is reserved */
+				/* 282 is reserved */
+				/* 283 is reserved */
+				/* 284 is reserved */
+				/* 285 is reserved */
+				/* 286 is reserved */
+				/* 287 is reserved */
+				/* 288 is reserved */
 #define	SYS_preadv	289
 #define	SYS_pwritev	290
+				/* 291 is reserved */
+				/* 292 is reserved */
+				/* 293 is reserved */
+				/* 294 is reserved */
+				/* 295 is reserved */
+				/* 296 is reserved */
 				/* 297 is freebsd4 fhstatfs */
 #define	SYS_fhopen	298
 #define	SYS_freebsd11_fhstat	299
@@ -316,6 +364,7 @@
 				/* 367 is obsolete __cap_get_file */
 				/* 368 is obsolete __cap_set_fd */
 				/* 369 is obsolete __cap_set_file */
+				/* 370 is reserved */
 #define	SYS_extattr_set_fd	371
 #define	SYS_extattr_get_fd	372
 #define	SYS_extattr_delete_fd	373
@@ -344,6 +393,7 @@
 #define	SYS_freebsd11_statfs	396
 #define	SYS_freebsd11_fstatfs	397
 #define	SYS_freebsd11_fhstatfs	398
+				/* 399 is reserved */
 #define	SYS_ksem_close	400
 #define	SYS_ksem_post	401
 #define	SYS_ksem_wait	402
@@ -362,6 +412,9 @@
 #define	SYS___mac_execve	415
 #define	SYS_sigaction	416
 #define	SYS_sigreturn	417
+				/* 418 is reserved */
+				/* 419 is reserved */
+				/* 420 is reserved */
 #define	SYS_getcontext	421
 #define	SYS_setcontext	422
 #define	SYS_swapcontext	423
@@ -408,6 +461,10 @@
 #define	SYS_thr_set_name	464
 #define	SYS_aio_fsync	465
 #define	SYS_rtprio_thread	466
+				/* 467 is reserved */
+				/* 468 is reserved */
+				/* 469 is reserved */
+				/* 470 is reserved */
 #define	SYS_sctp_peeloff	471
 #define	SYS_sctp_generic_sendmsg	472
 #define	SYS_sctp_generic_sendmsg_iov	473
@@ -458,6 +515,7 @@
 #define	SYS_pdfork	518
 #define	SYS_pdkill	519
 #define	SYS_pdgetpid	520
+				/* 521 is reserved */
 #define	SYS_pselect	522
 #define	SYS_getloginclass	523
 #define	SYS_setloginclass	524

@@ -1,8 +1,8 @@
 /*
  * System call argument to DTrace register array converstion.
- *
- * DO NOT EDIT-- this file is automatically @generated.
  * This file is part of the DTrace syscall provider.
+ *
+ * DO NOT EDIT-- this file is automatically @generated
  */
 
 static void
@@ -1427,11 +1427,6 @@ systrace_args(int sysnum, void *params, uint64_t *uarg, int *n_args)
 		iarg[a++] = p->gidsetsize; /* l_int */
 		uarg[a++] = (intptr_t)p->grouplist; /* l_gid_t * */
 		*n_args = 2;
-		break;
-	}
-	/* fchown */
-	case 207: {
-		*n_args = 0;
 		break;
 	}
 	/* setresuid */
@@ -3314,10 +3309,10 @@ systrace_args(int sysnum, void *params, uint64_t *uarg, int *n_args)
 		*n_args = 0;
 		break;
 	}
-	default:
-		*n_args = 0;
-		break;
-	};
+    default:
+        *n_args = 0;
+        break;
+    };
 }
 static void
 systrace_entry_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
@@ -5535,9 +5530,6 @@ systrace_entry_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 		default:
 			break;
 		};
-		break;
-	/* fchown */
-	case 207:
 		break;
 	/* setresuid */
 	case 208:
@@ -8638,11 +8630,11 @@ systrace_entry_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 	/* linux_fchmodat2 */
 	case 452:
 		break;
-	default:
-		break;
-	};
-	if (p != NULL)
-		strlcpy(desc, p, descsz);
+    default:
+        break;
+    };
+    if (p != NULL)
+        strlcpy(desc, p, descsz);
 }
 static void
 systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
@@ -9477,8 +9469,6 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 		if (ndx == 0 || ndx == 1)
 			p = "int";
 		break;
-	/* fchown */
-	case 207:
 	/* setresuid */
 	case 208:
 		if (ndx == 0 || ndx == 1)
@@ -10444,9 +10434,9 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 	case 451:
 	/* linux_fchmodat2 */
 	case 452:
-	default:
-		break;
-	};
-	if (p != NULL)
-		strlcpy(desc, p, descsz);
+    default:
+        break;
+    };
+    if (p != NULL)
+        strlcpy(desc, p, descsz);
 }
