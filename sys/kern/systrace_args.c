@@ -1,8 +1,8 @@
 /*
  * System call argument to DTrace register array converstion.
- *
- * DO NOT EDIT-- this file is automatically @generated.
  * This file is part of the DTrace syscall provider.
+ *
+ * DO NOT EDIT-- this file is automatically @generated
  */
 
 static void
@@ -3455,10 +3455,10 @@ systrace_args(int sysnum, void *params, uint64_t *uarg, int *n_args)
 		*n_args = 5;
 		break;
 	}
-	default:
-		*n_args = 0;
-		break;
-	};
+    default:
+        *n_args = 0;
+        break;
+    };
 }
 static void
 systrace_entry_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
@@ -9245,11 +9245,11 @@ systrace_entry_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 			break;
 		};
 		break;
-	default:
-		break;
-	};
-	if (p != NULL)
-		strlcpy(desc, p, descsz);
+    default:
+        break;
+    };
+    if (p != NULL)
+        strlcpy(desc, p, descsz);
 }
 static void
 systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
@@ -9323,7 +9323,7 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 	/* break */
 	case 17:
 		if (ndx == 0 || ndx == 1)
-			p = "void *";
+			p = "void";
 		break;
 	/* getpid */
 	case 20:
@@ -9882,7 +9882,7 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 	/* shmat */
 	case 228:
 		if (ndx == 0 || ndx == 1)
-			p = "void *";
+			p = "void";
 		break;
 	/* shmdt */
 	case 230:
@@ -10707,7 +10707,7 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 	/* mmap */
 	case 477:
 		if (ndx == 0 || ndx == 1)
-			p = "void *";
+			p = "void";
 		break;
 	/* lseek */
 	case 478:
@@ -11218,9 +11218,9 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 		if (ndx == 0 || ndx == 1)
 			p = "int";
 		break;
-	default:
-		break;
-	};
-	if (p != NULL)
-		strlcpy(desc, p, descsz);
+    default:
+        break;
+    };
+    if (p != NULL)
+        strlcpy(desc, p, descsz);
 }

@@ -4,6 +4,11 @@
  * DO NOT EDIT-- this file is automatically @generated.
  */
 
+				/* 0 is unimplemented linux_io_setup */
+				/* 1 is unimplemented linux_io_destroy */
+				/* 2 is unimplemented linux_io_submit */
+				/* 3 is unimplemented linux_io_cancel */
+				/* 4 is unimplemented linux_io_getevents */
 #define	LINUX_SYS_linux_setxattr	5
 #define	LINUX_SYS_linux_lsetxattr	6
 #define	LINUX_SYS_linux_fsetxattr	7
@@ -38,8 +43,10 @@
 #define	LINUX_SYS_linux_symlinkat	36
 #define	LINUX_SYS_linux_linkat	37
 #define	LINUX_SYS_linux_renameat	38
+				/* 39 is unimplemented linux_umount2 */
 #define	LINUX_SYS_linux_mount	40
 #define	LINUX_SYS_linux_pivot_root	41
+				/* 42 is unimplemented nfsservctl */
 #define	LINUX_SYS_linux_statfs	43
 #define	LINUX_SYS_linux_fstatfs	44
 #define	LINUX_SYS_linux_truncate	45
@@ -57,6 +64,7 @@
 #define	LINUX_SYS_close	57
 #define	LINUX_SYS_linux_vhangup	58
 #define	LINUX_SYS_linux_pipe2	59
+				/* 60 is unimplemented linux_quotactl */
 #define	LINUX_SYS_linux_getdents64	61
 #define	LINUX_SYS_linux_lseek	62
 #define	LINUX_SYS_read	63
@@ -77,6 +85,7 @@
 #define	LINUX_SYS_linux_readlinkat	78
 #define	LINUX_SYS_linux_newfstatat	79
 #define	LINUX_SYS_linux_newfstat	80
+				/* 81 is unimplemented linux_sync */
 #define	LINUX_SYS_fsync	82
 #define	LINUX_SYS_linux_fdatasync	83
 #define	LINUX_SYS_linux_sync_file_range	84
@@ -123,6 +132,7 @@
 #define	LINUX_SYS_linux_sched_get_priority_max	125
 #define	LINUX_SYS_linux_sched_get_priority_min	126
 #define	LINUX_SYS_linux_sched_rr_get_interval	127
+				/* 128 is unimplemented restart_syscall */
 #define	LINUX_SYS_linux_kill	129
 #define	LINUX_SYS_linux_tkill	130
 #define	LINUX_SYS_linux_tgkill	131
@@ -207,6 +217,7 @@
 #define	LINUX_SYS_linux_shutdown	210
 #define	LINUX_SYS_linux_sendmsg	211
 #define	LINUX_SYS_linux_recvmsg	212
+				/* 213 is unimplemented linux_readahead */
 #define	LINUX_SYS_linux_brk	214
 #define	LINUX_SYS_munmap	215
 #define	LINUX_SYS_linux_mremap	216
@@ -237,6 +248,22 @@
 #define	LINUX_SYS_linux_perf_event_open	241
 #define	LINUX_SYS_linux_accept4	242
 #define	LINUX_SYS_linux_recvmmsg	243
+				/* 244 is unimplemented unimpl_md_syscall */
+				/* 245 is unimplemented unimpl_md_syscall */
+				/* 246 is unimplemented unimpl_md_syscall */
+				/* 247 is unimplemented unimpl_md_syscall */
+				/* 248 is unimplemented unimpl_md_syscall */
+				/* 249 is unimplemented unimpl_md_syscall */
+				/* 250 is unimplemented unimpl_md_syscall */
+				/* 251 is unimplemented unimpl_md_syscall */
+				/* 252 is unimplemented unimpl_md_syscall */
+				/* 253 is unimplemented unimpl_md_syscall */
+				/* 254 is unimplemented unimpl_md_syscall */
+				/* 255 is unimplemented unimpl_md_syscall */
+				/* 256 is unimplemented unimpl_md_syscall */
+				/* 257 is unimplemented unimpl_md_syscall */
+				/* 258 is unimplemented unimpl_md_syscall */
+				/* 259 is unimplemented unimpl_md_syscall */
 #define	LINUX_SYS_linux_wait4	260
 #define	LINUX_SYS_linux_prlimit64	261
 #define	LINUX_SYS_linux_fanotify_init	262
@@ -272,6 +299,135 @@
 #define	LINUX_SYS_linux_io_pgetevents	292
 #define	LINUX_SYS_linux_rseq	293
 #define	LINUX_SYS_linux_kexec_file_load	294
+				/* 295 is unimplemented unimpl_md_syscall */
+				/* 296 is unimplemented unimpl_md_syscall */
+				/* 297 is unimplemented unimpl_md_syscall */
+				/* 298 is unimplemented unimpl_md_syscall */
+				/* 299 is unimplemented unimpl_md_syscall */
+				/* 300 is unimplemented unimpl_md_syscall */
+				/* 301 is unimplemented unimpl_md_syscall */
+				/* 302 is unimplemented unimpl_md_syscall */
+				/* 303 is unimplemented unimpl_md_syscall */
+				/* 304 is unimplemented unimpl_md_syscall */
+				/* 305 is unimplemented unimpl_md_syscall */
+				/* 306 is unimplemented unimpl_md_syscall */
+				/* 307 is unimplemented unimpl_md_syscall */
+				/* 308 is unimplemented unimpl_md_syscall */
+				/* 309 is unimplemented unimpl_md_syscall */
+				/* 310 is unimplemented unimpl_md_syscall */
+				/* 311 is unimplemented unimpl_md_syscall */
+				/* 312 is unimplemented unimpl_md_syscall */
+				/* 313 is unimplemented unimpl_md_syscall */
+				/* 314 is unimplemented unimpl_md_syscall */
+				/* 315 is unimplemented unimpl_md_syscall */
+				/* 316 is unimplemented unimpl_md_syscall */
+				/* 317 is unimplemented unimpl_md_syscall */
+				/* 318 is unimplemented unimpl_md_syscall */
+				/* 319 is unimplemented unimpl_md_syscall */
+				/* 320 is unimplemented unimpl_md_syscall */
+				/* 321 is unimplemented unimpl_md_syscall */
+				/* 322 is unimplemented unimpl_md_syscall */
+				/* 323 is unimplemented unimpl_md_syscall */
+				/* 324 is unimplemented unimpl_md_syscall */
+				/* 325 is unimplemented unimpl_md_syscall */
+				/* 326 is unimplemented unimpl_md_syscall */
+				/* 327 is unimplemented unimpl_md_syscall */
+				/* 328 is unimplemented unimpl_md_syscall */
+				/* 329 is unimplemented unimpl_md_syscall */
+				/* 330 is unimplemented unimpl_md_syscall */
+				/* 331 is unimplemented unimpl_md_syscall */
+				/* 332 is unimplemented unimpl_md_syscall */
+				/* 333 is unimplemented unimpl_md_syscall */
+				/* 334 is unimplemented unimpl_md_syscall */
+				/* 335 is unimplemented unimpl_md_syscall */
+				/* 336 is unimplemented unimpl_md_syscall */
+				/* 337 is unimplemented unimpl_md_syscall */
+				/* 338 is unimplemented unimpl_md_syscall */
+				/* 339 is unimplemented unimpl_md_syscall */
+				/* 340 is unimplemented unimpl_md_syscall */
+				/* 341 is unimplemented unimpl_md_syscall */
+				/* 342 is unimplemented unimpl_md_syscall */
+				/* 343 is unimplemented unimpl_md_syscall */
+				/* 344 is unimplemented unimpl_md_syscall */
+				/* 345 is unimplemented unimpl_md_syscall */
+				/* 346 is unimplemented unimpl_md_syscall */
+				/* 347 is unimplemented unimpl_md_syscall */
+				/* 348 is unimplemented unimpl_md_syscall */
+				/* 349 is unimplemented unimpl_md_syscall */
+				/* 350 is unimplemented unimpl_md_syscall */
+				/* 351 is unimplemented unimpl_md_syscall */
+				/* 352 is unimplemented unimpl_md_syscall */
+				/* 353 is unimplemented unimpl_md_syscall */
+				/* 354 is unimplemented unimpl_md_syscall */
+				/* 355 is unimplemented unimpl_md_syscall */
+				/* 356 is unimplemented unimpl_md_syscall */
+				/* 357 is unimplemented unimpl_md_syscall */
+				/* 358 is unimplemented unimpl_md_syscall */
+				/* 359 is unimplemented unimpl_md_syscall */
+				/* 360 is unimplemented unimpl_md_syscall */
+				/* 361 is unimplemented unimpl_md_syscall */
+				/* 362 is unimplemented unimpl_md_syscall */
+				/* 363 is unimplemented unimpl_md_syscall */
+				/* 364 is unimplemented unimpl_md_syscall */
+				/* 365 is unimplemented unimpl_md_syscall */
+				/* 366 is unimplemented unimpl_md_syscall */
+				/* 367 is unimplemented unimpl_md_syscall */
+				/* 368 is unimplemented unimpl_md_syscall */
+				/* 369 is unimplemented unimpl_md_syscall */
+				/* 370 is unimplemented unimpl_md_syscall */
+				/* 371 is unimplemented unimpl_md_syscall */
+				/* 372 is unimplemented unimpl_md_syscall */
+				/* 373 is unimplemented unimpl_md_syscall */
+				/* 374 is unimplemented unimpl_md_syscall */
+				/* 375 is unimplemented unimpl_md_syscall */
+				/* 376 is unimplemented unimpl_md_syscall */
+				/* 377 is unimplemented unimpl_md_syscall */
+				/* 378 is unimplemented unimpl_md_syscall */
+				/* 379 is unimplemented unimpl_md_syscall */
+				/* 380 is unimplemented unimpl_md_syscall */
+				/* 381 is unimplemented unimpl_md_syscall */
+				/* 382 is unimplemented unimpl_md_syscall */
+				/* 383 is unimplemented unimpl_md_syscall */
+				/* 384 is unimplemented unimpl_md_syscall */
+				/* 385 is unimplemented unimpl_md_syscall */
+				/* 386 is unimplemented unimpl_md_syscall */
+				/* 387 is unimplemented unimpl_md_syscall */
+				/* 388 is unimplemented unimpl_md_syscall */
+				/* 389 is unimplemented unimpl_md_syscall */
+				/* 390 is unimplemented unimpl_md_syscall */
+				/* 391 is unimplemented unimpl_md_syscall */
+				/* 392 is unimplemented unimpl_md_syscall */
+				/* 393 is unimplemented unimpl_md_syscall */
+				/* 394 is unimplemented unimpl_md_syscall */
+				/* 395 is unimplemented unimpl_md_syscall */
+				/* 396 is unimplemented unimpl_md_syscall */
+				/* 397 is unimplemented unimpl_md_syscall */
+				/* 398 is unimplemented unimpl_md_syscall */
+				/* 399 is unimplemented unimpl_md_syscall */
+				/* 400 is unimplemented unimpl_md_syscall */
+				/* 401 is unimplemented unimpl_md_syscall */
+				/* 402 is unimplemented unimpl_md_syscall */
+				/* 403 is unimplemented unimpl_md_syscall */
+				/* 404 is unimplemented unimpl_md_syscall */
+				/* 405 is unimplemented unimpl_md_syscall */
+				/* 406 is unimplemented unimpl_md_syscall */
+				/* 407 is unimplemented unimpl_md_syscall */
+				/* 408 is unimplemented unimpl_md_syscall */
+				/* 409 is unimplemented unimpl_md_syscall */
+				/* 410 is unimplemented unimpl_md_syscall */
+				/* 411 is unimplemented unimpl_md_syscall */
+				/* 412 is unimplemented unimpl_md_syscall */
+				/* 413 is unimplemented unimpl_md_syscall */
+				/* 414 is unimplemented unimpl_md_syscall */
+				/* 415 is unimplemented unimpl_md_syscall */
+				/* 416 is unimplemented unimpl_md_syscall */
+				/* 417 is unimplemented unimpl_md_syscall */
+				/* 418 is unimplemented unimpl_md_syscall */
+				/* 419 is unimplemented unimpl_md_syscall */
+				/* 420 is unimplemented unimpl_md_syscall */
+				/* 421 is unimplemented unimpl_md_syscall */
+				/* 422 is unimplemented unimpl_md_syscall */
+				/* 423 is unimplemented unimpl_md_syscall */
 #define	LINUX_SYS_linux_pidfd_send_signal	424
 #define	LINUX_SYS_linux_io_uring_setup	425
 #define	LINUX_SYS_linux_io_uring_enter	426

@@ -19,6 +19,12 @@
 -- available in ports.  Currently, this script is compatible with lua from ports
 -- along with the compatible luafilesystem and lua-posix modules.
 
+-- When we have a path, add it to the package.path (. is already in the list)
+if arg[0]:match("/") then
+	local a = arg[0]:gsub("/[^/]+.lua$", "")
+	package.path = package.path .. ";" .. a .. "/?.lua"
+end
+
 -- The FreeBSD syscall generator
 local FreeBSDSyscall = require("freebsd-syscall")
 
@@ -46,20 +52,20 @@ config.mergeChangesAbi()
 local tbl = FreeBSDSyscall:new{sysfile = sysfile, config = config}
 
 -- Output files
---syscalls.file = config.sysnames
---syscall_h.file = config.syshdr
---syscall_mk.file = config.sysmk
---init_sysent.file = config.syssw
---systrace_args.file = config.systrace
---sysproto_h.file = config.sysproto
+syscalls.file = config.sysnames
+syscall_h.file = config.syshdr
+syscall_mk.file = config.sysmk
+init_sysent.file = config.syssw
+systrace_args.file = config.systrace
+sysproto_h.file = config.sysproto
 
 -- Test output files
-syscalls.file = "test/syscalls.c"
-syscall_h.file = "test/syscall.h"
-syscall_mk.file = "test/syscall.mk"
-init_sysent.file = "test/init_sysent.c"
-systrace_args.file = "test/systrace_args.c"
-sysproto_h.file = "test/sysproto.h"
+--syscalls.file = "test/syscalls.c"
+--syscall_h.file = "test/syscall.h"
+--syscall_mk.file = "test/syscall.mk"
+--init_sysent.file = "test/init_sysent.c"
+--systrace_args.file = "test/systrace_args.c"
+--sysproto_h.file = "test/sysproto.h"
 
 syscalls.generate(tbl, config, syscalls.file)
 syscall_h.generate(tbl, config, syscall_h.file)

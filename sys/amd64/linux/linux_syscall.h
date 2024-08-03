@@ -138,6 +138,7 @@
 #define	LINUX_SYS_linux_sigaltstack	131
 #define	LINUX_SYS_linux_utime	132
 #define	LINUX_SYS_linux_mknod	133
+				/* 134 is unimplemented uselib */
 #define	LINUX_SYS_linux_personality	135
 #define	LINUX_SYS_linux_ustat	136
 #define	LINUX_SYS_linux_statfs	137
@@ -177,9 +178,18 @@
 #define	LINUX_SYS_linux_setdomainname	171
 #define	LINUX_SYS_linux_iopl	172
 #define	LINUX_SYS_linux_ioperm	173
+				/* 174 is unimplemented create_module */
 #define	LINUX_SYS_linux_init_module	175
 #define	LINUX_SYS_linux_delete_module	176
+				/* 177 is unimplemented get_kernel_syms */
+				/* 178 is unimplemented query_module */
 #define	LINUX_SYS_linux_quotactl	179
+				/* 180 is unimplemented nfsservctl */
+				/* 181 is unimplemented getpmsg */
+				/* 182 is unimplemented putpmsg */
+				/* 183 is unimplemented afs_syscall */
+				/* 184 is unimplemented tuxcall */
+				/* 185 is unimplemented security */
 #define	LINUX_SYS_linux_gettid	186
 #define	LINUX_SYS_linux_readahead	187
 #define	LINUX_SYS_linux_setxattr	188
@@ -199,13 +209,17 @@
 #define	LINUX_SYS_linux_sys_futex	202
 #define	LINUX_SYS_linux_sched_setaffinity	203
 #define	LINUX_SYS_linux_sched_getaffinity	204
+				/* 205 is unimplemented set_thread_area */
 #define	LINUX_SYS_linux_io_setup	206
 #define	LINUX_SYS_linux_io_destroy	207
 #define	LINUX_SYS_linux_io_getevents	208
 #define	LINUX_SYS_linux_io_submit	209
 #define	LINUX_SYS_linux_io_cancel	210
+				/* 211 is unimplemented get_thread_area */
 #define	LINUX_SYS_linux_lookup_dcookie	212
 #define	LINUX_SYS_linux_epoll_create	213
+				/* 214 is unimplemented epoll_ctl_old */
+				/* 215 is unimplemented epoll_wait_old */
 #define	LINUX_SYS_linux_remap_file_pages	216
 #define	LINUX_SYS_linux_getdents64	217
 #define	LINUX_SYS_linux_set_tid_address	218
@@ -226,6 +240,7 @@
 #define	LINUX_SYS_linux_epoll_ctl	233
 #define	LINUX_SYS_linux_tgkill	234
 #define	LINUX_SYS_linux_utimes	235
+				/* 236 is unimplemented vserver */
 #define	LINUX_SYS_linux_mbind	237
 #define	LINUX_SYS_linux_set_mempolicy	238
 #define	LINUX_SYS_linux_get_mempolicy	239
@@ -324,6 +339,95 @@
 #define	LINUX_SYS_linux_statx	332
 #define	LINUX_SYS_linux_io_pgetevents	333
 #define	LINUX_SYS_linux_rseq	334
+				/* 335 is unimplemented nosys */
+				/* 336 is unimplemented nosys */
+				/* 337 is unimplemented nosys */
+				/* 338 is unimplemented nosys */
+				/* 339 is unimplemented nosys */
+				/* 340 is unimplemented nosys */
+				/* 341 is unimplemented nosys */
+				/* 342 is unimplemented nosys */
+				/* 343 is unimplemented nosys */
+				/* 344 is unimplemented nosys */
+				/* 345 is unimplemented nosys */
+				/* 346 is unimplemented nosys */
+				/* 347 is unimplemented nosys */
+				/* 348 is unimplemented nosys */
+				/* 349 is unimplemented nosys */
+				/* 350 is unimplemented nosys */
+				/* 351 is unimplemented nosys */
+				/* 352 is unimplemented nosys */
+				/* 353 is unimplemented nosys */
+				/* 354 is unimplemented nosys */
+				/* 355 is unimplemented nosys */
+				/* 356 is unimplemented nosys */
+				/* 357 is unimplemented nosys */
+				/* 358 is unimplemented nosys */
+				/* 359 is unimplemented nosys */
+				/* 360 is unimplemented nosys */
+				/* 361 is unimplemented nosys */
+				/* 362 is unimplemented nosys */
+				/* 363 is unimplemented nosys */
+				/* 364 is unimplemented nosys */
+				/* 365 is unimplemented nosys */
+				/* 366 is unimplemented nosys */
+				/* 367 is unimplemented nosys */
+				/* 368 is unimplemented nosys */
+				/* 369 is unimplemented nosys */
+				/* 370 is unimplemented nosys */
+				/* 371 is unimplemented nosys */
+				/* 372 is unimplemented nosys */
+				/* 373 is unimplemented nosys */
+				/* 374 is unimplemented nosys */
+				/* 375 is unimplemented nosys */
+				/* 376 is unimplemented nosys */
+				/* 377 is unimplemented nosys */
+				/* 378 is unimplemented nosys */
+				/* 379 is unimplemented nosys */
+				/* 380 is unimplemented nosys */
+				/* 381 is unimplemented nosys */
+				/* 382 is unimplemented nosys */
+				/* 383 is unimplemented nosys */
+				/* 384 is unimplemented nosys */
+				/* 385 is unimplemented nosys */
+				/* 386 is unimplemented nosys */
+				/* 387 is unimplemented nosys */
+				/* 388 is unimplemented nosys */
+				/* 389 is unimplemented nosys */
+				/* 390 is unimplemented nosys */
+				/* 391 is unimplemented nosys */
+				/* 392 is unimplemented nosys */
+				/* 393 is unimplemented nosys */
+				/* 394 is unimplemented nosys */
+				/* 395 is unimplemented nosys */
+				/* 396 is unimplemented nosys */
+				/* 397 is unimplemented nosys */
+				/* 398 is unimplemented nosys */
+				/* 399 is unimplemented nosys */
+				/* 400 is unimplemented nosys */
+				/* 401 is unimplemented nosys */
+				/* 402 is unimplemented nosys */
+				/* 403 is unimplemented nosys */
+				/* 404 is unimplemented nosys */
+				/* 405 is unimplemented nosys */
+				/* 406 is unimplemented nosys */
+				/* 407 is unimplemented nosys */
+				/* 408 is unimplemented nosys */
+				/* 409 is unimplemented nosys */
+				/* 410 is unimplemented nosys */
+				/* 411 is unimplemented nosys */
+				/* 412 is unimplemented nosys */
+				/* 413 is unimplemented nosys */
+				/* 414 is unimplemented nosys */
+				/* 415 is unimplemented nosys */
+				/* 416 is unimplemented nosys */
+				/* 417 is unimplemented nosys */
+				/* 418 is unimplemented nosys */
+				/* 419 is unimplemented nosys */
+				/* 420 is unimplemented nosys */
+				/* 421 is unimplemented nosys */
+				/* 422 is unimplemented nosys */
+				/* 423 is unimplemented nosys */
 #define	LINUX_SYS_linux_pidfd_send_signal	424
 #define	LINUX_SYS_linux_io_uring_setup	425
 #define	LINUX_SYS_linux_io_uring_enter	426

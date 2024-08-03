@@ -4,8 +4,8 @@
  * DO NOT EDIT-- this file is automatically @generated.
  */
 
-#ifndef _FREEBSD32_SYSPROTO_H_
-#define	_FREEBSD32_SYSPROTO_H_
+#ifndef _SYS_SYSPROTO_H_
+#define	_SYS_SYSPROTO_H_
 
 #include <sys/types.h>
 #include <sys/signal.h>
@@ -237,8 +237,8 @@ struct readlink_args {
 };
 struct execve_args {
 	char fname_l_[PADL_(const char *)]; const char * fname; char fname_r_[PADR_(const char *)];
-	char argv_l_[PADL_(uint32_t *)]; uint32_t * argv; char argv_r_[PADR_(uint32_t *)];
-	char envv_l_[PADL_(uint32_t *)]; uint32_t * envv; char envv_r_[PADR_(uint32_t *)];
+	char argv_l_[PADL_(char **)]; char ** argv; char argv_r_[PADR_(char **)];
+	char envv_l_[PADL_(char **)]; char ** envv; char envv_r_[PADR_(char **)];
 };
 struct umask_args {
 	char newmask_l_[PADL_(mode_t)]; mode_t newmask; char newmask_r_[PADR_(mode_t)];
@@ -473,7 +473,7 @@ struct nlm_syscall_args {
 	char debug_level_l_[PADL_(int)]; int debug_level; char debug_level_r_[PADR_(int)];
 	char grace_period_l_[PADL_(int)]; int grace_period; char grace_period_r_[PADR_(int)];
 	char addr_count_l_[PADL_(int)]; int addr_count; char addr_count_r_[PADR_(int)];
-	char addrs_l_[PADL_(uint32_t *)]; uint32_t * addrs; char addrs_r_[PADR_(uint32_t *)];
+	char addrs_l_[PADL_(char **)]; char ** addrs; char addrs_r_[PADR_(char **)];
 };
 struct nfssvc_args {
 	char flag_l_[PADL_(int)]; int flag; char flag_r_[PADR_(int)];
@@ -555,7 +555,7 @@ struct __sysctl_args {
 	char name_l_[PADL_(int *)]; int * name; char name_r_[PADR_(int *)];
 	char namelen_l_[PADL_(u_int)]; u_int namelen; char namelen_r_[PADR_(u_int)];
 	char old_l_[PADL_(void *)]; void * old; char old_r_[PADR_(void *)];
-	char oldlenp_l_[PADL_(uint32_t *)]; uint32_t * oldlenp; char oldlenp_r_[PADR_(uint32_t *)];
+	char oldlenp_l_[PADL_(size_t *)]; size_t * oldlenp; char oldlenp_r_[PADR_(size_t *)];
 	char new_l_[PADL_(const void *)]; const void * new; char new_r_[PADR_(const void *)];
 	char newlen_l_[PADL_(size_t)]; size_t newlen; char newlen_r_[PADR_(size_t)];
 };
@@ -606,7 +606,7 @@ struct msgrcv_args {
 	char msqid_l_[PADL_(int)]; int msqid; char msqid_r_[PADR_(int)];
 	char msgp_l_[PADL_(void *)]; void * msgp; char msgp_r_[PADR_(void *)];
 	char msgsz_l_[PADL_(size_t)]; size_t msgsz; char msgsz_r_[PADR_(size_t)];
-	char msgtyp_l_[PADL_(int32_t)]; int32_t msgtyp; char msgtyp_r_[PADR_(int32_t)];
+	char msgtyp_l_[PADL_(long)]; long msgtyp; char msgtyp_r_[PADR_(long)];
 	char msgflg_l_[PADL_(int)]; int msgflg; char msgflg_r_[PADR_(int)];
 };
 struct shmat_args {
@@ -706,7 +706,7 @@ struct aio_write_args {
 };
 struct lio_listio_args {
 	char mode_l_[PADL_(int)]; int mode; char mode_r_[PADR_(int)];
-	char acb_list_l_[PADL_(uint32_t *)]; uint32_t * acb_list; char acb_list_r_[PADR_(uint32_t *)];
+	char acb_list_l_[PADL_(struct aiocb * const *)]; struct aiocb * const * acb_list; char acb_list_r_[PADR_(struct aiocb * const *)];
 	char nent_l_[PADL_(int)]; int nent; char nent_r_[PADR_(int)];
 	char sig_l_[PADL_(struct sigevent *)]; struct sigevent * sig; char sig_r_[PADR_(struct sigevent *)];
 };
@@ -783,7 +783,7 @@ struct aio_return_args {
 	char aiocbp_l_[PADL_(struct aiocb *)]; struct aiocb * aiocbp; char aiocbp_r_[PADR_(struct aiocb *)];
 };
 struct aio_suspend_args {
-	char aiocbp_l_[PADL_(uint32_t *)]; uint32_t * aiocbp; char aiocbp_r_[PADR_(uint32_t *)];
+	char aiocbp_l_[PADL_(const struct aiocb * const *)]; const struct aiocb * const * aiocbp; char aiocbp_r_[PADR_(const struct aiocb * const *)];
 	char nent_l_[PADL_(int)]; int nent; char nent_r_[PADR_(int)];
 	char timeout_l_[PADL_(const struct timespec *)]; const struct timespec * timeout; char timeout_r_[PADR_(const struct timespec *)];
 };
@@ -940,7 +940,7 @@ struct extattr_delete_file_args {
 	char attrname_l_[PADL_(const char *)]; const char * attrname; char attrname_r_[PADR_(const char *)];
 };
 struct aio_waitcomplete_args {
-	char aiocbp_l_[PADL_(uint32_t *)]; uint32_t * aiocbp; char aiocbp_r_[PADR_(uint32_t *)];
+	char aiocbp_l_[PADL_(struct aiocb **)]; struct aiocb ** aiocbp; char aiocbp_r_[PADR_(struct aiocb **)];
 	char timeout_l_[PADL_(struct timespec *)]; struct timespec * timeout; char timeout_r_[PADR_(struct timespec *)];
 };
 struct getresuid_args {
@@ -983,13 +983,13 @@ struct eaccess_args {
 	char amode_l_[PADL_(int)]; int amode; char amode_r_[PADR_(int)];
 };
 struct afs3_syscall_args {
-	char syscall_l_[PADL_(int32_t)]; int32_t syscall; char syscall_r_[PADR_(int32_t)];
-	char parm1_l_[PADL_(int32_t)]; int32_t parm1; char parm1_r_[PADR_(int32_t)];
-	char parm2_l_[PADL_(int32_t)]; int32_t parm2; char parm2_r_[PADR_(int32_t)];
-	char parm3_l_[PADL_(int32_t)]; int32_t parm3; char parm3_r_[PADR_(int32_t)];
-	char parm4_l_[PADL_(int32_t)]; int32_t parm4; char parm4_r_[PADR_(int32_t)];
-	char parm5_l_[PADL_(int32_t)]; int32_t parm5; char parm5_r_[PADR_(int32_t)];
-	char parm6_l_[PADL_(int32_t)]; int32_t parm6; char parm6_r_[PADR_(int32_t)];
+	char syscall_l_[PADL_(long)]; long syscall; char syscall_r_[PADR_(long)];
+	char parm1_l_[PADL_(long)]; long parm1; char parm1_r_[PADR_(long)];
+	char parm2_l_[PADL_(long)]; long parm2; char parm2_r_[PADR_(long)];
+	char parm3_l_[PADL_(long)]; long parm3; char parm3_r_[PADR_(long)];
+	char parm4_l_[PADL_(long)]; long parm4; char parm4_r_[PADR_(long)];
+	char parm5_l_[PADL_(long)]; long parm5; char parm5_r_[PADR_(long)];
+	char parm6_l_[PADL_(long)]; long parm6; char parm6_r_[PADR_(long)];
 };
 struct nmount_args {
 	char iovp_l_[PADL_(struct iovec *)]; struct iovec * iovp; char iovp_r_[PADR_(struct iovec *)];
@@ -1047,23 +1047,23 @@ struct mac_syscall_args {
 	char arg_l_[PADL_(void *)]; void * arg; char arg_r_[PADR_(void *)];
 };
 struct ksem_close_args {
-	char id_l_[PADL_(int32_t)]; int32_t id; char id_r_[PADR_(int32_t)];
+	char id_l_[PADL_(semid_t)]; semid_t id; char id_r_[PADR_(semid_t)];
 };
 struct ksem_post_args {
-	char id_l_[PADL_(int32_t)]; int32_t id; char id_r_[PADR_(int32_t)];
+	char id_l_[PADL_(semid_t)]; semid_t id; char id_r_[PADR_(semid_t)];
 };
 struct ksem_wait_args {
-	char id_l_[PADL_(int32_t)]; int32_t id; char id_r_[PADR_(int32_t)];
+	char id_l_[PADL_(semid_t)]; semid_t id; char id_r_[PADR_(semid_t)];
 };
 struct ksem_trywait_args {
-	char id_l_[PADL_(int32_t)]; int32_t id; char id_r_[PADR_(int32_t)];
+	char id_l_[PADL_(semid_t)]; semid_t id; char id_r_[PADR_(semid_t)];
 };
 struct ksem_init_args {
-	char idp_l_[PADL_(int32_t *)]; int32_t * idp; char idp_r_[PADR_(int32_t *)];
+	char idp_l_[PADL_(semid_t *)]; semid_t * idp; char idp_r_[PADR_(semid_t *)];
 	char value_l_[PADL_(unsigned int)]; unsigned int value; char value_r_[PADR_(unsigned int)];
 };
 struct ksem_open_args {
-	char idp_l_[PADL_(int32_t *)]; int32_t * idp; char idp_r_[PADR_(int32_t *)];
+	char idp_l_[PADL_(semid_t *)]; semid_t * idp; char idp_r_[PADR_(semid_t *)];
 	char name_l_[PADL_(const char *)]; const char * name; char name_r_[PADR_(const char *)];
 	char oflag_l_[PADL_(int)]; int oflag; char oflag_r_[PADR_(int)];
 	char mode_l_[PADL_(mode_t)]; mode_t mode; char mode_r_[PADR_(mode_t)];
@@ -1073,11 +1073,11 @@ struct ksem_unlink_args {
 	char name_l_[PADL_(const char *)]; const char * name; char name_r_[PADR_(const char *)];
 };
 struct ksem_getvalue_args {
-	char id_l_[PADL_(int32_t)]; int32_t id; char id_r_[PADR_(int32_t)];
+	char id_l_[PADL_(semid_t)]; semid_t id; char id_r_[PADR_(semid_t)];
 	char val_l_[PADL_(int *)]; int * val; char val_r_[PADR_(int *)];
 };
 struct ksem_destroy_args {
-	char id_l_[PADL_(int32_t)]; int32_t id; char id_r_[PADR_(int32_t)];
+	char id_l_[PADL_(semid_t)]; semid_t id; char id_r_[PADR_(semid_t)];
 };
 struct __mac_get_pid_args {
 	char pid_l_[PADL_(pid_t)]; pid_t pid; char pid_r_[PADR_(pid_t)];
@@ -1112,8 +1112,8 @@ struct extattr_delete_link_args {
 };
 struct __mac_execve_args {
 	char fname_l_[PADL_(const char *)]; const char * fname; char fname_r_[PADR_(const char *)];
-	char argv_l_[PADL_(uint32_t *)]; uint32_t * argv; char argv_r_[PADR_(uint32_t *)];
-	char envv_l_[PADL_(uint32_t *)]; uint32_t * envv; char envv_r_[PADR_(uint32_t *)];
+	char argv_l_[PADL_(char **)]; char ** argv; char argv_r_[PADR_(char **)];
+	char envv_l_[PADL_(char **)]; char ** envv; char envv_r_[PADR_(char **)];
 	char mac_p_l_[PADL_(struct mac *)]; struct mac * mac_p; char mac_p_r_[PADR_(struct mac *)];
 };
 struct sigaction_args {
@@ -1159,17 +1159,17 @@ struct sigwait_args {
 };
 struct thr_create_args {
 	char ctx_l_[PADL_(ucontext_t *)]; ucontext_t * ctx; char ctx_r_[PADR_(ucontext_t *)];
-	char id_l_[PADL_(int32_t *)]; int32_t * id; char id_r_[PADR_(int32_t *)];
+	char id_l_[PADL_(long *)]; long * id; char id_r_[PADR_(long *)];
 	char flags_l_[PADL_(int)]; int flags; char flags_r_[PADR_(int)];
 };
 struct thr_exit_args {
-	char state_l_[PADL_(int32_t *)]; int32_t * state; char state_r_[PADR_(int32_t *)];
+	char state_l_[PADL_(long *)]; long * state; char state_r_[PADR_(long *)];
 };
 struct thr_self_args {
-	char id_l_[PADL_(int32_t *)]; int32_t * id; char id_r_[PADR_(int32_t *)];
+	char id_l_[PADL_(long *)]; long * id; char id_r_[PADR_(long *)];
 };
 struct thr_kill_args {
-	char id_l_[PADL_(int32_t)]; int32_t id; char id_r_[PADR_(int32_t)];
+	char id_l_[PADL_(long)]; long id; char id_r_[PADR_(long)];
 	char sig_l_[PADL_(int)]; int sig; char sig_r_[PADR_(int)];
 };
 struct jail_attach_args {
@@ -1194,14 +1194,14 @@ struct extattr_list_link_args {
 	char nbytes_l_[PADL_(size_t)]; size_t nbytes; char nbytes_r_[PADR_(size_t)];
 };
 struct ksem_timedwait_args {
-	char id_l_[PADL_(int32_t)]; int32_t id; char id_r_[PADR_(int32_t)];
+	char id_l_[PADL_(semid_t)]; semid_t id; char id_r_[PADR_(semid_t)];
 	char abstime_l_[PADL_(const struct timespec *)]; const struct timespec * abstime; char abstime_r_[PADR_(const struct timespec *)];
 };
 struct thr_suspend_args {
 	char timeout_l_[PADL_(const struct timespec *)]; const struct timespec * timeout; char timeout_r_[PADR_(const struct timespec *)];
 };
 struct thr_wake_args {
-	char id_l_[PADL_(int32_t)]; int32_t id; char id_r_[PADR_(int32_t)];
+	char id_l_[PADL_(long)]; long id; char id_r_[PADR_(long)];
 };
 struct kldunloadf_args {
 	char fileid_l_[PADL_(int)]; int fileid; char fileid_r_[PADR_(int)];
@@ -1290,10 +1290,10 @@ struct kmq_unlink_args {
 struct abort2_args {
 	char why_l_[PADL_(const char *)]; const char * why; char why_r_[PADR_(const char *)];
 	char nargs_l_[PADL_(int)]; int nargs; char nargs_r_[PADR_(int)];
-	char args_l_[PADL_(uint32_t *)]; uint32_t * args; char args_r_[PADR_(uint32_t *)];
+	char args_l_[PADL_(void **)]; void ** args; char args_r_[PADR_(void **)];
 };
 struct thr_set_name_args {
-	char id_l_[PADL_(int32_t)]; int32_t id; char id_r_[PADR_(int32_t)];
+	char id_l_[PADL_(long)]; long id; char id_r_[PADR_(long)];
 	char name_l_[PADL_(const char *)]; const char * name; char name_r_[PADR_(const char *)];
 };
 struct aio_fsync_args {
@@ -1371,7 +1371,7 @@ struct ftruncate_args {
 };
 struct thr_kill2_args {
 	char pid_l_[PADL_(pid_t)]; pid_t pid; char pid_r_[PADR_(pid_t)];
-	char id_l_[PADL_(int32_t)]; int32_t id; char id_r_[PADR_(int32_t)];
+	char id_l_[PADL_(long)]; long id; char id_r_[PADR_(long)];
 	char sig_l_[PADL_(int)]; int sig; char sig_r_[PADR_(int)];
 };
 struct shm_unlink_args {
@@ -1426,8 +1426,8 @@ struct fchownat_args {
 };
 struct fexecve_args {
 	char fd_l_[PADL_(int)]; int fd; char fd_r_[PADR_(int)];
-	char argv_l_[PADL_(uint32_t *)]; uint32_t * argv; char argv_r_[PADR_(uint32_t *)];
-	char envv_l_[PADL_(uint32_t *)]; uint32_t * envv; char envv_r_[PADR_(uint32_t *)];
+	char argv_l_[PADL_(char **)]; char ** argv; char argv_r_[PADR_(char **)];
+	char envv_l_[PADL_(char **)]; char ** envv; char envv_r_[PADR_(char **)];
 };
 struct futimesat_args {
 	char fd_l_[PADL_(int)]; int fd; char fd_r_[PADR_(int)];
@@ -1611,12 +1611,12 @@ struct cap_rights_limit_args {
 };
 struct cap_ioctls_limit_args {
 	char fd_l_[PADL_(int)]; int fd; char fd_r_[PADR_(int)];
-	char cmds_l_[PADL_(const uint32_t *)]; const uint32_t * cmds; char cmds_r_[PADR_(const uint32_t *)];
+	char cmds_l_[PADL_(const u_long *)]; const u_long * cmds; char cmds_r_[PADR_(const u_long *)];
 	char ncmds_l_[PADL_(size_t)]; size_t ncmds; char ncmds_r_[PADR_(size_t)];
 };
 struct cap_ioctls_get_args {
 	char fd_l_[PADL_(int)]; int fd; char fd_r_[PADR_(int)];
-	char cmds_l_[PADL_(uint32_t *)]; uint32_t * cmds; char cmds_r_[PADR_(uint32_t *)];
+	char cmds_l_[PADL_(u_long *)]; u_long * cmds; char cmds_r_[PADR_(u_long *)];
 	char maxcmds_l_[PADL_(size_t)]; size_t maxcmds; char maxcmds_r_[PADR_(size_t)];
 };
 struct cap_fcntls_limit_args {
@@ -1713,7 +1713,7 @@ struct fstatfs_args {
 };
 struct getfsstat_args {
 	char buf_l_[PADL_(struct statfs *)]; struct statfs * buf; char buf_r_[PADR_(struct statfs *)];
-	char bufsize_l_[PADL_(int32_t)]; int32_t bufsize; char bufsize_r_[PADR_(int32_t)];
+	char bufsize_l_[PADL_(long)]; long bufsize; char bufsize_r_[PADR_(long)];
 	char mode_l_[PADL_(int)]; int mode; char mode_r_[PADR_(int)];
 };
 struct fhstatfs_args {
@@ -1793,7 +1793,7 @@ struct __sysctlbyname_args {
 	char name_l_[PADL_(const char *)]; const char * name; char name_r_[PADR_(const char *)];
 	char namelen_l_[PADL_(size_t)]; size_t namelen; char namelen_r_[PADR_(size_t)];
 	char old_l_[PADL_(void *)]; void * old; char old_r_[PADR_(void *)];
-	char oldlenp_l_[PADL_(uint32_t *)]; uint32_t * oldlenp; char oldlenp_r_[PADR_(uint32_t *)];
+	char oldlenp_l_[PADL_(size_t *)]; size_t * oldlenp; char oldlenp_r_[PADR_(size_t *)];
 	char new_l_[PADL_(void *)]; void * new; char new_r_[PADR_(void *)];
 	char newlen_l_[PADL_(size_t)]; size_t newlen; char newlen_r_[PADR_(size_t)];
 };
@@ -2293,7 +2293,7 @@ struct ocreat_args {
 };
 struct olseek_args {
 	char fd_l_[PADL_(int)]; int fd; char fd_r_[PADR_(int)];
-	char offset_l_[PADL_(int32_t)]; int32_t offset; char offset_r_[PADR_(int32_t)];
+	char offset_l_[PADL_(long)]; long offset; char offset_r_[PADR_(long)];
 	char whence_l_[PADL_(int)]; int whence; char whence_r_[PADR_(int)];
 };
 struct ostat_args {
@@ -2320,7 +2320,7 @@ struct ofstat_args {
 struct ogetkerninfo_args {
 	char op_l_[PADL_(int)]; int op; char op_r_[PADR_(int)];
 	char where_l_[PADL_(char *)]; char * where; char where_r_[PADR_(char *)];
-	char size_l_[PADL_(uint32_t *)]; uint32_t * size; char size_r_[PADR_(uint32_t *)];
+	char size_l_[PADL_(size_t *)]; size_t * size; char size_r_[PADR_(size_t *)];
 	char arg_l_[PADL_(int)]; int arg; char arg_r_[PADR_(int)];
 };
 struct ommap_args {
@@ -2329,7 +2329,7 @@ struct ommap_args {
 	char prot_l_[PADL_(int)]; int prot; char prot_r_[PADR_(int)];
 	char flags_l_[PADL_(int)]; int flags; char flags_r_[PADR_(int)];
 	char fd_l_[PADL_(int)]; int fd; char fd_r_[PADR_(int)];
-	char pos_l_[PADL_(int32_t)]; int32_t pos; char pos_r_[PADR_(int32_t)];
+	char pos_l_[PADL_(long)]; long pos; char pos_r_[PADR_(long)];
 };
 struct ogethostname_args {
 	char hostname_l_[PADL_(char *)]; char * hostname; char hostname_r_[PADR_(char *)];
@@ -2397,11 +2397,11 @@ struct orecvfrom_args {
 };
 struct otruncate_args {
 	char path_l_[PADL_(const char *)]; const char * path; char path_r_[PADR_(const char *)];
-	char length_l_[PADL_(int32_t)]; int32_t length; char length_r_[PADR_(int32_t)];
+	char length_l_[PADL_(long)]; long length; char length_r_[PADR_(long)];
 };
 struct oftruncate_args {
 	char fd_l_[PADL_(int)]; int fd; char fd_r_[PADR_(int)];
-	char length_l_[PADL_(int32_t)]; int32_t length; char length_r_[PADR_(int32_t)];
+	char length_l_[PADL_(long)]; long length; char length_r_[PADR_(long)];
 };
 struct ogetpeername_args {
 	char fdes_l_[PADL_(int)]; int fdes; char fdes_r_[PADR_(int)];
@@ -2409,7 +2409,7 @@ struct ogetpeername_args {
 	char alen_l_[PADL_(__socklen_t *)]; __socklen_t * alen; char alen_r_[PADR_(__socklen_t *)];
 };
 struct osethostid_args {
-	char hostid_l_[PADL_(int32_t)]; int32_t hostid; char hostid_r_[PADR_(int32_t)];
+	char hostid_l_[PADL_(long)]; long hostid; char hostid_r_[PADR_(long)];
 };
 struct ogetrlimit_args {
 	char which_l_[PADL_(u_int)]; u_int which; char which_r_[PADR_(u_int)];
@@ -2432,7 +2432,7 @@ struct ogetdirentries_args {
 	char fd_l_[PADL_(int)]; int fd; char fd_r_[PADR_(int)];
 	char buf_l_[PADL_(char *)]; char * buf; char buf_r_[PADR_(char *)];
 	char count_l_[PADL_(u_int)]; u_int count; char count_r_[PADR_(u_int)];
-	char basep_l_[PADL_(int32_t *)]; int32_t * basep; char basep_r_[PADR_(int32_t *)];
+	char basep_l_[PADL_(long *)]; long * basep; char basep_r_[PADR_(long *)];
 };
 int	ocreat(struct thread *, struct ocreat_args *);
 long	olseek(struct thread *, struct olseek_args *);
@@ -2479,7 +2479,7 @@ int	ogetdirentries(struct thread *, struct ogetdirentries_args *);
 
 struct freebsd4_getfsstat_args {
 	char buf_l_[PADL_(struct ostatfs *)]; struct ostatfs * buf; char buf_r_[PADR_(struct ostatfs *)];
-	char bufsize_l_[PADL_(int32_t)]; int32_t bufsize; char bufsize_r_[PADR_(int32_t)];
+	char bufsize_l_[PADL_(long)]; long bufsize; char bufsize_r_[PADR_(long)];
 	char mode_l_[PADL_(int)]; int mode; char mode_r_[PADR_(int)];
 };
 struct freebsd4_statfs_args {
@@ -2585,7 +2585,7 @@ struct freebsd6_aio_write_args {
 };
 struct freebsd6_lio_listio_args {
 	char mode_l_[PADL_(int)]; int mode; char mode_r_[PADR_(int)];
-	char acb_list_l_[PADL_(uint32_t *)]; uint32_t * acb_list; char acb_list_r_[PADR_(uint32_t *)];
+	char acb_list_l_[PADL_(struct oaiocb * const *)]; struct oaiocb * const * acb_list; char acb_list_r_[PADR_(struct oaiocb * const *)];
 	char nent_l_[PADL_(int)]; int nent; char nent_r_[PADR_(int)];
 	char sig_l_[PADL_(struct osigevent *)]; struct osigevent * sig; char sig_r_[PADR_(struct osigevent *)];
 };
@@ -2668,7 +2668,7 @@ struct freebsd11_getdirentries_args {
 	char fd_l_[PADL_(int)]; int fd; char fd_r_[PADR_(int)];
 	char buf_l_[PADL_(char *)]; char * buf; char buf_r_[PADR_(char *)];
 	char count_l_[PADL_(u_int)]; u_int count; char count_r_[PADR_(u_int)];
-	char basep_l_[PADL_(int32_t *)]; int32_t * basep; char basep_r_[PADR_(int32_t *)];
+	char basep_l_[PADL_(long *)]; long * basep; char basep_r_[PADR_(long *)];
 };
 struct freebsd11_getdents_args {
 	char fd_l_[PADL_(int)]; int fd; char fd_r_[PADR_(int)];
@@ -2701,7 +2701,7 @@ struct freebsd11_kevent_args {
 };
 struct freebsd11_getfsstat_args {
 	char buf_l_[PADL_(struct freebsd11_statfs *)]; struct freebsd11_statfs * buf; char buf_r_[PADR_(struct freebsd11_statfs *)];
-	char bufsize_l_[PADL_(int32_t)]; int32_t bufsize; char bufsize_r_[PADR_(int32_t)];
+	char bufsize_l_[PADL_(long)]; long bufsize; char bufsize_r_[PADR_(long)];
 	char mode_l_[PADL_(int)]; int mode; char mode_r_[PADR_(int)];
 };
 struct freebsd11_statfs_args {
@@ -2775,493 +2775,493 @@ int	freebsd13_swapoff(struct thread *, struct freebsd13_swapoff_args *);
 
 #endif /* COMPAT_FREEBSD13 */
 
-#define	FREEBSD32_SYS_AUE_syscall	AUE_NULL
-#define	FREEBSD32_SYS_AUE_exit	AUE_EXIT
-#define	FREEBSD32_SYS_AUE_fork	AUE_FORK
-#define	FREEBSD32_SYS_AUE_read	AUE_READ
-#define	FREEBSD32_SYS_AUE_write	AUE_WRITE
-#define	FREEBSD32_SYS_AUE_open	AUE_OPEN_RWTC
-#define	FREEBSD32_SYS_AUE_close	AUE_CLOSE
-#define	FREEBSD32_SYS_AUE_wait4	AUE_WAIT4
-#define	FREEBSD32_SYS_AUE_ocreat	AUE_CREAT
-#define	FREEBSD32_SYS_AUE_link	AUE_LINK
-#define	FREEBSD32_SYS_AUE_unlink	AUE_UNLINK
-#define	FREEBSD32_SYS_AUE_chdir	AUE_CHDIR
-#define	FREEBSD32_SYS_AUE_fchdir	AUE_FCHDIR
-#define	FREEBSD32_SYS_AUE_freebsd11_mknod	AUE_MKNOD
-#define	FREEBSD32_SYS_AUE_chmod	AUE_CHMOD
-#define	FREEBSD32_SYS_AUE_chown	AUE_CHOWN
-#define	FREEBSD32_SYS_AUE_break	AUE_NULL
-#define	FREEBSD32_SYS_AUE_freebsd4_getfsstat	AUE_GETFSSTAT
-#define	FREEBSD32_SYS_AUE_olseek	AUE_LSEEK
-#define	FREEBSD32_SYS_AUE_getpid	AUE_GETPID
-#define	FREEBSD32_SYS_AUE_mount	AUE_MOUNT
-#define	FREEBSD32_SYS_AUE_unmount	AUE_UMOUNT
-#define	FREEBSD32_SYS_AUE_setuid	AUE_SETUID
-#define	FREEBSD32_SYS_AUE_getuid	AUE_GETUID
-#define	FREEBSD32_SYS_AUE_geteuid	AUE_GETEUID
-#define	FREEBSD32_SYS_AUE_ptrace	AUE_PTRACE
-#define	FREEBSD32_SYS_AUE_recvmsg	AUE_RECVMSG
-#define	FREEBSD32_SYS_AUE_sendmsg	AUE_SENDMSG
-#define	FREEBSD32_SYS_AUE_recvfrom	AUE_RECVFROM
-#define	FREEBSD32_SYS_AUE_accept	AUE_ACCEPT
-#define	FREEBSD32_SYS_AUE_getpeername	AUE_GETPEERNAME
-#define	FREEBSD32_SYS_AUE_getsockname	AUE_GETSOCKNAME
-#define	FREEBSD32_SYS_AUE_access	AUE_ACCESS
-#define	FREEBSD32_SYS_AUE_chflags	AUE_CHFLAGS
-#define	FREEBSD32_SYS_AUE_fchflags	AUE_FCHFLAGS
-#define	FREEBSD32_SYS_AUE_sync	AUE_SYNC
-#define	FREEBSD32_SYS_AUE_kill	AUE_KILL
-#define	FREEBSD32_SYS_AUE_ostat	AUE_STAT
-#define	FREEBSD32_SYS_AUE_getppid	AUE_GETPPID
-#define	FREEBSD32_SYS_AUE_olstat	AUE_LSTAT
-#define	FREEBSD32_SYS_AUE_dup	AUE_DUP
-#define	FREEBSD32_SYS_AUE_freebsd10_pipe	AUE_PIPE
-#define	FREEBSD32_SYS_AUE_getegid	AUE_GETEGID
-#define	FREEBSD32_SYS_AUE_profil	AUE_PROFILE
-#define	FREEBSD32_SYS_AUE_ktrace	AUE_KTRACE
-#define	FREEBSD32_SYS_AUE_osigaction	AUE_SIGACTION
-#define	FREEBSD32_SYS_AUE_getgid	AUE_GETGID
-#define	FREEBSD32_SYS_AUE_osigprocmask	AUE_SIGPROCMASK
-#define	FREEBSD32_SYS_AUE_getlogin	AUE_GETLOGIN
-#define	FREEBSD32_SYS_AUE_setlogin	AUE_SETLOGIN
-#define	FREEBSD32_SYS_AUE_acct	AUE_ACCT
-#define	FREEBSD32_SYS_AUE_osigpending	AUE_SIGPENDING
-#define	FREEBSD32_SYS_AUE_sigaltstack	AUE_SIGALTSTACK
-#define	FREEBSD32_SYS_AUE_ioctl	AUE_IOCTL
-#define	FREEBSD32_SYS_AUE_reboot	AUE_REBOOT
-#define	FREEBSD32_SYS_AUE_revoke	AUE_REVOKE
-#define	FREEBSD32_SYS_AUE_symlink	AUE_SYMLINK
-#define	FREEBSD32_SYS_AUE_readlink	AUE_READLINK
-#define	FREEBSD32_SYS_AUE_execve	AUE_EXECVE
-#define	FREEBSD32_SYS_AUE_umask	AUE_UMASK
-#define	FREEBSD32_SYS_AUE_chroot	AUE_CHROOT
-#define	FREEBSD32_SYS_AUE_ofstat	AUE_FSTAT
-#define	FREEBSD32_SYS_AUE_ogetkerninfo	AUE_NULL
-#define	FREEBSD32_SYS_AUE_ogetpagesize	AUE_NULL
-#define	FREEBSD32_SYS_AUE_msync	AUE_MSYNC
-#define	FREEBSD32_SYS_AUE_vfork	AUE_VFORK
-#define	FREEBSD32_SYS_AUE_ommap	AUE_MMAP
-#define	FREEBSD32_SYS_AUE_freebsd11_vadvise	AUE_O_VADVISE
-#define	FREEBSD32_SYS_AUE_munmap	AUE_MUNMAP
-#define	FREEBSD32_SYS_AUE_mprotect	AUE_MPROTECT
-#define	FREEBSD32_SYS_AUE_madvise	AUE_MADVISE
-#define	FREEBSD32_SYS_AUE_mincore	AUE_MINCORE
-#define	FREEBSD32_SYS_AUE_getgroups	AUE_GETGROUPS
-#define	FREEBSD32_SYS_AUE_setgroups	AUE_SETGROUPS
-#define	FREEBSD32_SYS_AUE_getpgrp	AUE_GETPGRP
-#define	FREEBSD32_SYS_AUE_setpgid	AUE_SETPGRP
-#define	FREEBSD32_SYS_AUE_setitimer	AUE_SETITIMER
-#define	FREEBSD32_SYS_AUE_owait	AUE_WAIT4
-#define	FREEBSD32_SYS_AUE_swapon	AUE_SWAPON
-#define	FREEBSD32_SYS_AUE_getitimer	AUE_GETITIMER
-#define	FREEBSD32_SYS_AUE_ogethostname	AUE_SYSCTL
-#define	FREEBSD32_SYS_AUE_osethostname	AUE_SYSCTL
-#define	FREEBSD32_SYS_AUE_getdtablesize	AUE_GETDTABLESIZE
-#define	FREEBSD32_SYS_AUE_dup2	AUE_DUP2
-#define	FREEBSD32_SYS_AUE_fcntl	AUE_FCNTL
-#define	FREEBSD32_SYS_AUE_select	AUE_SELECT
-#define	FREEBSD32_SYS_AUE_fsync	AUE_FSYNC
-#define	FREEBSD32_SYS_AUE_setpriority	AUE_SETPRIORITY
-#define	FREEBSD32_SYS_AUE_socket	AUE_SOCKET
-#define	FREEBSD32_SYS_AUE_connect	AUE_CONNECT
-#define	FREEBSD32_SYS_AUE_oaccept	AUE_ACCEPT
-#define	FREEBSD32_SYS_AUE_getpriority	AUE_GETPRIORITY
-#define	FREEBSD32_SYS_AUE_osend	AUE_SEND
-#define	FREEBSD32_SYS_AUE_orecv	AUE_RECV
-#define	FREEBSD32_SYS_AUE_osigreturn	AUE_SIGRETURN
-#define	FREEBSD32_SYS_AUE_bind	AUE_BIND
-#define	FREEBSD32_SYS_AUE_setsockopt	AUE_SETSOCKOPT
-#define	FREEBSD32_SYS_AUE_listen	AUE_LISTEN
-#define	FREEBSD32_SYS_AUE_osigvec	AUE_NULL
-#define	FREEBSD32_SYS_AUE_osigblock	AUE_NULL
-#define	FREEBSD32_SYS_AUE_osigsetmask	AUE_NULL
-#define	FREEBSD32_SYS_AUE_osigsuspend	AUE_NULL
-#define	FREEBSD32_SYS_AUE_osigstack	AUE_NULL
-#define	FREEBSD32_SYS_AUE_orecvmsg	AUE_RECVMSG
-#define	FREEBSD32_SYS_AUE_osendmsg	AUE_SENDMSG
-#define	FREEBSD32_SYS_AUE_gettimeofday	AUE_GETTIMEOFDAY
-#define	FREEBSD32_SYS_AUE_getrusage	AUE_GETRUSAGE
-#define	FREEBSD32_SYS_AUE_getsockopt	AUE_GETSOCKOPT
-#define	FREEBSD32_SYS_AUE_readv	AUE_READV
-#define	FREEBSD32_SYS_AUE_writev	AUE_WRITEV
-#define	FREEBSD32_SYS_AUE_settimeofday	AUE_SETTIMEOFDAY
-#define	FREEBSD32_SYS_AUE_fchown	AUE_FCHOWN
-#define	FREEBSD32_SYS_AUE_fchmod	AUE_FCHMOD
-#define	FREEBSD32_SYS_AUE_orecvfrom	AUE_RECVFROM
-#define	FREEBSD32_SYS_AUE_setreuid	AUE_SETREUID
-#define	FREEBSD32_SYS_AUE_setregid	AUE_SETREGID
-#define	FREEBSD32_SYS_AUE_rename	AUE_RENAME
-#define	FREEBSD32_SYS_AUE_otruncate	AUE_TRUNCATE
-#define	FREEBSD32_SYS_AUE_oftruncate	AUE_FTRUNCATE
-#define	FREEBSD32_SYS_AUE_flock	AUE_FLOCK
-#define	FREEBSD32_SYS_AUE_mkfifo	AUE_MKFIFO
-#define	FREEBSD32_SYS_AUE_sendto	AUE_SENDTO
-#define	FREEBSD32_SYS_AUE_shutdown	AUE_SHUTDOWN
-#define	FREEBSD32_SYS_AUE_socketpair	AUE_SOCKETPAIR
-#define	FREEBSD32_SYS_AUE_mkdir	AUE_MKDIR
-#define	FREEBSD32_SYS_AUE_rmdir	AUE_RMDIR
-#define	FREEBSD32_SYS_AUE_utimes	AUE_UTIMES
-#define	FREEBSD32_SYS_AUE_adjtime	AUE_ADJTIME
-#define	FREEBSD32_SYS_AUE_ogetpeername	AUE_GETPEERNAME
-#define	FREEBSD32_SYS_AUE_ogethostid	AUE_SYSCTL
-#define	FREEBSD32_SYS_AUE_osethostid	AUE_SYSCTL
-#define	FREEBSD32_SYS_AUE_ogetrlimit	AUE_GETRLIMIT
-#define	FREEBSD32_SYS_AUE_osetrlimit	AUE_SETRLIMIT
-#define	FREEBSD32_SYS_AUE_okillpg	AUE_KILLPG
-#define	FREEBSD32_SYS_AUE_setsid	AUE_SETSID
-#define	FREEBSD32_SYS_AUE_quotactl	AUE_QUOTACTL
-#define	FREEBSD32_SYS_AUE_oquota	AUE_O_QUOTA
-#define	FREEBSD32_SYS_AUE_ogetsockname	AUE_GETSOCKNAME
-#define	FREEBSD32_SYS_AUE_nlm_syscall	AUE_NULL
-#define	FREEBSD32_SYS_AUE_nfssvc	AUE_NFS_SVC
-#define	FREEBSD32_SYS_AUE_ogetdirentries	AUE_GETDIRENTRIES
-#define	FREEBSD32_SYS_AUE_freebsd4_statfs	AUE_STATFS
-#define	FREEBSD32_SYS_AUE_freebsd4_fstatfs	AUE_FSTATFS
-#define	FREEBSD32_SYS_AUE_lgetfh	AUE_LGETFH
-#define	FREEBSD32_SYS_AUE_getfh	AUE_NFS_GETFH
-#define	FREEBSD32_SYS_AUE_freebsd4_getdomainname	AUE_SYSCTL
-#define	FREEBSD32_SYS_AUE_freebsd4_setdomainname	AUE_SYSCTL
-#define	FREEBSD32_SYS_AUE_freebsd4_uname	AUE_NULL
-#define	FREEBSD32_SYS_AUE_sysarch	AUE_SYSARCH
-#define	FREEBSD32_SYS_AUE_rtprio	AUE_RTPRIO
-#define	FREEBSD32_SYS_AUE_semsys	AUE_SEMSYS
-#define	FREEBSD32_SYS_AUE_msgsys	AUE_MSGSYS
-#define	FREEBSD32_SYS_AUE_shmsys	AUE_SHMSYS
-#define	FREEBSD32_SYS_AUE_freebsd6_pread	AUE_PREAD
-#define	FREEBSD32_SYS_AUE_freebsd6_pwrite	AUE_PWRITE
-#define	FREEBSD32_SYS_AUE_setfib	AUE_SETFIB
-#define	FREEBSD32_SYS_AUE_ntp_adjtime	AUE_NTP_ADJTIME
-#define	FREEBSD32_SYS_AUE_setgid	AUE_SETGID
-#define	FREEBSD32_SYS_AUE_setegid	AUE_SETEGID
-#define	FREEBSD32_SYS_AUE_seteuid	AUE_SETEUID
-#define	FREEBSD32_SYS_AUE_freebsd11_stat	AUE_STAT
-#define	FREEBSD32_SYS_AUE_freebsd11_fstat	AUE_FSTAT
-#define	FREEBSD32_SYS_AUE_freebsd11_lstat	AUE_LSTAT
-#define	FREEBSD32_SYS_AUE_pathconf	AUE_PATHCONF
-#define	FREEBSD32_SYS_AUE_fpathconf	AUE_FPATHCONF
-#define	FREEBSD32_SYS_AUE_getrlimit	AUE_GETRLIMIT
-#define	FREEBSD32_SYS_AUE_setrlimit	AUE_SETRLIMIT
-#define	FREEBSD32_SYS_AUE_freebsd11_getdirentries	AUE_GETDIRENTRIES
-#define	FREEBSD32_SYS_AUE_freebsd6_mmap	AUE_MMAP
-#define	FREEBSD32_SYS_AUE___syscall	AUE_NULL
-#define	FREEBSD32_SYS_AUE_freebsd6_lseek	AUE_LSEEK
-#define	FREEBSD32_SYS_AUE_freebsd6_truncate	AUE_TRUNCATE
-#define	FREEBSD32_SYS_AUE_freebsd6_ftruncate	AUE_FTRUNCATE
-#define	FREEBSD32_SYS_AUE___sysctl	AUE_SYSCTL
-#define	FREEBSD32_SYS_AUE_mlock	AUE_MLOCK
-#define	FREEBSD32_SYS_AUE_munlock	AUE_MUNLOCK
-#define	FREEBSD32_SYS_AUE_undelete	AUE_UNDELETE
-#define	FREEBSD32_SYS_AUE_futimes	AUE_FUTIMES
-#define	FREEBSD32_SYS_AUE_getpgid	AUE_GETPGID
-#define	FREEBSD32_SYS_AUE_poll	AUE_POLL
-#define	FREEBSD32_SYS_AUE_freebsd7___semctl	AUE_SEMCTL
-#define	FREEBSD32_SYS_AUE_semget	AUE_SEMGET
-#define	FREEBSD32_SYS_AUE_semop	AUE_SEMOP
-#define	FREEBSD32_SYS_AUE_freebsd7_msgctl	AUE_MSGCTL
-#define	FREEBSD32_SYS_AUE_msgget	AUE_MSGGET
-#define	FREEBSD32_SYS_AUE_msgsnd	AUE_MSGSND
-#define	FREEBSD32_SYS_AUE_msgrcv	AUE_MSGRCV
-#define	FREEBSD32_SYS_AUE_shmat	AUE_SHMAT
-#define	FREEBSD32_SYS_AUE_freebsd7_shmctl	AUE_SHMCTL
-#define	FREEBSD32_SYS_AUE_shmdt	AUE_SHMDT
-#define	FREEBSD32_SYS_AUE_shmget	AUE_SHMGET
-#define	FREEBSD32_SYS_AUE_clock_gettime	AUE_NULL
-#define	FREEBSD32_SYS_AUE_clock_settime	AUE_CLOCK_SETTIME
-#define	FREEBSD32_SYS_AUE_clock_getres	AUE_NULL
-#define	FREEBSD32_SYS_AUE_ktimer_create	AUE_NULL
-#define	FREEBSD32_SYS_AUE_ktimer_delete	AUE_NULL
-#define	FREEBSD32_SYS_AUE_ktimer_settime	AUE_NULL
-#define	FREEBSD32_SYS_AUE_ktimer_gettime	AUE_NULL
-#define	FREEBSD32_SYS_AUE_ktimer_getoverrun	AUE_NULL
-#define	FREEBSD32_SYS_AUE_nanosleep	AUE_NULL
-#define	FREEBSD32_SYS_AUE_ffclock_getcounter	AUE_NULL
-#define	FREEBSD32_SYS_AUE_ffclock_setestimate	AUE_NULL
-#define	FREEBSD32_SYS_AUE_ffclock_getestimate	AUE_NULL
-#define	FREEBSD32_SYS_AUE_clock_nanosleep	AUE_NULL
-#define	FREEBSD32_SYS_AUE_clock_getcpuclockid2	AUE_NULL
-#define	FREEBSD32_SYS_AUE_ntp_gettime	AUE_NULL
-#define	FREEBSD32_SYS_AUE_minherit	AUE_MINHERIT
-#define	FREEBSD32_SYS_AUE_rfork	AUE_RFORK
-#define	FREEBSD32_SYS_AUE_issetugid	AUE_ISSETUGID
-#define	FREEBSD32_SYS_AUE_lchown	AUE_LCHOWN
-#define	FREEBSD32_SYS_AUE_aio_read	AUE_AIO_READ
-#define	FREEBSD32_SYS_AUE_aio_write	AUE_AIO_WRITE
-#define	FREEBSD32_SYS_AUE_lio_listio	AUE_LIO_LISTIO
-#define	FREEBSD32_SYS_AUE_freebsd11_getdents	AUE_O_GETDENTS
-#define	FREEBSD32_SYS_AUE_lchmod	AUE_LCHMOD
-#define	FREEBSD32_SYS_AUE_lutimes	AUE_LUTIMES
-#define	FREEBSD32_SYS_AUE_freebsd11_nstat	AUE_STAT
-#define	FREEBSD32_SYS_AUE_freebsd11_nfstat	AUE_FSTAT
-#define	FREEBSD32_SYS_AUE_freebsd11_nlstat	AUE_LSTAT
-#define	FREEBSD32_SYS_AUE_preadv	AUE_PREADV
-#define	FREEBSD32_SYS_AUE_pwritev	AUE_PWRITEV
-#define	FREEBSD32_SYS_AUE_freebsd4_fhstatfs	AUE_FHSTATFS
-#define	FREEBSD32_SYS_AUE_fhopen	AUE_FHOPEN
-#define	FREEBSD32_SYS_AUE_freebsd11_fhstat	AUE_FHSTAT
-#define	FREEBSD32_SYS_AUE_modnext	AUE_NULL
-#define	FREEBSD32_SYS_AUE_modstat	AUE_NULL
-#define	FREEBSD32_SYS_AUE_modfnext	AUE_NULL
-#define	FREEBSD32_SYS_AUE_modfind	AUE_NULL
-#define	FREEBSD32_SYS_AUE_kldload	AUE_MODLOAD
-#define	FREEBSD32_SYS_AUE_kldunload	AUE_MODUNLOAD
-#define	FREEBSD32_SYS_AUE_kldfind	AUE_NULL
-#define	FREEBSD32_SYS_AUE_kldnext	AUE_NULL
-#define	FREEBSD32_SYS_AUE_kldstat	AUE_NULL
-#define	FREEBSD32_SYS_AUE_kldfirstmod	AUE_NULL
-#define	FREEBSD32_SYS_AUE_getsid	AUE_GETSID
-#define	FREEBSD32_SYS_AUE_setresuid	AUE_SETRESUID
-#define	FREEBSD32_SYS_AUE_setresgid	AUE_SETRESGID
-#define	FREEBSD32_SYS_AUE_aio_return	AUE_AIO_RETURN
-#define	FREEBSD32_SYS_AUE_aio_suspend	AUE_AIO_SUSPEND
-#define	FREEBSD32_SYS_AUE_aio_cancel	AUE_AIO_CANCEL
-#define	FREEBSD32_SYS_AUE_aio_error	AUE_AIO_ERROR
-#define	FREEBSD32_SYS_AUE_freebsd6_aio_read	AUE_AIO_READ
-#define	FREEBSD32_SYS_AUE_freebsd6_aio_write	AUE_AIO_WRITE
-#define	FREEBSD32_SYS_AUE_freebsd6_lio_listio	AUE_LIO_LISTIO
-#define	FREEBSD32_SYS_AUE_yield	AUE_NULL
-#define	FREEBSD32_SYS_AUE_mlockall	AUE_MLOCKALL
-#define	FREEBSD32_SYS_AUE_munlockall	AUE_MUNLOCKALL
-#define	FREEBSD32_SYS_AUE___getcwd	AUE_GETCWD
-#define	FREEBSD32_SYS_AUE_sched_setparam	AUE_NULL
-#define	FREEBSD32_SYS_AUE_sched_getparam	AUE_NULL
-#define	FREEBSD32_SYS_AUE_sched_setscheduler	AUE_NULL
-#define	FREEBSD32_SYS_AUE_sched_getscheduler	AUE_NULL
-#define	FREEBSD32_SYS_AUE_sched_yield	AUE_NULL
-#define	FREEBSD32_SYS_AUE_sched_get_priority_max	AUE_NULL
-#define	FREEBSD32_SYS_AUE_sched_get_priority_min	AUE_NULL
-#define	FREEBSD32_SYS_AUE_sched_rr_get_interval	AUE_NULL
-#define	FREEBSD32_SYS_AUE_utrace	AUE_NULL
-#define	FREEBSD32_SYS_AUE_freebsd4_sendfile	AUE_SENDFILE
-#define	FREEBSD32_SYS_AUE_kldsym	AUE_NULL
-#define	FREEBSD32_SYS_AUE_jail	AUE_JAIL
-#define	FREEBSD32_SYS_AUE_nnpfs_syscall	AUE_NULL
-#define	FREEBSD32_SYS_AUE_sigprocmask	AUE_SIGPROCMASK
-#define	FREEBSD32_SYS_AUE_sigsuspend	AUE_SIGSUSPEND
-#define	FREEBSD32_SYS_AUE_freebsd4_sigaction	AUE_SIGACTION
-#define	FREEBSD32_SYS_AUE_sigpending	AUE_SIGPENDING
-#define	FREEBSD32_SYS_AUE_freebsd4_sigreturn	AUE_SIGRETURN
-#define	FREEBSD32_SYS_AUE_sigtimedwait	AUE_SIGWAIT
-#define	FREEBSD32_SYS_AUE_sigwaitinfo	AUE_NULL
-#define	FREEBSD32_SYS_AUE___acl_get_file	AUE_ACL_GET_FILE
-#define	FREEBSD32_SYS_AUE___acl_set_file	AUE_ACL_SET_FILE
-#define	FREEBSD32_SYS_AUE___acl_get_fd	AUE_ACL_GET_FD
-#define	FREEBSD32_SYS_AUE___acl_set_fd	AUE_ACL_SET_FD
-#define	FREEBSD32_SYS_AUE___acl_delete_file	AUE_ACL_DELETE_FILE
-#define	FREEBSD32_SYS_AUE___acl_delete_fd	AUE_ACL_DELETE_FD
-#define	FREEBSD32_SYS_AUE___acl_aclcheck_file	AUE_ACL_CHECK_FILE
-#define	FREEBSD32_SYS_AUE___acl_aclcheck_fd	AUE_ACL_CHECK_FD
-#define	FREEBSD32_SYS_AUE_extattrctl	AUE_EXTATTRCTL
-#define	FREEBSD32_SYS_AUE_extattr_set_file	AUE_EXTATTR_SET_FILE
-#define	FREEBSD32_SYS_AUE_extattr_get_file	AUE_EXTATTR_GET_FILE
-#define	FREEBSD32_SYS_AUE_extattr_delete_file	AUE_EXTATTR_DELETE_FILE
-#define	FREEBSD32_SYS_AUE_aio_waitcomplete	AUE_AIO_WAITCOMPLETE
-#define	FREEBSD32_SYS_AUE_getresuid	AUE_GETRESUID
-#define	FREEBSD32_SYS_AUE_getresgid	AUE_GETRESGID
-#define	FREEBSD32_SYS_AUE_kqueue	AUE_KQUEUE
-#define	FREEBSD32_SYS_AUE_freebsd11_kevent	AUE_KEVENT
-#define	FREEBSD32_SYS_AUE_extattr_set_fd	AUE_EXTATTR_SET_FD
-#define	FREEBSD32_SYS_AUE_extattr_get_fd	AUE_EXTATTR_GET_FD
-#define	FREEBSD32_SYS_AUE_extattr_delete_fd	AUE_EXTATTR_DELETE_FD
-#define	FREEBSD32_SYS_AUE___setugid	AUE_SETUGID
-#define	FREEBSD32_SYS_AUE_eaccess	AUE_EACCESS
-#define	FREEBSD32_SYS_AUE_afs3_syscall	AUE_NULL
-#define	FREEBSD32_SYS_AUE_nmount	AUE_NMOUNT
-#define	FREEBSD32_SYS_AUE___mac_get_proc	AUE_NULL
-#define	FREEBSD32_SYS_AUE___mac_set_proc	AUE_NULL
-#define	FREEBSD32_SYS_AUE___mac_get_fd	AUE_NULL
-#define	FREEBSD32_SYS_AUE___mac_get_file	AUE_NULL
-#define	FREEBSD32_SYS_AUE___mac_set_fd	AUE_NULL
-#define	FREEBSD32_SYS_AUE___mac_set_file	AUE_NULL
-#define	FREEBSD32_SYS_AUE_kenv	AUE_NULL
-#define	FREEBSD32_SYS_AUE_lchflags	AUE_LCHFLAGS
-#define	FREEBSD32_SYS_AUE_uuidgen	AUE_NULL
-#define	FREEBSD32_SYS_AUE_sendfile	AUE_SENDFILE
-#define	FREEBSD32_SYS_AUE_mac_syscall	AUE_NULL
-#define	FREEBSD32_SYS_AUE_freebsd11_getfsstat	AUE_GETFSSTAT
-#define	FREEBSD32_SYS_AUE_freebsd11_statfs	AUE_STATFS
-#define	FREEBSD32_SYS_AUE_freebsd11_fstatfs	AUE_FSTATFS
-#define	FREEBSD32_SYS_AUE_freebsd11_fhstatfs	AUE_FHSTATFS
-#define	FREEBSD32_SYS_AUE_ksem_close	AUE_SEMCLOSE
-#define	FREEBSD32_SYS_AUE_ksem_post	AUE_SEMPOST
-#define	FREEBSD32_SYS_AUE_ksem_wait	AUE_SEMWAIT
-#define	FREEBSD32_SYS_AUE_ksem_trywait	AUE_SEMTRYWAIT
-#define	FREEBSD32_SYS_AUE_ksem_init	AUE_SEMINIT
-#define	FREEBSD32_SYS_AUE_ksem_open	AUE_SEMOPEN
-#define	FREEBSD32_SYS_AUE_ksem_unlink	AUE_SEMUNLINK
-#define	FREEBSD32_SYS_AUE_ksem_getvalue	AUE_SEMGETVALUE
-#define	FREEBSD32_SYS_AUE_ksem_destroy	AUE_SEMDESTROY
-#define	FREEBSD32_SYS_AUE___mac_get_pid	AUE_NULL
-#define	FREEBSD32_SYS_AUE___mac_get_link	AUE_NULL
-#define	FREEBSD32_SYS_AUE___mac_set_link	AUE_NULL
-#define	FREEBSD32_SYS_AUE_extattr_set_link	AUE_EXTATTR_SET_LINK
-#define	FREEBSD32_SYS_AUE_extattr_get_link	AUE_EXTATTR_GET_LINK
-#define	FREEBSD32_SYS_AUE_extattr_delete_link	AUE_EXTATTR_DELETE_LINK
-#define	FREEBSD32_SYS_AUE___mac_execve	AUE_NULL
-#define	FREEBSD32_SYS_AUE_sigaction	AUE_SIGACTION
-#define	FREEBSD32_SYS_AUE_sigreturn	AUE_SIGRETURN
-#define	FREEBSD32_SYS_AUE_getcontext	AUE_NULL
-#define	FREEBSD32_SYS_AUE_setcontext	AUE_NULL
-#define	FREEBSD32_SYS_AUE_swapcontext	AUE_NULL
-#define	FREEBSD32_SYS_AUE_freebsd13_swapoff	AUE_SWAPOFF
-#define	FREEBSD32_SYS_AUE___acl_get_link	AUE_ACL_GET_LINK
-#define	FREEBSD32_SYS_AUE___acl_set_link	AUE_ACL_SET_LINK
-#define	FREEBSD32_SYS_AUE___acl_delete_link	AUE_ACL_DELETE_LINK
-#define	FREEBSD32_SYS_AUE___acl_aclcheck_link	AUE_ACL_CHECK_LINK
-#define	FREEBSD32_SYS_AUE_sigwait	AUE_SIGWAIT
-#define	FREEBSD32_SYS_AUE_thr_create	AUE_THR_CREATE
-#define	FREEBSD32_SYS_AUE_thr_exit	AUE_THR_EXIT
-#define	FREEBSD32_SYS_AUE_thr_self	AUE_NULL
-#define	FREEBSD32_SYS_AUE_thr_kill	AUE_THR_KILL
-#define	FREEBSD32_SYS_AUE_freebsd10__umtx_lock	AUE_NULL
-#define	FREEBSD32_SYS_AUE_freebsd10__umtx_unlock	AUE_NULL
-#define	FREEBSD32_SYS_AUE_jail_attach	AUE_JAIL_ATTACH
-#define	FREEBSD32_SYS_AUE_extattr_list_fd	AUE_EXTATTR_LIST_FD
-#define	FREEBSD32_SYS_AUE_extattr_list_file	AUE_EXTATTR_LIST_FILE
-#define	FREEBSD32_SYS_AUE_extattr_list_link	AUE_EXTATTR_LIST_LINK
-#define	FREEBSD32_SYS_AUE_ksem_timedwait	AUE_SEMWAIT
-#define	FREEBSD32_SYS_AUE_thr_suspend	AUE_NULL
-#define	FREEBSD32_SYS_AUE_thr_wake	AUE_NULL
-#define	FREEBSD32_SYS_AUE_kldunloadf	AUE_MODUNLOAD
-#define	FREEBSD32_SYS_AUE_audit	AUE_AUDIT
-#define	FREEBSD32_SYS_AUE_auditon	AUE_AUDITON
-#define	FREEBSD32_SYS_AUE_getauid	AUE_GETAUID
-#define	FREEBSD32_SYS_AUE_setauid	AUE_SETAUID
-#define	FREEBSD32_SYS_AUE_getaudit	AUE_GETAUDIT
-#define	FREEBSD32_SYS_AUE_setaudit	AUE_SETAUDIT
-#define	FREEBSD32_SYS_AUE_getaudit_addr	AUE_GETAUDIT_ADDR
-#define	FREEBSD32_SYS_AUE_setaudit_addr	AUE_SETAUDIT_ADDR
-#define	FREEBSD32_SYS_AUE_auditctl	AUE_AUDITCTL
-#define	FREEBSD32_SYS_AUE__umtx_op	AUE_NULL
-#define	FREEBSD32_SYS_AUE_thr_new	AUE_THR_NEW
-#define	FREEBSD32_SYS_AUE_sigqueue	AUE_NULL
-#define	FREEBSD32_SYS_AUE_kmq_open	AUE_MQ_OPEN
-#define	FREEBSD32_SYS_AUE_kmq_setattr	AUE_MQ_SETATTR
-#define	FREEBSD32_SYS_AUE_kmq_timedreceive	AUE_MQ_TIMEDRECEIVE
-#define	FREEBSD32_SYS_AUE_kmq_timedsend	AUE_MQ_TIMEDSEND
-#define	FREEBSD32_SYS_AUE_kmq_notify	AUE_MQ_NOTIFY
-#define	FREEBSD32_SYS_AUE_kmq_unlink	AUE_MQ_UNLINK
-#define	FREEBSD32_SYS_AUE_abort2	AUE_NULL
-#define	FREEBSD32_SYS_AUE_thr_set_name	AUE_NULL
-#define	FREEBSD32_SYS_AUE_aio_fsync	AUE_AIO_FSYNC
-#define	FREEBSD32_SYS_AUE_rtprio_thread	AUE_RTPRIO
-#define	FREEBSD32_SYS_AUE_sctp_peeloff	AUE_SCTP_PEELOFF
-#define	FREEBSD32_SYS_AUE_sctp_generic_sendmsg	AUE_SCTP_GENERIC_SENDMSG
-#define	FREEBSD32_SYS_AUE_sctp_generic_sendmsg_iov	AUE_SCTP_GENERIC_SENDMSG_IOV
-#define	FREEBSD32_SYS_AUE_sctp_generic_recvmsg	AUE_SCTP_GENERIC_RECVMSG
-#define	FREEBSD32_SYS_AUE_pread	AUE_PREAD
-#define	FREEBSD32_SYS_AUE_pwrite	AUE_PWRITE
-#define	FREEBSD32_SYS_AUE_mmap	AUE_MMAP
-#define	FREEBSD32_SYS_AUE_lseek	AUE_LSEEK
-#define	FREEBSD32_SYS_AUE_truncate	AUE_TRUNCATE
-#define	FREEBSD32_SYS_AUE_ftruncate	AUE_FTRUNCATE
-#define	FREEBSD32_SYS_AUE_thr_kill2	AUE_THR_KILL2
-#define	FREEBSD32_SYS_AUE_freebsd12_shm_open	AUE_SHMOPEN
-#define	FREEBSD32_SYS_AUE_shm_unlink	AUE_SHMUNLINK
-#define	FREEBSD32_SYS_AUE_cpuset	AUE_NULL
-#define	FREEBSD32_SYS_AUE_cpuset_setid	AUE_NULL
-#define	FREEBSD32_SYS_AUE_cpuset_getid	AUE_NULL
-#define	FREEBSD32_SYS_AUE_cpuset_getaffinity	AUE_NULL
-#define	FREEBSD32_SYS_AUE_cpuset_setaffinity	AUE_NULL
-#define	FREEBSD32_SYS_AUE_faccessat	AUE_FACCESSAT
-#define	FREEBSD32_SYS_AUE_fchmodat	AUE_FCHMODAT
-#define	FREEBSD32_SYS_AUE_fchownat	AUE_FCHOWNAT
-#define	FREEBSD32_SYS_AUE_fexecve	AUE_FEXECVE
-#define	FREEBSD32_SYS_AUE_freebsd11_fstatat	AUE_FSTATAT
-#define	FREEBSD32_SYS_AUE_futimesat	AUE_FUTIMESAT
-#define	FREEBSD32_SYS_AUE_linkat	AUE_LINKAT
-#define	FREEBSD32_SYS_AUE_mkdirat	AUE_MKDIRAT
-#define	FREEBSD32_SYS_AUE_mkfifoat	AUE_MKFIFOAT
-#define	FREEBSD32_SYS_AUE_freebsd11_mknodat	AUE_MKNODAT
-#define	FREEBSD32_SYS_AUE_openat	AUE_OPENAT_RWTC
-#define	FREEBSD32_SYS_AUE_readlinkat	AUE_READLINKAT
-#define	FREEBSD32_SYS_AUE_renameat	AUE_RENAMEAT
-#define	FREEBSD32_SYS_AUE_symlinkat	AUE_SYMLINKAT
-#define	FREEBSD32_SYS_AUE_unlinkat	AUE_UNLINKAT
-#define	FREEBSD32_SYS_AUE_posix_openpt	AUE_POSIX_OPENPT
-#define	FREEBSD32_SYS_AUE_gssd_syscall	AUE_NULL
-#define	FREEBSD32_SYS_AUE_jail_get	AUE_JAIL_GET
-#define	FREEBSD32_SYS_AUE_jail_set	AUE_JAIL_SET
-#define	FREEBSD32_SYS_AUE_jail_remove	AUE_JAIL_REMOVE
-#define	FREEBSD32_SYS_AUE_freebsd12_closefrom	AUE_CLOSEFROM
-#define	FREEBSD32_SYS_AUE___semctl	AUE_SEMCTL
-#define	FREEBSD32_SYS_AUE_msgctl	AUE_MSGCTL
-#define	FREEBSD32_SYS_AUE_shmctl	AUE_SHMCTL
-#define	FREEBSD32_SYS_AUE_lpathconf	AUE_LPATHCONF
-#define	FREEBSD32_SYS_AUE___cap_rights_get	AUE_CAP_RIGHTS_GET
-#define	FREEBSD32_SYS_AUE_cap_enter	AUE_CAP_ENTER
-#define	FREEBSD32_SYS_AUE_cap_getmode	AUE_CAP_GETMODE
-#define	FREEBSD32_SYS_AUE_pdfork	AUE_PDFORK
-#define	FREEBSD32_SYS_AUE_pdkill	AUE_PDKILL
-#define	FREEBSD32_SYS_AUE_pdgetpid	AUE_PDGETPID
-#define	FREEBSD32_SYS_AUE_pselect	AUE_SELECT
-#define	FREEBSD32_SYS_AUE_getloginclass	AUE_GETLOGINCLASS
-#define	FREEBSD32_SYS_AUE_setloginclass	AUE_SETLOGINCLASS
-#define	FREEBSD32_SYS_AUE_rctl_get_racct	AUE_NULL
-#define	FREEBSD32_SYS_AUE_rctl_get_rules	AUE_NULL
-#define	FREEBSD32_SYS_AUE_rctl_get_limits	AUE_NULL
-#define	FREEBSD32_SYS_AUE_rctl_add_rule	AUE_NULL
-#define	FREEBSD32_SYS_AUE_rctl_remove_rule	AUE_NULL
-#define	FREEBSD32_SYS_AUE_posix_fallocate	AUE_POSIX_FALLOCATE
-#define	FREEBSD32_SYS_AUE_posix_fadvise	AUE_POSIX_FADVISE
-#define	FREEBSD32_SYS_AUE_wait6	AUE_WAIT6
-#define	FREEBSD32_SYS_AUE_cap_rights_limit	AUE_CAP_RIGHTS_LIMIT
-#define	FREEBSD32_SYS_AUE_cap_ioctls_limit	AUE_CAP_IOCTLS_LIMIT
-#define	FREEBSD32_SYS_AUE_cap_ioctls_get	AUE_CAP_IOCTLS_GET
-#define	FREEBSD32_SYS_AUE_cap_fcntls_limit	AUE_CAP_FCNTLS_LIMIT
-#define	FREEBSD32_SYS_AUE_cap_fcntls_get	AUE_CAP_FCNTLS_GET
-#define	FREEBSD32_SYS_AUE_bindat	AUE_BINDAT
-#define	FREEBSD32_SYS_AUE_connectat	AUE_CONNECTAT
-#define	FREEBSD32_SYS_AUE_chflagsat	AUE_CHFLAGSAT
-#define	FREEBSD32_SYS_AUE_accept4	AUE_ACCEPT
-#define	FREEBSD32_SYS_AUE_pipe2	AUE_PIPE
-#define	FREEBSD32_SYS_AUE_aio_mlock	AUE_AIO_MLOCK
-#define	FREEBSD32_SYS_AUE_procctl	AUE_PROCCTL
-#define	FREEBSD32_SYS_AUE_ppoll	AUE_POLL
-#define	FREEBSD32_SYS_AUE_futimens	AUE_FUTIMES
-#define	FREEBSD32_SYS_AUE_utimensat	AUE_FUTIMESAT
-#define	FREEBSD32_SYS_AUE_fdatasync	AUE_FSYNC
-#define	FREEBSD32_SYS_AUE_fstat	AUE_FSTAT
-#define	FREEBSD32_SYS_AUE_fstatat	AUE_FSTATAT
-#define	FREEBSD32_SYS_AUE_fhstat	AUE_FHSTAT
-#define	FREEBSD32_SYS_AUE_getdirentries	AUE_GETDIRENTRIES
-#define	FREEBSD32_SYS_AUE_statfs	AUE_STATFS
-#define	FREEBSD32_SYS_AUE_fstatfs	AUE_FSTATFS
-#define	FREEBSD32_SYS_AUE_getfsstat	AUE_GETFSSTAT
-#define	FREEBSD32_SYS_AUE_fhstatfs	AUE_FHSTATFS
-#define	FREEBSD32_SYS_AUE_mknodat	AUE_MKNODAT
-#define	FREEBSD32_SYS_AUE_kevent	AUE_KEVENT
-#define	FREEBSD32_SYS_AUE_cpuset_getdomain	AUE_NULL
-#define	FREEBSD32_SYS_AUE_cpuset_setdomain	AUE_NULL
-#define	FREEBSD32_SYS_AUE_getrandom	AUE_NULL
-#define	FREEBSD32_SYS_AUE_getfhat	AUE_NULL
-#define	FREEBSD32_SYS_AUE_fhlink	AUE_NULL
-#define	FREEBSD32_SYS_AUE_fhlinkat	AUE_NULL
-#define	FREEBSD32_SYS_AUE_fhreadlink	AUE_NULL
-#define	FREEBSD32_SYS_AUE_funlinkat	AUE_UNLINKAT
-#define	FREEBSD32_SYS_AUE_copy_file_range	AUE_NULL
-#define	FREEBSD32_SYS_AUE___sysctlbyname	AUE_SYSCTL
-#define	FREEBSD32_SYS_AUE_shm_open2	AUE_SHMOPEN
-#define	FREEBSD32_SYS_AUE_shm_rename	AUE_SHMRENAME
-#define	FREEBSD32_SYS_AUE_sigfastblock	AUE_NULL
-#define	FREEBSD32_SYS_AUE___realpathat	AUE_REALPATHAT
-#define	FREEBSD32_SYS_AUE_close_range	AUE_CLOSERANGE
-#define	FREEBSD32_SYS_AUE_rpctls_syscall	AUE_NULL
-#define	FREEBSD32_SYS_AUE___specialfd	AUE_SPECIALFD
-#define	FREEBSD32_SYS_AUE_aio_writev	AUE_AIO_WRITEV
-#define	FREEBSD32_SYS_AUE_aio_readv	AUE_AIO_READV
-#define	FREEBSD32_SYS_AUE_fspacectl	AUE_FSPACECTL
-#define	FREEBSD32_SYS_AUE_sched_getcpu	AUE_NULL
-#define	FREEBSD32_SYS_AUE_swapoff	AUE_SWAPOFF
-#define	FREEBSD32_SYS_AUE_kqueuex	AUE_KQUEUE
-#define	FREEBSD32_SYS_AUE_membarrier	AUE_NULL
-#define	FREEBSD32_SYS_AUE_timerfd_create	AUE_TIMERFD
-#define	FREEBSD32_SYS_AUE_timerfd_gettime	AUE_TIMERFD
-#define	FREEBSD32_SYS_AUE_timerfd_settime	AUE_TIMERFD
-#define	FREEBSD32_SYS_AUE_kcmp	AUE_NULL
+#define	SYS_AUE_syscall	AUE_NULL
+#define	SYS_AUE_exit	AUE_EXIT
+#define	SYS_AUE_fork	AUE_FORK
+#define	SYS_AUE_read	AUE_READ
+#define	SYS_AUE_write	AUE_WRITE
+#define	SYS_AUE_open	AUE_OPEN_RWTC
+#define	SYS_AUE_close	AUE_CLOSE
+#define	SYS_AUE_wait4	AUE_WAIT4
+#define	SYS_AUE_ocreat	AUE_CREAT
+#define	SYS_AUE_link	AUE_LINK
+#define	SYS_AUE_unlink	AUE_UNLINK
+#define	SYS_AUE_chdir	AUE_CHDIR
+#define	SYS_AUE_fchdir	AUE_FCHDIR
+#define	SYS_AUE_freebsd11_mknod	AUE_MKNOD
+#define	SYS_AUE_chmod	AUE_CHMOD
+#define	SYS_AUE_chown	AUE_CHOWN
+#define	SYS_AUE_break	AUE_NULL
+#define	SYS_AUE_freebsd4_getfsstat	AUE_GETFSSTAT
+#define	SYS_AUE_olseek	AUE_LSEEK
+#define	SYS_AUE_getpid	AUE_GETPID
+#define	SYS_AUE_mount	AUE_MOUNT
+#define	SYS_AUE_unmount	AUE_UMOUNT
+#define	SYS_AUE_setuid	AUE_SETUID
+#define	SYS_AUE_getuid	AUE_GETUID
+#define	SYS_AUE_geteuid	AUE_GETEUID
+#define	SYS_AUE_ptrace	AUE_PTRACE
+#define	SYS_AUE_recvmsg	AUE_RECVMSG
+#define	SYS_AUE_sendmsg	AUE_SENDMSG
+#define	SYS_AUE_recvfrom	AUE_RECVFROM
+#define	SYS_AUE_accept	AUE_ACCEPT
+#define	SYS_AUE_getpeername	AUE_GETPEERNAME
+#define	SYS_AUE_getsockname	AUE_GETSOCKNAME
+#define	SYS_AUE_access	AUE_ACCESS
+#define	SYS_AUE_chflags	AUE_CHFLAGS
+#define	SYS_AUE_fchflags	AUE_FCHFLAGS
+#define	SYS_AUE_sync	AUE_SYNC
+#define	SYS_AUE_kill	AUE_KILL
+#define	SYS_AUE_ostat	AUE_STAT
+#define	SYS_AUE_getppid	AUE_GETPPID
+#define	SYS_AUE_olstat	AUE_LSTAT
+#define	SYS_AUE_dup	AUE_DUP
+#define	SYS_AUE_freebsd10_pipe	AUE_PIPE
+#define	SYS_AUE_getegid	AUE_GETEGID
+#define	SYS_AUE_profil	AUE_PROFILE
+#define	SYS_AUE_ktrace	AUE_KTRACE
+#define	SYS_AUE_osigaction	AUE_SIGACTION
+#define	SYS_AUE_getgid	AUE_GETGID
+#define	SYS_AUE_osigprocmask	AUE_SIGPROCMASK
+#define	SYS_AUE_getlogin	AUE_GETLOGIN
+#define	SYS_AUE_setlogin	AUE_SETLOGIN
+#define	SYS_AUE_acct	AUE_ACCT
+#define	SYS_AUE_osigpending	AUE_SIGPENDING
+#define	SYS_AUE_sigaltstack	AUE_SIGALTSTACK
+#define	SYS_AUE_ioctl	AUE_IOCTL
+#define	SYS_AUE_reboot	AUE_REBOOT
+#define	SYS_AUE_revoke	AUE_REVOKE
+#define	SYS_AUE_symlink	AUE_SYMLINK
+#define	SYS_AUE_readlink	AUE_READLINK
+#define	SYS_AUE_execve	AUE_EXECVE
+#define	SYS_AUE_umask	AUE_UMASK
+#define	SYS_AUE_chroot	AUE_CHROOT
+#define	SYS_AUE_ofstat	AUE_FSTAT
+#define	SYS_AUE_ogetkerninfo	AUE_NULL
+#define	SYS_AUE_ogetpagesize	AUE_NULL
+#define	SYS_AUE_msync	AUE_MSYNC
+#define	SYS_AUE_vfork	AUE_VFORK
+#define	SYS_AUE_ommap	AUE_MMAP
+#define	SYS_AUE_freebsd11_vadvise	AUE_O_VADVISE
+#define	SYS_AUE_munmap	AUE_MUNMAP
+#define	SYS_AUE_mprotect	AUE_MPROTECT
+#define	SYS_AUE_madvise	AUE_MADVISE
+#define	SYS_AUE_mincore	AUE_MINCORE
+#define	SYS_AUE_getgroups	AUE_GETGROUPS
+#define	SYS_AUE_setgroups	AUE_SETGROUPS
+#define	SYS_AUE_getpgrp	AUE_GETPGRP
+#define	SYS_AUE_setpgid	AUE_SETPGRP
+#define	SYS_AUE_setitimer	AUE_SETITIMER
+#define	SYS_AUE_owait	AUE_WAIT4
+#define	SYS_AUE_swapon	AUE_SWAPON
+#define	SYS_AUE_getitimer	AUE_GETITIMER
+#define	SYS_AUE_ogethostname	AUE_SYSCTL
+#define	SYS_AUE_osethostname	AUE_SYSCTL
+#define	SYS_AUE_getdtablesize	AUE_GETDTABLESIZE
+#define	SYS_AUE_dup2	AUE_DUP2
+#define	SYS_AUE_fcntl	AUE_FCNTL
+#define	SYS_AUE_select	AUE_SELECT
+#define	SYS_AUE_fsync	AUE_FSYNC
+#define	SYS_AUE_setpriority	AUE_SETPRIORITY
+#define	SYS_AUE_socket	AUE_SOCKET
+#define	SYS_AUE_connect	AUE_CONNECT
+#define	SYS_AUE_oaccept	AUE_ACCEPT
+#define	SYS_AUE_getpriority	AUE_GETPRIORITY
+#define	SYS_AUE_osend	AUE_SEND
+#define	SYS_AUE_orecv	AUE_RECV
+#define	SYS_AUE_osigreturn	AUE_SIGRETURN
+#define	SYS_AUE_bind	AUE_BIND
+#define	SYS_AUE_setsockopt	AUE_SETSOCKOPT
+#define	SYS_AUE_listen	AUE_LISTEN
+#define	SYS_AUE_osigvec	AUE_NULL
+#define	SYS_AUE_osigblock	AUE_NULL
+#define	SYS_AUE_osigsetmask	AUE_NULL
+#define	SYS_AUE_osigsuspend	AUE_NULL
+#define	SYS_AUE_osigstack	AUE_NULL
+#define	SYS_AUE_orecvmsg	AUE_RECVMSG
+#define	SYS_AUE_osendmsg	AUE_SENDMSG
+#define	SYS_AUE_gettimeofday	AUE_GETTIMEOFDAY
+#define	SYS_AUE_getrusage	AUE_GETRUSAGE
+#define	SYS_AUE_getsockopt	AUE_GETSOCKOPT
+#define	SYS_AUE_readv	AUE_READV
+#define	SYS_AUE_writev	AUE_WRITEV
+#define	SYS_AUE_settimeofday	AUE_SETTIMEOFDAY
+#define	SYS_AUE_fchown	AUE_FCHOWN
+#define	SYS_AUE_fchmod	AUE_FCHMOD
+#define	SYS_AUE_orecvfrom	AUE_RECVFROM
+#define	SYS_AUE_setreuid	AUE_SETREUID
+#define	SYS_AUE_setregid	AUE_SETREGID
+#define	SYS_AUE_rename	AUE_RENAME
+#define	SYS_AUE_otruncate	AUE_TRUNCATE
+#define	SYS_AUE_oftruncate	AUE_FTRUNCATE
+#define	SYS_AUE_flock	AUE_FLOCK
+#define	SYS_AUE_mkfifo	AUE_MKFIFO
+#define	SYS_AUE_sendto	AUE_SENDTO
+#define	SYS_AUE_shutdown	AUE_SHUTDOWN
+#define	SYS_AUE_socketpair	AUE_SOCKETPAIR
+#define	SYS_AUE_mkdir	AUE_MKDIR
+#define	SYS_AUE_rmdir	AUE_RMDIR
+#define	SYS_AUE_utimes	AUE_UTIMES
+#define	SYS_AUE_adjtime	AUE_ADJTIME
+#define	SYS_AUE_ogetpeername	AUE_GETPEERNAME
+#define	SYS_AUE_ogethostid	AUE_SYSCTL
+#define	SYS_AUE_osethostid	AUE_SYSCTL
+#define	SYS_AUE_ogetrlimit	AUE_GETRLIMIT
+#define	SYS_AUE_osetrlimit	AUE_SETRLIMIT
+#define	SYS_AUE_okillpg	AUE_KILLPG
+#define	SYS_AUE_setsid	AUE_SETSID
+#define	SYS_AUE_quotactl	AUE_QUOTACTL
+#define	SYS_AUE_oquota	AUE_O_QUOTA
+#define	SYS_AUE_ogetsockname	AUE_GETSOCKNAME
+#define	SYS_AUE_nlm_syscall	AUE_NULL
+#define	SYS_AUE_nfssvc	AUE_NFS_SVC
+#define	SYS_AUE_ogetdirentries	AUE_GETDIRENTRIES
+#define	SYS_AUE_freebsd4_statfs	AUE_STATFS
+#define	SYS_AUE_freebsd4_fstatfs	AUE_FSTATFS
+#define	SYS_AUE_lgetfh	AUE_LGETFH
+#define	SYS_AUE_getfh	AUE_NFS_GETFH
+#define	SYS_AUE_freebsd4_getdomainname	AUE_SYSCTL
+#define	SYS_AUE_freebsd4_setdomainname	AUE_SYSCTL
+#define	SYS_AUE_freebsd4_uname	AUE_NULL
+#define	SYS_AUE_sysarch	AUE_SYSARCH
+#define	SYS_AUE_rtprio	AUE_RTPRIO
+#define	SYS_AUE_semsys	AUE_SEMSYS
+#define	SYS_AUE_msgsys	AUE_MSGSYS
+#define	SYS_AUE_shmsys	AUE_SHMSYS
+#define	SYS_AUE_freebsd6_pread	AUE_PREAD
+#define	SYS_AUE_freebsd6_pwrite	AUE_PWRITE
+#define	SYS_AUE_setfib	AUE_SETFIB
+#define	SYS_AUE_ntp_adjtime	AUE_NTP_ADJTIME
+#define	SYS_AUE_setgid	AUE_SETGID
+#define	SYS_AUE_setegid	AUE_SETEGID
+#define	SYS_AUE_seteuid	AUE_SETEUID
+#define	SYS_AUE_freebsd11_stat	AUE_STAT
+#define	SYS_AUE_freebsd11_fstat	AUE_FSTAT
+#define	SYS_AUE_freebsd11_lstat	AUE_LSTAT
+#define	SYS_AUE_pathconf	AUE_PATHCONF
+#define	SYS_AUE_fpathconf	AUE_FPATHCONF
+#define	SYS_AUE_getrlimit	AUE_GETRLIMIT
+#define	SYS_AUE_setrlimit	AUE_SETRLIMIT
+#define	SYS_AUE_freebsd11_getdirentries	AUE_GETDIRENTRIES
+#define	SYS_AUE_freebsd6_mmap	AUE_MMAP
+#define	SYS_AUE___syscall	AUE_NULL
+#define	SYS_AUE_freebsd6_lseek	AUE_LSEEK
+#define	SYS_AUE_freebsd6_truncate	AUE_TRUNCATE
+#define	SYS_AUE_freebsd6_ftruncate	AUE_FTRUNCATE
+#define	SYS_AUE___sysctl	AUE_SYSCTL
+#define	SYS_AUE_mlock	AUE_MLOCK
+#define	SYS_AUE_munlock	AUE_MUNLOCK
+#define	SYS_AUE_undelete	AUE_UNDELETE
+#define	SYS_AUE_futimes	AUE_FUTIMES
+#define	SYS_AUE_getpgid	AUE_GETPGID
+#define	SYS_AUE_poll	AUE_POLL
+#define	SYS_AUE_freebsd7___semctl	AUE_SEMCTL
+#define	SYS_AUE_semget	AUE_SEMGET
+#define	SYS_AUE_semop	AUE_SEMOP
+#define	SYS_AUE_freebsd7_msgctl	AUE_MSGCTL
+#define	SYS_AUE_msgget	AUE_MSGGET
+#define	SYS_AUE_msgsnd	AUE_MSGSND
+#define	SYS_AUE_msgrcv	AUE_MSGRCV
+#define	SYS_AUE_shmat	AUE_SHMAT
+#define	SYS_AUE_freebsd7_shmctl	AUE_SHMCTL
+#define	SYS_AUE_shmdt	AUE_SHMDT
+#define	SYS_AUE_shmget	AUE_SHMGET
+#define	SYS_AUE_clock_gettime	AUE_NULL
+#define	SYS_AUE_clock_settime	AUE_CLOCK_SETTIME
+#define	SYS_AUE_clock_getres	AUE_NULL
+#define	SYS_AUE_ktimer_create	AUE_NULL
+#define	SYS_AUE_ktimer_delete	AUE_NULL
+#define	SYS_AUE_ktimer_settime	AUE_NULL
+#define	SYS_AUE_ktimer_gettime	AUE_NULL
+#define	SYS_AUE_ktimer_getoverrun	AUE_NULL
+#define	SYS_AUE_nanosleep	AUE_NULL
+#define	SYS_AUE_ffclock_getcounter	AUE_NULL
+#define	SYS_AUE_ffclock_setestimate	AUE_NULL
+#define	SYS_AUE_ffclock_getestimate	AUE_NULL
+#define	SYS_AUE_clock_nanosleep	AUE_NULL
+#define	SYS_AUE_clock_getcpuclockid2	AUE_NULL
+#define	SYS_AUE_ntp_gettime	AUE_NULL
+#define	SYS_AUE_minherit	AUE_MINHERIT
+#define	SYS_AUE_rfork	AUE_RFORK
+#define	SYS_AUE_issetugid	AUE_ISSETUGID
+#define	SYS_AUE_lchown	AUE_LCHOWN
+#define	SYS_AUE_aio_read	AUE_AIO_READ
+#define	SYS_AUE_aio_write	AUE_AIO_WRITE
+#define	SYS_AUE_lio_listio	AUE_LIO_LISTIO
+#define	SYS_AUE_freebsd11_getdents	AUE_O_GETDENTS
+#define	SYS_AUE_lchmod	AUE_LCHMOD
+#define	SYS_AUE_lutimes	AUE_LUTIMES
+#define	SYS_AUE_freebsd11_nstat	AUE_STAT
+#define	SYS_AUE_freebsd11_nfstat	AUE_FSTAT
+#define	SYS_AUE_freebsd11_nlstat	AUE_LSTAT
+#define	SYS_AUE_preadv	AUE_PREADV
+#define	SYS_AUE_pwritev	AUE_PWRITEV
+#define	SYS_AUE_freebsd4_fhstatfs	AUE_FHSTATFS
+#define	SYS_AUE_fhopen	AUE_FHOPEN
+#define	SYS_AUE_freebsd11_fhstat	AUE_FHSTAT
+#define	SYS_AUE_modnext	AUE_NULL
+#define	SYS_AUE_modstat	AUE_NULL
+#define	SYS_AUE_modfnext	AUE_NULL
+#define	SYS_AUE_modfind	AUE_NULL
+#define	SYS_AUE_kldload	AUE_MODLOAD
+#define	SYS_AUE_kldunload	AUE_MODUNLOAD
+#define	SYS_AUE_kldfind	AUE_NULL
+#define	SYS_AUE_kldnext	AUE_NULL
+#define	SYS_AUE_kldstat	AUE_NULL
+#define	SYS_AUE_kldfirstmod	AUE_NULL
+#define	SYS_AUE_getsid	AUE_GETSID
+#define	SYS_AUE_setresuid	AUE_SETRESUID
+#define	SYS_AUE_setresgid	AUE_SETRESGID
+#define	SYS_AUE_aio_return	AUE_AIO_RETURN
+#define	SYS_AUE_aio_suspend	AUE_AIO_SUSPEND
+#define	SYS_AUE_aio_cancel	AUE_AIO_CANCEL
+#define	SYS_AUE_aio_error	AUE_AIO_ERROR
+#define	SYS_AUE_freebsd6_aio_read	AUE_AIO_READ
+#define	SYS_AUE_freebsd6_aio_write	AUE_AIO_WRITE
+#define	SYS_AUE_freebsd6_lio_listio	AUE_LIO_LISTIO
+#define	SYS_AUE_yield	AUE_NULL
+#define	SYS_AUE_mlockall	AUE_MLOCKALL
+#define	SYS_AUE_munlockall	AUE_MUNLOCKALL
+#define	SYS_AUE___getcwd	AUE_GETCWD
+#define	SYS_AUE_sched_setparam	AUE_NULL
+#define	SYS_AUE_sched_getparam	AUE_NULL
+#define	SYS_AUE_sched_setscheduler	AUE_NULL
+#define	SYS_AUE_sched_getscheduler	AUE_NULL
+#define	SYS_AUE_sched_yield	AUE_NULL
+#define	SYS_AUE_sched_get_priority_max	AUE_NULL
+#define	SYS_AUE_sched_get_priority_min	AUE_NULL
+#define	SYS_AUE_sched_rr_get_interval	AUE_NULL
+#define	SYS_AUE_utrace	AUE_NULL
+#define	SYS_AUE_freebsd4_sendfile	AUE_SENDFILE
+#define	SYS_AUE_kldsym	AUE_NULL
+#define	SYS_AUE_jail	AUE_JAIL
+#define	SYS_AUE_nnpfs_syscall	AUE_NULL
+#define	SYS_AUE_sigprocmask	AUE_SIGPROCMASK
+#define	SYS_AUE_sigsuspend	AUE_SIGSUSPEND
+#define	SYS_AUE_freebsd4_sigaction	AUE_SIGACTION
+#define	SYS_AUE_sigpending	AUE_SIGPENDING
+#define	SYS_AUE_freebsd4_sigreturn	AUE_SIGRETURN
+#define	SYS_AUE_sigtimedwait	AUE_SIGWAIT
+#define	SYS_AUE_sigwaitinfo	AUE_NULL
+#define	SYS_AUE___acl_get_file	AUE_ACL_GET_FILE
+#define	SYS_AUE___acl_set_file	AUE_ACL_SET_FILE
+#define	SYS_AUE___acl_get_fd	AUE_ACL_GET_FD
+#define	SYS_AUE___acl_set_fd	AUE_ACL_SET_FD
+#define	SYS_AUE___acl_delete_file	AUE_ACL_DELETE_FILE
+#define	SYS_AUE___acl_delete_fd	AUE_ACL_DELETE_FD
+#define	SYS_AUE___acl_aclcheck_file	AUE_ACL_CHECK_FILE
+#define	SYS_AUE___acl_aclcheck_fd	AUE_ACL_CHECK_FD
+#define	SYS_AUE_extattrctl	AUE_EXTATTRCTL
+#define	SYS_AUE_extattr_set_file	AUE_EXTATTR_SET_FILE
+#define	SYS_AUE_extattr_get_file	AUE_EXTATTR_GET_FILE
+#define	SYS_AUE_extattr_delete_file	AUE_EXTATTR_DELETE_FILE
+#define	SYS_AUE_aio_waitcomplete	AUE_AIO_WAITCOMPLETE
+#define	SYS_AUE_getresuid	AUE_GETRESUID
+#define	SYS_AUE_getresgid	AUE_GETRESGID
+#define	SYS_AUE_kqueue	AUE_KQUEUE
+#define	SYS_AUE_freebsd11_kevent	AUE_KEVENT
+#define	SYS_AUE_extattr_set_fd	AUE_EXTATTR_SET_FD
+#define	SYS_AUE_extattr_get_fd	AUE_EXTATTR_GET_FD
+#define	SYS_AUE_extattr_delete_fd	AUE_EXTATTR_DELETE_FD
+#define	SYS_AUE___setugid	AUE_SETUGID
+#define	SYS_AUE_eaccess	AUE_EACCESS
+#define	SYS_AUE_afs3_syscall	AUE_NULL
+#define	SYS_AUE_nmount	AUE_NMOUNT
+#define	SYS_AUE___mac_get_proc	AUE_NULL
+#define	SYS_AUE___mac_set_proc	AUE_NULL
+#define	SYS_AUE___mac_get_fd	AUE_NULL
+#define	SYS_AUE___mac_get_file	AUE_NULL
+#define	SYS_AUE___mac_set_fd	AUE_NULL
+#define	SYS_AUE___mac_set_file	AUE_NULL
+#define	SYS_AUE_kenv	AUE_NULL
+#define	SYS_AUE_lchflags	AUE_LCHFLAGS
+#define	SYS_AUE_uuidgen	AUE_NULL
+#define	SYS_AUE_sendfile	AUE_SENDFILE
+#define	SYS_AUE_mac_syscall	AUE_NULL
+#define	SYS_AUE_freebsd11_getfsstat	AUE_GETFSSTAT
+#define	SYS_AUE_freebsd11_statfs	AUE_STATFS
+#define	SYS_AUE_freebsd11_fstatfs	AUE_FSTATFS
+#define	SYS_AUE_freebsd11_fhstatfs	AUE_FHSTATFS
+#define	SYS_AUE_ksem_close	AUE_SEMCLOSE
+#define	SYS_AUE_ksem_post	AUE_SEMPOST
+#define	SYS_AUE_ksem_wait	AUE_SEMWAIT
+#define	SYS_AUE_ksem_trywait	AUE_SEMTRYWAIT
+#define	SYS_AUE_ksem_init	AUE_SEMINIT
+#define	SYS_AUE_ksem_open	AUE_SEMOPEN
+#define	SYS_AUE_ksem_unlink	AUE_SEMUNLINK
+#define	SYS_AUE_ksem_getvalue	AUE_SEMGETVALUE
+#define	SYS_AUE_ksem_destroy	AUE_SEMDESTROY
+#define	SYS_AUE___mac_get_pid	AUE_NULL
+#define	SYS_AUE___mac_get_link	AUE_NULL
+#define	SYS_AUE___mac_set_link	AUE_NULL
+#define	SYS_AUE_extattr_set_link	AUE_EXTATTR_SET_LINK
+#define	SYS_AUE_extattr_get_link	AUE_EXTATTR_GET_LINK
+#define	SYS_AUE_extattr_delete_link	AUE_EXTATTR_DELETE_LINK
+#define	SYS_AUE___mac_execve	AUE_NULL
+#define	SYS_AUE_sigaction	AUE_SIGACTION
+#define	SYS_AUE_sigreturn	AUE_SIGRETURN
+#define	SYS_AUE_getcontext	AUE_NULL
+#define	SYS_AUE_setcontext	AUE_NULL
+#define	SYS_AUE_swapcontext	AUE_NULL
+#define	SYS_AUE_freebsd13_swapoff	AUE_SWAPOFF
+#define	SYS_AUE___acl_get_link	AUE_ACL_GET_LINK
+#define	SYS_AUE___acl_set_link	AUE_ACL_SET_LINK
+#define	SYS_AUE___acl_delete_link	AUE_ACL_DELETE_LINK
+#define	SYS_AUE___acl_aclcheck_link	AUE_ACL_CHECK_LINK
+#define	SYS_AUE_sigwait	AUE_SIGWAIT
+#define	SYS_AUE_thr_create	AUE_THR_CREATE
+#define	SYS_AUE_thr_exit	AUE_THR_EXIT
+#define	SYS_AUE_thr_self	AUE_NULL
+#define	SYS_AUE_thr_kill	AUE_THR_KILL
+#define	SYS_AUE_freebsd10__umtx_lock	AUE_NULL
+#define	SYS_AUE_freebsd10__umtx_unlock	AUE_NULL
+#define	SYS_AUE_jail_attach	AUE_JAIL_ATTACH
+#define	SYS_AUE_extattr_list_fd	AUE_EXTATTR_LIST_FD
+#define	SYS_AUE_extattr_list_file	AUE_EXTATTR_LIST_FILE
+#define	SYS_AUE_extattr_list_link	AUE_EXTATTR_LIST_LINK
+#define	SYS_AUE_ksem_timedwait	AUE_SEMWAIT
+#define	SYS_AUE_thr_suspend	AUE_NULL
+#define	SYS_AUE_thr_wake	AUE_NULL
+#define	SYS_AUE_kldunloadf	AUE_MODUNLOAD
+#define	SYS_AUE_audit	AUE_AUDIT
+#define	SYS_AUE_auditon	AUE_AUDITON
+#define	SYS_AUE_getauid	AUE_GETAUID
+#define	SYS_AUE_setauid	AUE_SETAUID
+#define	SYS_AUE_getaudit	AUE_GETAUDIT
+#define	SYS_AUE_setaudit	AUE_SETAUDIT
+#define	SYS_AUE_getaudit_addr	AUE_GETAUDIT_ADDR
+#define	SYS_AUE_setaudit_addr	AUE_SETAUDIT_ADDR
+#define	SYS_AUE_auditctl	AUE_AUDITCTL
+#define	SYS_AUE__umtx_op	AUE_NULL
+#define	SYS_AUE_thr_new	AUE_THR_NEW
+#define	SYS_AUE_sigqueue	AUE_NULL
+#define	SYS_AUE_kmq_open	AUE_MQ_OPEN
+#define	SYS_AUE_kmq_setattr	AUE_MQ_SETATTR
+#define	SYS_AUE_kmq_timedreceive	AUE_MQ_TIMEDRECEIVE
+#define	SYS_AUE_kmq_timedsend	AUE_MQ_TIMEDSEND
+#define	SYS_AUE_kmq_notify	AUE_MQ_NOTIFY
+#define	SYS_AUE_kmq_unlink	AUE_MQ_UNLINK
+#define	SYS_AUE_abort2	AUE_NULL
+#define	SYS_AUE_thr_set_name	AUE_NULL
+#define	SYS_AUE_aio_fsync	AUE_AIO_FSYNC
+#define	SYS_AUE_rtprio_thread	AUE_RTPRIO
+#define	SYS_AUE_sctp_peeloff	AUE_SCTP_PEELOFF
+#define	SYS_AUE_sctp_generic_sendmsg	AUE_SCTP_GENERIC_SENDMSG
+#define	SYS_AUE_sctp_generic_sendmsg_iov	AUE_SCTP_GENERIC_SENDMSG_IOV
+#define	SYS_AUE_sctp_generic_recvmsg	AUE_SCTP_GENERIC_RECVMSG
+#define	SYS_AUE_pread	AUE_PREAD
+#define	SYS_AUE_pwrite	AUE_PWRITE
+#define	SYS_AUE_mmap	AUE_MMAP
+#define	SYS_AUE_lseek	AUE_LSEEK
+#define	SYS_AUE_truncate	AUE_TRUNCATE
+#define	SYS_AUE_ftruncate	AUE_FTRUNCATE
+#define	SYS_AUE_thr_kill2	AUE_THR_KILL2
+#define	SYS_AUE_freebsd12_shm_open	AUE_SHMOPEN
+#define	SYS_AUE_shm_unlink	AUE_SHMUNLINK
+#define	SYS_AUE_cpuset	AUE_NULL
+#define	SYS_AUE_cpuset_setid	AUE_NULL
+#define	SYS_AUE_cpuset_getid	AUE_NULL
+#define	SYS_AUE_cpuset_getaffinity	AUE_NULL
+#define	SYS_AUE_cpuset_setaffinity	AUE_NULL
+#define	SYS_AUE_faccessat	AUE_FACCESSAT
+#define	SYS_AUE_fchmodat	AUE_FCHMODAT
+#define	SYS_AUE_fchownat	AUE_FCHOWNAT
+#define	SYS_AUE_fexecve	AUE_FEXECVE
+#define	SYS_AUE_freebsd11_fstatat	AUE_FSTATAT
+#define	SYS_AUE_futimesat	AUE_FUTIMESAT
+#define	SYS_AUE_linkat	AUE_LINKAT
+#define	SYS_AUE_mkdirat	AUE_MKDIRAT
+#define	SYS_AUE_mkfifoat	AUE_MKFIFOAT
+#define	SYS_AUE_freebsd11_mknodat	AUE_MKNODAT
+#define	SYS_AUE_openat	AUE_OPENAT_RWTC
+#define	SYS_AUE_readlinkat	AUE_READLINKAT
+#define	SYS_AUE_renameat	AUE_RENAMEAT
+#define	SYS_AUE_symlinkat	AUE_SYMLINKAT
+#define	SYS_AUE_unlinkat	AUE_UNLINKAT
+#define	SYS_AUE_posix_openpt	AUE_POSIX_OPENPT
+#define	SYS_AUE_gssd_syscall	AUE_NULL
+#define	SYS_AUE_jail_get	AUE_JAIL_GET
+#define	SYS_AUE_jail_set	AUE_JAIL_SET
+#define	SYS_AUE_jail_remove	AUE_JAIL_REMOVE
+#define	SYS_AUE_freebsd12_closefrom	AUE_CLOSEFROM
+#define	SYS_AUE___semctl	AUE_SEMCTL
+#define	SYS_AUE_msgctl	AUE_MSGCTL
+#define	SYS_AUE_shmctl	AUE_SHMCTL
+#define	SYS_AUE_lpathconf	AUE_LPATHCONF
+#define	SYS_AUE___cap_rights_get	AUE_CAP_RIGHTS_GET
+#define	SYS_AUE_cap_enter	AUE_CAP_ENTER
+#define	SYS_AUE_cap_getmode	AUE_CAP_GETMODE
+#define	SYS_AUE_pdfork	AUE_PDFORK
+#define	SYS_AUE_pdkill	AUE_PDKILL
+#define	SYS_AUE_pdgetpid	AUE_PDGETPID
+#define	SYS_AUE_pselect	AUE_SELECT
+#define	SYS_AUE_getloginclass	AUE_GETLOGINCLASS
+#define	SYS_AUE_setloginclass	AUE_SETLOGINCLASS
+#define	SYS_AUE_rctl_get_racct	AUE_NULL
+#define	SYS_AUE_rctl_get_rules	AUE_NULL
+#define	SYS_AUE_rctl_get_limits	AUE_NULL
+#define	SYS_AUE_rctl_add_rule	AUE_NULL
+#define	SYS_AUE_rctl_remove_rule	AUE_NULL
+#define	SYS_AUE_posix_fallocate	AUE_POSIX_FALLOCATE
+#define	SYS_AUE_posix_fadvise	AUE_POSIX_FADVISE
+#define	SYS_AUE_wait6	AUE_WAIT6
+#define	SYS_AUE_cap_rights_limit	AUE_CAP_RIGHTS_LIMIT
+#define	SYS_AUE_cap_ioctls_limit	AUE_CAP_IOCTLS_LIMIT
+#define	SYS_AUE_cap_ioctls_get	AUE_CAP_IOCTLS_GET
+#define	SYS_AUE_cap_fcntls_limit	AUE_CAP_FCNTLS_LIMIT
+#define	SYS_AUE_cap_fcntls_get	AUE_CAP_FCNTLS_GET
+#define	SYS_AUE_bindat	AUE_BINDAT
+#define	SYS_AUE_connectat	AUE_CONNECTAT
+#define	SYS_AUE_chflagsat	AUE_CHFLAGSAT
+#define	SYS_AUE_accept4	AUE_ACCEPT
+#define	SYS_AUE_pipe2	AUE_PIPE
+#define	SYS_AUE_aio_mlock	AUE_AIO_MLOCK
+#define	SYS_AUE_procctl	AUE_PROCCTL
+#define	SYS_AUE_ppoll	AUE_POLL
+#define	SYS_AUE_futimens	AUE_FUTIMES
+#define	SYS_AUE_utimensat	AUE_FUTIMESAT
+#define	SYS_AUE_fdatasync	AUE_FSYNC
+#define	SYS_AUE_fstat	AUE_FSTAT
+#define	SYS_AUE_fstatat	AUE_FSTATAT
+#define	SYS_AUE_fhstat	AUE_FHSTAT
+#define	SYS_AUE_getdirentries	AUE_GETDIRENTRIES
+#define	SYS_AUE_statfs	AUE_STATFS
+#define	SYS_AUE_fstatfs	AUE_FSTATFS
+#define	SYS_AUE_getfsstat	AUE_GETFSSTAT
+#define	SYS_AUE_fhstatfs	AUE_FHSTATFS
+#define	SYS_AUE_mknodat	AUE_MKNODAT
+#define	SYS_AUE_kevent	AUE_KEVENT
+#define	SYS_AUE_cpuset_getdomain	AUE_NULL
+#define	SYS_AUE_cpuset_setdomain	AUE_NULL
+#define	SYS_AUE_getrandom	AUE_NULL
+#define	SYS_AUE_getfhat	AUE_NULL
+#define	SYS_AUE_fhlink	AUE_NULL
+#define	SYS_AUE_fhlinkat	AUE_NULL
+#define	SYS_AUE_fhreadlink	AUE_NULL
+#define	SYS_AUE_funlinkat	AUE_UNLINKAT
+#define	SYS_AUE_copy_file_range	AUE_NULL
+#define	SYS_AUE___sysctlbyname	AUE_SYSCTL
+#define	SYS_AUE_shm_open2	AUE_SHMOPEN
+#define	SYS_AUE_shm_rename	AUE_SHMRENAME
+#define	SYS_AUE_sigfastblock	AUE_NULL
+#define	SYS_AUE___realpathat	AUE_REALPATHAT
+#define	SYS_AUE_close_range	AUE_CLOSERANGE
+#define	SYS_AUE_rpctls_syscall	AUE_NULL
+#define	SYS_AUE___specialfd	AUE_SPECIALFD
+#define	SYS_AUE_aio_writev	AUE_AIO_WRITEV
+#define	SYS_AUE_aio_readv	AUE_AIO_READV
+#define	SYS_AUE_fspacectl	AUE_FSPACECTL
+#define	SYS_AUE_sched_getcpu	AUE_NULL
+#define	SYS_AUE_swapoff	AUE_SWAPOFF
+#define	SYS_AUE_kqueuex	AUE_KQUEUE
+#define	SYS_AUE_membarrier	AUE_NULL
+#define	SYS_AUE_timerfd_create	AUE_TIMERFD
+#define	SYS_AUE_timerfd_gettime	AUE_TIMERFD
+#define	SYS_AUE_timerfd_settime	AUE_TIMERFD
+#define	SYS_AUE_kcmp	AUE_NULL
 
 #undef PAD_
 #undef PADL_
 #undef PADR_
 
-#endif /* !_FREEBSD32_SYSPROTO_H_ */
+#endif /* !_SYS_SYSPROTO_H_ */
