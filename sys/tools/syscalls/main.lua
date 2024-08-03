@@ -59,14 +59,6 @@ init_sysent.file = config.syssw
 systrace_args.file = config.systrace
 sysproto_h.file = config.sysproto
 
--- Test output files
---syscalls.file = "test/syscalls.c"
---syscall_h.file = "test/syscall.h"
---syscall_mk.file = "test/syscall.mk"
---init_sysent.file = "test/init_sysent.c"
---systrace_args.file = "test/systrace_args.c"
---sysproto_h.file = "test/sysproto.h"
-
 syscalls.generate(tbl, config, syscalls.file)
 syscall_h.generate(tbl, config, syscall_h.file)
 syscall_mk.generate(tbl, config, syscall_mk.file)
