@@ -19,6 +19,12 @@
 -- available in ports.  Currently, this script is compatible with lua from ports
 -- along with the compatible luafilesystem and lua-posix modules.
 
+-- When we have a path, add it to the package.path (. is already in the list)
+if arg[0]:match("/") then
+	local a = arg[0]:gsub("/[^/]+.lua$", "")
+	package.path = package.path .. ";" .. a .. "/?.lua"
+end
+
 -- The FreeBSD syscall generator
 local FreeBSDSyscall = require("freebsd-syscall")
 
