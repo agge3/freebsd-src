@@ -74,6 +74,7 @@ function syscall_mk.generate(tbl, config, fh)
 			    bio:write(string.format("\t%s.o \\\n", v:symbol()))
             end
         end
+    end
 end
 
 -- Check if the script is run directly
