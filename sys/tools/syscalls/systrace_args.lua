@@ -201,28 +201,26 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
     end
 
     bio:write(string.format([[
-        default:
-                *n_args = 0;
-                break;
-        };
-}
+	default:
+		*n_args = 0;
+		break;
+	};
 ]]))
 
     bio:store(string.format([[
-        default:
-                break;
-        };
-        if (p != NULL)
-                strlcpy(desc, p, descsz);
-}
+    default:
+		break;
+	};
+	if (p != NULL)
+		strlcpy(desc, p, descsz);
 ]]), 1)
 
     bio:store(string.format([[
-        default:
-            break;
-        };
-        if (p != NULL)
-            strlcpy(desc, p, descsz);
+    default:
+		break;
+	};
+	if (p != NULL)
+		strlcpy(desc, p, descsz);
 }
 ]]), 2)
 
