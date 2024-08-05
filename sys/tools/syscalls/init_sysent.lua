@@ -229,7 +229,7 @@ struct sysent %s[] = {
     end
 
     -- End
-    bio:write("};")
+    bio:write("};\n")
 end
 
 -- Check if the script is run directly

@@ -85,7 +85,7 @@ function syscall_h.generate(tbl, config, fh)
 		else -- do nothing
 		end
 	end
-	bio:write(string.format("#define\t%sMAXSYSCALL\t%d", 
+	bio:write(string.format("#define\t%sMAXSYSCALL\t%d\n", 
         config.syscallprefix, max + 1))
 end
 

@@ -71,14 +71,21 @@ local function checkType(line, type)
 	end
 end
 
+--
+-- Validation check to confirm we're not skipping system calls. Compares this 
+-- system call number to the previous system call number.
+-- NOTE: To be called higher up the call stack (e.g., freebsd-syscalls.lua)
+--
 function syscall:validate(prev)
     return prev + 1 == self.num
 end
 
--- If there are ABI changes from native, process the system call to match the
--- expected ABI.
+-- If there are ABI changes from native, process this system call to match the
+-- target ABI.
+-- RETURN: TRUE if any modifications were done. FALSE if no modifications were 
+-- done
 function syscall:processAbiChanges()
-    if config.changes_abi and self.name ~= nil then
+    if config.changes_abi then
         -- argalias should be:
         --   COMPAT_PREFIX + ABI Prefix + funcname
     	self.arg_prefix = config.abi_func_prefix
@@ -115,6 +122,7 @@ function syscall:symbol()
 end
 
 -- Return the comment for this system call.
+-- TODO: Incomplete/unused
 function syscall:comment()
     local c = self:compat_level()
     if self.type.OBSOL then
@@ -124,7 +132,7 @@ function syscall:comment()
         return "/* reserved for local use */"
     end
     if self.type.UNIMPL then
-        return "" -- xxx not seeing where there is
+        return "" -- xxx
     else
         return "/* " .. self.num .. " = " .. self.alias .. " */"
     end
@@ -155,18 +163,13 @@ function syscall:compat_level()
 end
     
 --
--- Adds the definition for the system call.
+-- Adds the definition for this system call.
 -- NOTE: Is guarded by the system call number ~= nil
 -- RETURN: TRUE, if the definition was added. FALSE, if not
 --
 function syscall:addDef(line, words)
     if self.num == nil then
 	    self.num = words[1]
-
-        --if tonumber(self.num) == nil then -- handle range of system calls
-        --    self.range = true
-        --end
-
 	    self.audit = words[2]
 	    self.type = util.setFromString(words[3], "[^|]+")
 	    checkType(line, self.type)
@@ -181,7 +184,7 @@ function syscall:addDef(line, words)
 end
 
 -- 
--- Adds the function declaration for the system call.
+-- Adds the function declaration for this system call.
 -- NOTE: Is guarded by validation of the definition.
 -- RETURN: TRUE, if the function declaration was added. FALSE, if not
 --
@@ -206,7 +209,7 @@ function syscall:addFunc(line, words)
 end
 
 --
--- Adds the argument(s) for the system call.
+-- Adds the argument(s) for this system call.
 -- NOTE: Is guarded by validation of the function declaration.
 -- RETURN: TRUE, if the argument(s) were added. FALSE, if not
 --
@@ -234,6 +237,10 @@ end
 -- RETURN: TRUE, if added succesfully. FALSE (or ABORT), if not
 --
 function syscall:isAdded(line)
+    -- XXX A lot of code here that's close to working (and a better way to do
+    -- things), but is getting tripped up in the control flow of adding.
+    -- Revisit
+    
     --
     -- Three cases:
     --  (1) This system call was a range of system calls - exit with specific 
@@ -271,6 +278,7 @@ function syscall:isAdded(line)
     --        return true
     --    end
     --end
+
     if self.expect_rbrace then
 	    if not line:match("}$") then
 	    	util.abort(1, "Expected '}' found '" .. line .. "' instead.")
@@ -329,7 +337,14 @@ function syscall:add(line)
     if self:addDef(line, words) then
         -- Cases where we just want to exit and add - nothing else to do.
         if self.name ~= "{" then
-            self.alias = self.name -- set for all these cases
+            -- If this system call has a nil name, make it an empty string.
+            -- NOTE: We may want to be aware that this system call had a nil 
+            -- name later, but for now the idea front-load it here.
+            if self.name == nil then
+                self.name = ""
+            end
+            self.alias = self.name -- set for all cases
+
             -- This system call was a range.
             if tonumber(self.num) == nil then
                 return true
@@ -340,7 +355,7 @@ function syscall:add(line)
                 self.thr = "SY_THR_ABSENT"
                 self.arg_alias = self:symbol() .. "_args"
                 return true
-            -- This system call does not have a full instantiation.
+            -- This system call was some other one line entry.
             else
                 return true
             end

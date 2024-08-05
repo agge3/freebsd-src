@@ -68,13 +68,12 @@ function syscall_mk.generate(tbl, config, fh)
 		then
             if idx >= size then
                 -- At last system call, no backslash
-			    bio:write(string.format("\t%s.o", v:symbol()))
+			    bio:write(string.format("\t%s.o\n", v:symbol()))
             else 
                 -- Normal behavior
 			    bio:write(string.format("\t%s.o \\\n", v:symbol()))
             end
         end
-	end
 end
 
 -- Check if the script is run directly

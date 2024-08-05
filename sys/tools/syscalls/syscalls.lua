@@ -93,7 +93,7 @@ function syscalls.generate(tbl, config, fh)
 	end
 
     -- End
-    bio:write("};")
+    bio:write("};\n")
 end
 
 -- Check if the script is run directly
