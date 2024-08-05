@@ -205,10 +205,11 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 		*n_args = 0;
 		break;
 	};
+}
 ]]))
 
     bio:store(string.format([[
-    default:
+	default:
 		break;
 	};
 	if (p != NULL)
@@ -217,7 +218,7 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 ]]), 1)
 
     bio:store(string.format([[
-    default:
+	default:
 		break;
 	};
 	if (p != NULL)
