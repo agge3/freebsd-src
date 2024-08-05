@@ -213,6 +213,7 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 	};
 	if (p != NULL)
 		strlcpy(desc, p, descsz);
+}
 ]]), 1)
 
     bio:store(string.format([[
