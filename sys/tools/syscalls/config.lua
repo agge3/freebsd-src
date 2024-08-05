@@ -5,12 +5,6 @@
 -- Copyright (c) 2024 Tyler Baxter <agge@FreeBSD.org>
 --
 
--- Derived in large part from makesyscalls.lua:
---
--- SPDX-License-Identifier: BSD-2-Clause-FreeBSD
---
--- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
-
 -- Code to read in the config file that drives this. Since we inherit from the
 -- FreeBSD makesyscall.sh legacy, all config is done through a config file that
 -- sets a number of varibale (as noted below, it used to be a .sh file that was
@@ -66,11 +60,6 @@ config.mod = {}
 -- are required (e.g., native)).
 -- 
 config.compat_options = {}
-
--- Important boolean keys: file, changes to the ABI, or no changes to the ABI. 
-config.file = false
-config.no_changes_abi = false
-config.changes_abi = false
 
 -- For each entry, the ABI flag is the key. One may also optionally provide an 
 -- expr, which are contained in an array associated with each key; expr gets 
@@ -134,6 +123,7 @@ local compat_option_sets = {
 		{ stdcompat = "FREEBSD11" },
 		{ stdcompat = "FREEBSD12" },
 		{ stdcompat = "FREEBSD13" },
+		{ stdcompat = "FREEBSD14" },
 	},
 }
 
@@ -243,14 +233,6 @@ function config.abiChanges(name)
     return config.abi_flags[name] ~= nil
 end
 
--- Merge any changes to the ABI (from native) and handles if there shouldn't be
--- changes.
-function config.mergeChangesAbi()
-    if config.no_changes_abi then 
-        config.changes_abi = false
-    end
-end
-
 --
 -- Call to instantiate config.compat_set with configuration file compatability
 -- options (may remain empty if no compatability options are required (e.g., 
@@ -272,8 +254,6 @@ end
 -- Parses the provided capabilities.conf, returns a string to be split and 
 -- merged into the global config.
 -- Helper function for config.capability() to use.
---
--- NOTE: Hasn't been changed from makesyscalls.lua, will work the same.
 --
 local function grabCapenabled(file, open_fail_ok)
 	local capentries = {}
