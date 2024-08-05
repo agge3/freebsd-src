@@ -47,7 +47,8 @@ end
 -- initialization procedure, to prepare to handle the current parsing line's 
 -- argument.
 function scarg:init()
-    self.abi_changes = checkAbiChanges(self.scarg)
+    self.arg_abi_change = checkAbiChanges(self.scarg)
+    self.changes_abi = self.changes_abi or self.arg_abi_change
     self.scarg = stripArgAnnotations(self.scarg)
     self.scarg = util.trim(self.scarg, ',')
     self.name = self.scarg:match("([^* ]+)$")
@@ -64,13 +65,10 @@ end
 --
 function scarg:process()
     -- Much of this is identical to makesyscalls.lua
-    -- Notable changes are: using `self` for OOP, arg_abi_change is now (local)
-    -- abi_changes, and abi_changes is now global_changes_abi. There's also a
-    -- helper function mergeGlobal() to merge changes into the global config.
     if self.type ~= "" and self.name ~= "void" then
 		-- util.is64bitType() needs a bare type so check it after argname
 		-- is removed
-		self.global_changes_abi = config.abiChanges("pair_64bit") and 
+		self.changes_abi = config.abiChanges("pair_64bit") and 
                                   util.is64bitType(self.type)
 
 		self.type = self.type:gsub("intptr_t", config.abi_intptr_t)
@@ -94,16 +92,13 @@ function scarg:process()
 		end
 
 		-- XX TODO: Forward declarations? See: sysstubfwd in CheriBSD
-		if self.abi_changes then
+		if self.arg_abi_change then
 			local abi_type_suffix = config.abi_type_suffix
 			self.type = self.type:gsub("(struct [^ ]*)", "%1" ..
 			    config.abi_type_suffix)
 			self.type = self.type:gsub("(union [^ ]*)", "%1" ..
 			    config.abi_type_suffix)
 		end
-
-        -- Finally, merge any changes to the ABI into the global config.
-        self:mergeGlobal()
 
         return true
     end
@@ -183,34 +178,26 @@ function scarg:append(tbl)
     return false
 end
 
-function scarg:getArg()
-    return self.arg
+-- Returns TRUE if this argument has ABI changes from native. 
+-- EXAMPLE: 32-bit argument for freebsd32
+function scarg:changesAbi()
+    return self.changes_abi
 end
         
--- Default constructor. scarg HAS a finalizer procedure so MAKE SURE to nil the
--- reference.
 function scarg:new(obj, line)
 	obj = obj or { }
 	setmetatable(obj, self)
 	self.__index = self
     
     self.scarg = line
-	self.abi_changes = false
-    self.global_abi_changes = false
+	self.arg_abi_change = false -- abi changes that we only want in this scope
+    self.changes_abi = false -- abi changes to be part of the system call object
 
     self.arg = {}
 
     obj:init()
 
 	return obj
-end
-
--- Merge any changes to the ABI (changes from native) into the global config.
-function scarg:mergeGlobal()
-    if self.global_changes_abi then
-        -- xxx this is what we're intending to do here, right?
-        config.changes_abi = self.global_changes_abi
-    end
 end
 
 return scarg

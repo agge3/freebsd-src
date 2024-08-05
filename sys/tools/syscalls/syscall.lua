@@ -84,8 +84,27 @@ end
 -- target ABI.
 -- RETURN: TRUE if any modifications were done. FALSE if no modifications were 
 -- done
-function syscall:processAbiChanges()
-    if config.changes_abi then
+function syscall:processChangesAbi()
+    -- First, confirm we have a valid changes_abi flag.
+    if config.syscall_no_abi_change[self.name] then
+        self.changes_abi = false
+    end
+    if config.abiChanges("pointer_args") then
+	    for _, v in ipairs(v.args) do
+	    	if util.isPtrType(v.type) then
+	    		if config.syscall_no_abi_change[self.name] then
+	    			print("WARNING: " .. self.name ..
+	    			    " in syscall_no_abi_change, but pointers args are present")
+	    		end
+	    		self.changes_abi = true
+	    		goto ptrfound
+	    	end
+	    end
+	    ::ptrfound::
+    end
+
+    -- If there are ABI changes from native, process accordingly.
+    if self.changes_abi then
         -- argalias should be:
         --   COMPAT_PREFIX + ABI Prefix + funcname
     	self.arg_prefix = config.abi_func_prefix
@@ -222,11 +241,12 @@ function syscall:addArgs(line)
 
         -- scarg is going to instantiate itself with its own methods
 	    local arg = scarg:new({ }, line)
-        -- if arg processes, then add. if not, don't add
+        -- If arg processes, then add. If not, don't add.
         if arg:process() then 
             arg:append(self.args)
+            -- Lastly, grab ABI change information from this argument.
+            self.changes_abi = arg:changesAbi()
         end
-        arg = nil -- nil the reference to trigger scarg's finalizer
         return true
     end
     return false
@@ -292,19 +312,21 @@ end
 -- Once we have a good syscall, add some final information to it (based on how 
 -- it was instantiated).
 function syscall:finalize()
-    -- These may be changed by processAbiChanges(), or they'll remain empty for 
+    -- These may be changed by processChangesAbi(), or they'll remain empty for 
     -- native.
     self.prefix = ""
     self.arg_prefix = ""
+    self:processChangesAbi()
 
+    -- NOTE: Do these first with an unmodified name.
     -- capability flag, if it was provided
     self.cap = processCap(self.name, self.prefix, self.type)
     -- thread flag, based on type(s) provided
     self.thr = processThr(self.type)
 
-    self:processAbiChanges()
-
-    if self.name ~= nil then
+    -- An empty string would not want a prefix; in that case we want to keep an
+    -- empty string.
+    if self.name ~= "" then
         self.name = self.prefix .. self.name
     end
     if self.alias == nil or self.alias == "" then
@@ -387,9 +409,8 @@ function syscall:new(obj)
 	setmetatable(obj, self)
 	self.__index = self
 
-    self.range = false
-
 	self.expect_rbrace = false
+    self.changes_abi = false
 	self.args = { }
 
 	return obj
