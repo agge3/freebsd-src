@@ -1,13 +1,14 @@
 --
 -- SPDX-License-Identifier: BSD-2-Clause
 --
--- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
 -- Copyright (c) 2024 Tyler Baxter <agge@FreeBSD.org>
+-- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
+-- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
 --
 
-local util = require("util")
-local scarg = require("scarg")
-local scret = require("scret")
+local scarg = require("core.scarg")
+local scret = require("core.scret")
+local util = require("tools.util")
 
 local syscall = {}
 
@@ -28,7 +29,7 @@ syscall.known_flags = util.set {
 }
 
 --
--- Processes the thread flag for the system call.
+-- Processes the thread flag for this system call.
 -- RETURN: String thr, the appropriate thread flag
 --
 local function processThr(type)
@@ -42,7 +43,7 @@ local function processThr(type)
 end
 
 --
--- Processes the capability flag for the system call.
+-- Processes the capability flag for this system call.
 -- RETURN: String cap, "SYF_CAPENABLED" for capability enabled, "0" if not
 --
 local function processCap(name, prefix, type)
@@ -61,7 +62,7 @@ local function processCap(name, prefix, type)
     return str
 end
 
--- Validates a system call's type, aborts if unknown.
+-- Check that this system call has a known type.
 local function checkType(line, type)
 	for k, v in pairs(type) do
 	    if not syscall.known_flags[k] and not
@@ -71,11 +72,9 @@ local function checkType(line, type)
 	end
 end
 
---
--- Validation check to confirm we're not skipping system calls. Compares this 
--- system call number to the previous system call number.
--- NOTE: To be called higher up the call stack (e.g., freebsd-syscalls.lua)
---
+-- Validate that we're not skipping system calls by comparing this system call
+-- number to the previous system call number. Called higher up the call stack by 
+-- class FreeBSDSyscall.
 function syscall:validate(prev)
     return prev + 1 == self.num
 end
@@ -89,6 +88,7 @@ function syscall:processChangesAbi()
     if config.syscall_no_abi_change[self.name] then
         self.changes_abi = false
     end
+    -- xxx subject to a rework:
     if config.abiChanges("pointer_args") then
 	    for _, v in ipairs(v.args) do
 	    	if util.isPtrType(v.type) then
@@ -103,7 +103,7 @@ function syscall:processChangesAbi()
 	    ::ptrfound::
     end
 
-    -- If there are ABI changes from native, process accordingly.
+    -- If there are ABI changes from native:
     if self.changes_abi then
         -- argalias should be:
         --   COMPAT_PREFIX + ABI Prefix + funcname
@@ -181,11 +181,8 @@ function syscall:compat_level()
 	return native
 end
     
---
--- Adds the definition for this system call.
--- NOTE: Is guarded by the system call number ~= nil
--- RETURN: TRUE, if the definition was added. FALSE, if not
---
+-- Adds the definition for this system call. Guarded by whether we already have
+-- a system call number or not.
 function syscall:addDef(line, words)
     if self.num == nil then
 	    self.num = words[1]
@@ -196,17 +193,14 @@ function syscall:addDef(line, words)
 	    -- These next three are optional, and either all present or all absent
 	    self.altname = words[5]
 	    self.alttag = words[6]
-	    self.alttype = words[7]
+	    self.rettype = words[7]
 	    return true
     end
     return false
 end
 
--- 
--- Adds the function declaration for this system call.
--- NOTE: Is guarded by validation of the definition.
--- RETURN: TRUE, if the function declaration was added. FALSE, if not
---
+-- Adds the function declaration for this system call. If addDef() found an 
+-- opening curly brace, then we're looking for a function declaration.
 function syscall:addFunc(line, words)
     if self.name == "{" then
 	    -- Expect line is "type syscall(" or "type syscall(void);"
@@ -214,8 +208,12 @@ function syscall:addFunc(line, words)
             util.abort(1, "Malformed line " .. line)
         end
 
-	    local ret = scret:new({ }, words[1])
-        self.rettype = ret:add()
+	    local ret = scret:new({}, line)
+        self.ret = ret:add()
+		-- Don't clobber rettype set in the alt information
+		if self.rettype == nil then
+			self.rettype = "int"
+        end
     
 	    self.name = words[2]:match("([%w_]+)%(")
 	    if words[2]:match("%);$") then
@@ -227,24 +225,20 @@ function syscall:addFunc(line, words)
     return false
 end
 
---
--- Adds the argument(s) for this system call.
--- NOTE: Is guarded by validation of the function declaration.
--- RETURN: TRUE, if the argument(s) were added. FALSE, if not
---
+-- Adds the argument(s) for this system call. Once addFunc() assigns a name for
+-- this system call, arguments are next in syscalls.master.
 function syscall:addArgs(line)
 	if not self.expect_rbrace then
 	    if line:match("%);$") then
 	    	self.expect_rbrace = true
 	    	return true
 	    end
-
-        -- scarg is going to instantiate itself with its own methods
-	    local arg = scarg:new({ }, line)
-        -- If arg processes, then add. If not, don't add.
+	    local arg = scarg:new({}, line)
+        -- We don't want to add this argument if it doesn't process. 
+        -- scarg:process() handles those conditions.
         if arg:process() then 
             arg:append(self.args)
-            -- Lastly, grab ABI change information from this argument.
+            -- Grab ABI change information for this argument.
             self.changes_abi = arg:changesAbi()
         end
         return true
@@ -252,53 +246,8 @@ function syscall:addArgs(line)
     return false
 end
 
---
--- Confirm that the system call was added succesfully, ABORT if not.
--- RETURN: TRUE, if added succesfully. FALSE (or ABORT), if not
---
+-- Returns TRUE if this system call was added succesfully.
 function syscall:isAdded(line)
-    -- XXX A lot of code here that's close to working (and a better way to do
-    -- things), but is getting tripped up in the control flow of adding.
-    -- Revisit
-    
-    --
-    -- Three cases:
-    --  (1) This system call was a range of system calls - exit with specific 
-    --  procedures.
-    --  (2) This system call was a loadable system call - exit with specific 
-    --  procedures.
-    --  (3) (Common case) This system call was a full system call - confirm 
-    --  there's a closing curly brace and perform standard finalize procedure.
-    -- 
-    --if self.range or self.name ~="{" then
-    --    self.alias = self.name
-    --    return true
-    --end
-    --if self.altname ~= nil and self.alttag ~= nil and 
-    --       self.alttype ~= nil then
-    --    self.alias = self.name
-    --    self.cap = "0"
-    --    self.thr = "SY_THR_ABSENT"
-    --    return true
-    --end
-    --if self.name ~= "{" then
-    --    self.alias = self.name
-    --    if tonumber(self.num) == nil then
-    --        --print("range caught at " .. self.num)
-    --        return true
-    --    elseif self.altname ~= nil then
-    --        --print("loadable system call caught at " .. self.num)
-    --        self.cap = "0"
-    --        self.thr = "SY_THR_ABSENT"
-    --        self.arg_alias = self:symbol() .. "_args"
-    --        --self.audit = "ERROR AT LKMNOSYS"
-    --        return true
-    --    else
-    --        --print("incomplete definition caught at " .. self.num)
-    --        return true
-    --    end
-    --end
-
     if self.expect_rbrace then
 	    if not line:match("}$") then
 	    	util.abort(1, "Expected '}' found '" .. line .. "' instead.")
@@ -309,8 +258,7 @@ function syscall:isAdded(line)
     return false
 end
 
--- Once we have a good syscall, add some final information to it (based on how 
--- it was instantiated).
+-- Once we have a good syscall, add some final information to it.
 function syscall:finalize()
     -- These may be changed by processChangesAbi(), or they'll remain empty for 
     -- native.
@@ -318,13 +266,11 @@ function syscall:finalize()
     self.arg_prefix = ""
     self:processChangesAbi()
 
-    -- NOTE: Do these first with an unmodified name.
-    -- capability flag, if it was provided
-    self.cap = processCap(self.name, self.prefix, self.type)
-    -- thread flag, based on type(s) provided
-    self.thr = processThr(self.type)
+    -- These need to be done before modifying self.name.
+    self.cap = processCap(self.name, self.prefix, self.type) -- capability flag
+    self.thr = processThr(self.type) -- thread flag
 
-    -- An empty string would not want a prefix; in that case we want to keep an
+    -- An empty string would not want a prefix; in that case we want to keep the
     -- empty string.
     if self.name ~= "" then
         self.name = self.prefix .. self.name
@@ -333,72 +279,62 @@ function syscall:finalize()
         self.alias = self.name
     end
 
-    -- Handle argument(s) alias.
+    -- Assign argument alias.
     if self.arg_alias == nil and self.name ~= nil then
         -- Symbol will either be: (native) the same as the system call name, or 
-        -- (non-native) the correct modified symbol for the arg_alias
+        -- (non-native) the correct modified symbol for the arg_alias.
         self.arg_alias = self:symbol() .. "_args"
     elseif self.arg_alias ~= nil then 
         self.arg_alias = self.arg_prefix .. self.arg_alias
     end
 end
 
---
--- Interface to add a system call. To be added to the master system call object,
--- FreeBSDSyscall.
---
--- NOTE: The system call is built up one line at a time, validating through four 
--- states, before confirmed to be added.
---
--- RETURN: TRUE, if system call processing is successful (and ready to add)
---         FALSE, if still processing
---         ABORT, with error
---
+-- Interface to add this system call to the master system call table.
+-- The system call is built up one line at a time. The states describe the 
+-- current parsing state.
+-- Returns TRUE when ready to add and FALSE while still parsing.
 function syscall:add(line)
     local words = util.split(line, "%S+")
     if self:addDef(line, words) then
-        -- Cases where we just want to exit and add - nothing else to do.
+        -- Cases where the syscalls.master entry is one line; we just want to 
+        -- exit and add:
         if self.name ~= "{" then
-            -- If this system call has a nil name, make it an empty string.
-            -- NOTE: We may want to be aware that this system call had a nil 
-            -- name later, but for now the idea front-load it here.
+            -- A NIL name should be written as an empty string.
             if self.name == nil then
                 self.name = ""
             end
             self.alias = self.name -- set for all cases
 
-            -- This system call was a range.
+            -- This system call is a range.
             if tonumber(self.num) == nil then
                 return true
             -- This system call is a loadable system call.
             elseif self.altname ~= nil and self.alttag ~= nil and 
-                   self.alttype ~= nil then
+                   self.rettype ~= nil then
                 self.cap = "0"
                 self.thr = "SY_THR_ABSENT"
                 self.arg_alias = self:symbol() .. "_args"
+                self.ret = self.rettype
                 return true
-            -- This system call was some other one line entry.
+            -- This system call is some other one line entry.
             else
                 return true
             end
         end
-        return false -- otherwise, definition added - keep going
+        return false -- Otherwise, definition added; keep going.
     end
     if self:addFunc(line, words) then
-        return false -- function added, keep going
+        return false -- Function added; keep going.
     end
     if self:addArgs(line) then
-        return false -- arguments added, keep going
+        return false -- Arguments added; keep going.
     end
-    return self:isAdded(line) -- final validation, before adding
+    return self:isAdded(line) -- Final validation, before adding.
 end
 
---
--- Return TRUE if this system call is native, FALSE if not
---
+-- Return TRUE if this system call is native.
 -- NOTE: The other system call names are also treated as native, so that's why
 -- they're being allowed in here.
---
 function syscall:native()
     return self:compat_level() == native or self.name == "lkmnosys" or 
            self.name == "sysarch"
@@ -411,16 +347,14 @@ function syscall:new(obj)
 
 	self.expect_rbrace = false
     self.changes_abi = false
-	self.args = { }
+	self.args = {}
 
 	return obj
 end
 
---
 -- Make a shallow copy of `self` and replace the system call number with num 
 -- (which should be a number).
--- USAGE: For system call ranges.
---
+-- For system call ranges.
 function syscall:shallowCopy(num)
 	local obj = syscall:new(obj)
 
@@ -432,11 +366,9 @@ function syscall:shallowCopy(num)
 	return obj
 end
 
---
 -- Make a deep copy of the parameter object.
--- USAGE: For a full system call (i.e., nested arguments table).
 -- CREDIT: http://lua-users.org/wiki/CopyTable
---
+-- For a full system call (the nested arguments table should be a deep copy).
 local function deepCopy(orig)
     local type = type(orig)
     local copy
@@ -501,10 +433,8 @@ function syscall:iter()
 		self.num = s	-- Replace string with number, like the clones
 		return function ()
 			if s == e then
-                -- In the case that it's not a range, we want a deep copy for 
-                -- the nested arguments table.
                 local deep_copy = deepCopy(self)
-				s = e + 1 -- then increment the iterator
+				s = e + 1
                 return deep_copy
 			end
 		end

@@ -2,16 +2,12 @@
 --
 -- SPDX-License-Identifier: BSD-2-Clause
 --
--- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
 -- Copyright (c) 2024 Tyler Baxter <agge@FreeBSD.org>
+-- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
+-- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
 --
-
 -- Thanks to Kyle Evans for his makesyscall.lua in FreeBSD which served as
 -- inspiration for this, and as a source of code at times.
---
--- SPDX-License-Identifier: BSD-2-Clause-FreeBSD
---
--- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
 --
 
 -- We generally assume that this script will be run by flua, however we've
@@ -21,20 +17,22 @@
 
 -- When we have a path, add it to the package.path (. is already in the list)
 if arg[0]:match("/") then
-	local a = arg[0]:gsub("/[^/]+.lua$", "")
-	package.path = package.path .. ";" .. a .. "/?.lua"
+	local path = arg[0]:gsub("/[^/]+.lua$", "")
+	package.path = package.path .. ";" .. path .. "/?.lua"
 end
 
--- The FreeBSD syscall generator
-local FreeBSDSyscall = require("freebsd-syscall")
+-- Common config file management
+local config = require("config")
+-- FreeBSDSyscall generates a table of system calls from syscalls.master
+local FreeBSDSyscall = require("core.freebsd-syscall")
 
-local config = require("config")                -- common config file management
-local syscalls = require("syscalls")
-local syscall_h = require("syscall_h")
-local syscall_mk = require("syscall_mk")
-local init_sysent = require("init_sysent")
-local systrace_args = require("systrace_args")
-local sysproto_h = require("sysproto_h")
+-- Modules for each file:
+local syscalls = require("scripts.syscalls")
+local syscall_h = require("scripts.syscall_h")
+local syscall_mk = require("scripts.syscall_mk")
+local init_sysent = require("scripts.init_sysent")
+local systrace_args = require("scripts.systrace_args")
+local sysproto_h = require("scripts.sysproto_h")
 
 -- Entry
 if #arg < 1 or #arg > 2 then
@@ -46,9 +44,7 @@ local sysfile, configfile = arg[1], arg[2]
 config.merge(configfile)
 config.mergeCompat()
 config.mergeCapability()
-config.mergeChangesAbi()
 
--- The parsed syscall table
 local tbl = FreeBSDSyscall:new{sysfile = sysfile, config = config}
 
 -- Output files

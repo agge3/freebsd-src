@@ -2,15 +2,8 @@
 --
 -- SPDX-License-Identifier: BSD-2-Clause
 --
--- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
 -- Copyright (c) 2024 Tyler Baxter <agge@FreeBSD.org>
---
---
--- Thanks to Kyle Evans for his makesyscall.lua in FreeBSD which served as
--- inspiration for this, and as a source of code at times.
---
--- SPDX-License-Identifier: BSD-2-Clause-FreeBSD
---
+-- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
 --
 
@@ -22,18 +15,18 @@
 -- Setup to be a module, or ran as its own script.
 local init_sysent = {}
 
--- When we have a path, add it to the package.path (. is already in the list)
-if arg[0]:match("/") then
-	local a = arg[0]:gsub("/[^/]+.lua$", "")
-	package.path = package.path .. ";" .. a .. "/?.lua"
+local script = not pcall(debug.getlocal, 4, 1) -- TRUE if script.
+
+if script then
+    -- Add library root to the package path.
+    local path = arg[0]:gsub("/[^/]+.lua$", "")
+    package.path = package.path .. ";" .. path .. "/../?.lua"  
 end
 
--- The FreeBSD syscall generator
-local FreeBSDSyscall = require("freebsd-syscall")
-
-local config = require("config")    -- common config file management
-local util = require("util")        -- utility functions
-local bsdio = require("bsdio")      -- lsg specific io and io macros
+local config = require("config")
+local FreeBSDSyscall = require("core.freebsd-syscall")
+local util = require("tools.util")
+local bsdio = require("tools.generator")
 
 -- Globals
 -- File has not been decided yet; config will decide file. Default defined as
@@ -232,19 +225,17 @@ struct sysent %s[] = {
     bio:write("};\n")
 end
 
--- Check if the script is run directly
-if not pcall(debug.getlocal, 4, 1) then
-    -- Entry of script
+-- Entry of script:
+if script then  
     if #arg < 1 or #arg > 2 then
     	error("usage: " .. arg[0] .. " syscall.master")
     end
-    
+   
     local sysfile, configfile = arg[1], arg[2]
     
     config.merge(configfile)
     config.mergeCompat()
     config.mergeCapability()
-    config.mergeChangesAbi()
     
     -- The parsed syscall table
     local tbl = FreeBSDSyscall:new{sysfile = sysfile, config = config}

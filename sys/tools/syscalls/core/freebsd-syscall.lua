@@ -1,26 +1,22 @@
 --
 -- SPDX-License-Identifier: BSD-2-Clause
 --
--- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
 -- Copyright (c) 2024 Tyler Baxter <agge@FreeBSD.org>
---
-
--- Derived in large part from makesyscalls.lua:
---
--- SPDX-License-Identifier: BSD-2-Clause-FreeBSD
---
+-- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
+--
 
-local syscall = require("syscall")
+local syscall = require("core.syscall")
+local util = require("tools.util")
 
 local FreeBSDSyscall = {}
 
 FreeBSDSyscall.__index = FreeBSDSyscall
 
--- Processes compatability options in the global config and inserts them into
--- known_flags to reference.
+-- For each compat option in the provided config table, process them and insert 
+-- them into known_flags for class syscall.
 function FreeBSDSyscall:processCompat()
-	for _, v in pairs(config.compat_options) do
+	for _, v in pairs(self.config.compat_options) do
 		if v.stdcompat ~= nil then
 			local stdcompat = v.stdcompat
 			v.definition = "COMPAT_" .. stdcompat:upper()
@@ -30,7 +26,7 @@ function FreeBSDSyscall:processCompat()
 			v.descr = stdcompat:lower()
 		end
 
-		-- Add compat option to syscall.known_flags
+		-- Add compat option to syscall.known_flags.
 	    table.insert(syscall.known_flags, v.flag)
 	end
 end
@@ -49,7 +45,7 @@ function FreeBSDSyscall:parseSysfile()
 		return
 	end
 
-	self.syscalls = { }
+	self.syscalls = {}
 
 	local fh = io.open(file)
 	if fh == nil then
@@ -115,13 +111,13 @@ function FreeBSDSyscall:parseSysfile()
 		util.abort(1, "Dangling system call at the end")
 	end
 
-	assert(io.close(fh))
+	assert(fh:close())
 	self.includes = incs
 	self.defines = defs
 end
 
 function FreeBSDSyscall:new(obj)
-	obj = obj or { }
+	obj = obj or {}
 	setmetatable(obj, self)
 	self.__index = self
     

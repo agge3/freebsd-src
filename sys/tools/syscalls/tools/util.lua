@@ -1,15 +1,10 @@
 --
 -- SPDX-License-Identifier: BSD-2-Clause
 --
--- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
 -- Copyright (c) 2024 Tyler Baxter <agge@FreeBSD.org>
---
-
--- Derived in large part from makesyscalls.lua:
---
--- SPDX-License-Identifier: BSD-2-Clause-FreeBSD
---
+-- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
+--
 
 local util = {}
 
@@ -147,8 +142,8 @@ function util.processArgsize(syscall)
     return "0"
 end
 
--- CREDIT: Lua Game Development Cookbook, Mario Kasuba
 -- ipairs for a sparse array
+-- CREDIT: Lua Game Development Cookbook, Mario Kasuba
 function util.ipairs_sparse(t)
   -- tmpIndex will hold sorted indices, otherwise
   -- this iterator would be no different from pairs iterator

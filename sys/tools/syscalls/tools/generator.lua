@@ -2,18 +2,12 @@
 -- SPDX-License-Identifier: BSD-2-Clause
 --
 -- Copyright (c) 2024 Tyler Baxter <agge@FreeBSD.org>
---
---
--- Thanks to Kyle Evans for his makesyscall.lua in FreeBSD which served as
--- inspiration for this, and as a source of code at times.
---
--- SPDX-License-Identifier: BSD-2-Clause-FreeBSD
---
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
 --
 
-util = require("util")
+util = require("tools.util")
 
+-- TODO: Brooks review (new name): `generator`
 local bsdio = {}
 
 bsdio.__index = bsdio
@@ -31,33 +25,30 @@ end
 --
 function bsdio:pad64(bool)
     if bool then
-	    self:write(string.format([[
+	    self:write([[
 #if !defined(PAD64_REQUIRED) && !defined(__amd64__)
 #define PAD64_REQUIRED
 #endif
-]]))
+]])
     end
 end
 
-
--- Returns the generated tag. Useful if only the tag is needed.
+-- Returns the generated tag.
 function bsdio:tag()
     return self.tag
 end
 
 bsdio.storage_levels = {}
 
--- Store lines for later writing. Can also specify which order (level) to store
--- in.
--- Useful when a file has multiple stages of generation.
+-- Optional level to specify which order to store in, which defaults to one if 
+-- not provided.
 function bsdio:store(str, level)
-    level = level or 1 -- default to level one if not provided
+    level = level or 1
     self.storage_levels[level] = self.storage_levels[level] or {}
     table.insert(self.storage_levels[level], str)
 end
 
--- Write all storage; lines are in the order they were inserted and levels are 
--- in the order they were specified.
+-- Write all storage in the order it was stored.
 function bsdio:writeStorage()
     if self.storage_levels ~= nil then
         for k, v in util.ipairs_sparse(self.storage_levels) do
@@ -112,20 +103,6 @@ function bsdio:generated(str, comment)
 
 ]], comment_middle, comment_middle, self.tag, comment_end))
     end
-end
-
--- xxx just a thought, we'll see if there's anything that can done in this 
--- regard
-function bsdio:old(compat_level)
-   	--elseif c >= 0 then
-	--	local s
-	--	if c == 0 then
-	--		s = "obsolete"
-	--	elseif c == 3 then
-	--		s = "old"
-	--	else
-	--		s = "freebsd" .. c
-	--	end 
 end
 
 -- File is part of bsdio's identity. Different objects with different identities 

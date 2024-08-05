@@ -1,27 +1,19 @@
 --
 -- SPDX-License-Identifier: BSD-2-Clause
 --
--- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
 -- Copyright (c) 2024 Tyler Baxter <agge@FreeBSD.org>
---
-
--- Derived in large part from makesyscalls.lua:
---
--- SPDX-License-Identifier: BSD-2-Clause-FreeBSD
---
+-- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
+--
 
--- class scarg provides an interface for syscall arguments, in the parsing state.
-
-local config = require("config")
-local util = require("util")
+local util = require("tools.util")
 
 local scarg = {}
 
 scarg.__index = scarg
 
--- Check argument against config for ABI changes from native. Return TRUE if
--- there are.
+-- Check this argument against config for ABI changes from native. Return TRUE 
+-- if there are.
 local function checkAbiChanges(arg)
 	for k, v in pairs(config.known_abi_flags) do
 		if config.abiChanges(k) and v ~= nil then
@@ -35,7 +27,7 @@ local function checkAbiChanges(arg)
 	return false
 end
 
--- Strips the Microsoft(R) SAL annotations from the argument(s).
+-- Strips the Microsoft(R) SAL annotations from this argument.
 local function stripArgAnnotations(arg)
 	arg = arg:gsub("_Contains_[^ ]*[_)] ?", "")
 	arg = arg:gsub("_In[^ ]*[_)] ?", "")
@@ -43,9 +35,7 @@ local function stripArgAnnotations(arg)
 	return util.trim(arg)
 end
 
--- Everytime a scarg object is created, it would go through this default 
--- initialization procedure, to prepare to handle the current parsing line's 
--- argument.
+-- Preprocessing of this argument.
 function scarg:init()
     self.arg_abi_change = checkAbiChanges(self.scarg)
     self.changes_abi = self.changes_abi or self.arg_abi_change
@@ -55,16 +45,12 @@ function scarg:init()
     self.type = util.trim(self.scarg:gsub(self.name .. "$", ""), nil) 
 end
 
---
--- Processes the argument, doing things such as: flagging for a global config
--- ABI change, converting to the default ABI, converting to the specified ABI,
--- handling 64-bit pairing, etc.
---
--- RETURN: TRUE, argument has type and needs to be added (is now processed)
---         FALSE, argument type is void, it doesn't need to be added
---
+-- Processes this argument.
+-- Flags if there's ABI changes from native, converts this argument to the 
+-- target ABI, and handles 64-bit argument pairing.
+-- Returns TRUE if this argument is processed and ready to add.
+-- Returns FALSE if it shouldn't be added (the argument type is void).
 function scarg:process()
-    -- Much of this is identical to makesyscalls.lua
     if self.type ~= "" and self.name ~= "void" then
 		-- util.is64bitType() needs a bare type so check it after argname
 		-- is removed
@@ -99,20 +85,14 @@ function scarg:process()
 			self.type = self.type:gsub("(union [^ ]*)", "%1" ..
 			    config.abi_type_suffix)
 		end
-
         return true
     end
-
     return false
 end
 
---
--- Pad if necessary, to keep index aligned (for pairing 64-bit arguments).
--- RETURN: TRUE if padded, FALSE if not
---
+-- For pairing 64-bit arguments, pad if necessary.
+-- Returns TRUE if this argument was padded.
 function scarg:pad(tbl)
-    -- This is done all in one-go in makesyscalls.lua, but it's now it's own 
-    -- procedure.
     if #tbl % 2 == 1 then
         table.insert(tbl, {
             type = "int",
@@ -120,41 +100,11 @@ function scarg:pad(tbl)
         })
         return true
     end
-
     return false
 end
 
---
--- Append to the system call's argument table.
--- NOTE: Appends to the end, "order" is the responsibility of the caller.
--- RETURN: TRUE if appended, FALSE if not
---
-function scarg:insert()
-    if config.abiChanges("pair_64bit") and util.is64bitType(self.type) then
-        self:pad(tbl)
-    	table.insert(self.arg, {
-    		type = "uint32_t",
-    		name = self.name .. "1",
-    	})
-    	table.insert(self.arg, {
-    		type = "uint32_t",
-    		name = self.name .. "2",
-    	})
-    else
-    	table.insert(self.arg, {
-    		type = self.type,
-    		name = self.name,
-    	})
-        return self.arg
-    end
-    return self.arg
-end
-
---
--- Append to the system call's argument table.
--- NOTE: Appends to the end, "order" is the responsibility of the caller.
--- RETURN: TRUE if appended, FALSE if not
---
+-- To append to the system call's argument table. Appends to the end.
+-- Returns TRUE if successful.
 function scarg:append(tbl)
     if config.abiChanges("pair_64bit") and util.is64bitType(self.type) then
         self:pad(tbl)
@@ -174,7 +124,6 @@ function scarg:append(tbl)
     	})
         return true
     end
-
     return false
 end
 
@@ -190,10 +139,10 @@ function scarg:new(obj, line)
 	self.__index = self
     
     self.scarg = line
-	self.arg_abi_change = false -- abi changes that we only want in this scope
-    self.changes_abi = false -- abi changes to be part of the system call object
-
-    self.arg = {}
+    -- ABI changes that we only want in this scope.
+	self.arg_abi_change = false
+    -- ABI changes that we want the system call object to see.
+    self.changes_abi = false
 
     obj:init()
 
