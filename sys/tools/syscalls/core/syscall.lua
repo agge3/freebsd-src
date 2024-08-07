@@ -6,6 +6,7 @@
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
 --
 
+local config = require("config")
 local scarg = require("core.scarg")
 local scret = require("core.scret")
 local util = require("tools.util")
@@ -34,7 +35,7 @@ syscall.known_flags = util.set {
 --
 local function processThr(type)
     local str = "SY_THR_STATIC"
-    for k, v in pairs(type) do
+    for k, _ in pairs(type) do
         if k == "NOTSTATIC" then
             str = "SY_THR_ABSENT"
         end
@@ -53,7 +54,7 @@ local function processCap(name, prefix, type)
        config.capenabled[stripped] ~= nil then
         str = "SYF_CAPENABLED"
     else
-        for k, v in pairs(type) do
+        for k, _ in pairs(type) do
             if k == "CAPENABLED" then
                 str = "SYF_CAPENABLED"
             end
@@ -63,8 +64,8 @@ local function processCap(name, prefix, type)
 end
 
 -- Check that this system call has a known type.
-local function checkType(line, type)
-	for k, v in pairs(type) do
+local function checkType(type)
+	for k, _ in pairs(type) do
 	    if not syscall.known_flags[k] and not
             k:match("^COMPAT") then
 			util.abort(1, "Bad type: " .. k)
@@ -73,7 +74,7 @@ local function checkType(line, type)
 end
 
 -- Validate that we're not skipping system calls by comparing this system call
--- number to the previous system call number. Called higher up the call stack by 
+-- number to the previous system call number. Called higher up the call stack by
 -- class FreeBSDSyscall.
 function syscall:validate(prev)
     return prev + 1 == self.num
@@ -81,41 +82,39 @@ end
 
 -- If there are ABI changes from native, process this system call to match the
 -- target ABI.
--- RETURN: TRUE if any modifications were done. FALSE if no modifications were 
+-- RETURN: TRUE if any modifications were done. FALSE if no modifications were
 -- done
 function syscall:processChangesAbi()
     -- First, confirm we have a valid changes_abi flag.
     if config.syscall_no_abi_change[self.name] then
         self.changes_abi = false
     end
-    -- xxx subject to a rework:
     if config.abiChanges("pointer_args") then
-	    for _, v in ipairs(v.args) do
-	    	if util.isPtrType(v.type) then
-	    		if config.syscall_no_abi_change[self.name] then
-	    			print("WARNING: " .. self.name ..
-	    			    " in syscall_no_abi_change, but pointers args are present")
-	    		end
-	    		self.changes_abi = true
-	    		goto ptrfound
-	    	end
+        for _, v in ipairs(self.args) do
+            if util.isPtrType(v.type) then
+                if config.syscall_no_abi_change[self.name] then
+                    print("WARNING: " .. self.name ..
+                        " in syscall_no_abi_change, but pointers args are present")
+                end
+                self.changes_abi = true
+                break
+            end
 	    end
-	    ::ptrfound::
     end
 
     -- If there are ABI changes from native:
     if self.changes_abi then
         -- argalias should be:
         --   COMPAT_PREFIX + ABI Prefix + funcname
-    	self.arg_prefix = config.abi_func_prefix
-    	self.prefix = config.abi_func_prefix
-    	self.arg_alias = self.prefix .. self.name
-    	return true
+        self.arg_prefix = config.abi_func_prefix
+        self.prefix = config.abi_func_prefix
+        self.arg_alias = self.prefix .. self.name
+        return true
     end
     return false
 end
 
--- Native is an arbitrarily large number to have a constant and not 
+-- Native is an arbitrarily large number to have a constant and not
 -- interfere with compat numbers.
 local native = 1000000
 
@@ -143,7 +142,7 @@ end
 -- Return the comment for this system call.
 -- TODO: Incomplete/unused
 function syscall:comment()
-    local c = self:compat_level()
+    --local c = self:compat_level()
     if self.type.OBSOL then
         return "/* obsolete " .. self.alias .. " */"
     end
@@ -172,7 +171,7 @@ function syscall:compat_level()
 	elseif self.type.COMPAT then
 		return 3
 	end
-	for k, v in pairs(self.type) do
+	for k, _ in pairs(self.type) do
 		local l = k:match("^COMPAT(%d+)")
 		if l ~= nil then
 			return tonumber(l)
@@ -180,15 +179,16 @@ function syscall:compat_level()
 	end
 	return native
 end
-    
+
 -- Adds the definition for this system call. Guarded by whether we already have
 -- a system call number or not.
-function syscall:addDef(line, words)
+function syscall:addDef(line)
     if self.num == nil then
+        local words = util.split(line, "%S+")
 	    self.num = words[1]
 	    self.audit = words[2]
 	    self.type = util.setFromString(words[3], "[^|]+")
-	    checkType(line, self.type)
+	    checkType(self.type)
 	    self.name = words[4]
 	    -- These next three are optional, and either all present or all absent
 	    self.altname = words[5]
@@ -199,10 +199,11 @@ function syscall:addDef(line, words)
     return false
 end
 
--- Adds the function declaration for this system call. If addDef() found an 
+-- Adds the function declaration for this system call. If addDef() found an
 -- opening curly brace, then we're looking for a function declaration.
-function syscall:addFunc(line, words)
+function syscall:addFunc(line)
     if self.name == "{" then
+        local words = util.split(line, "%S+")
 	    -- Expect line is "type syscall(" or "type syscall(void);"
         if #words ~= 2 then
             util.abort(1, "Malformed line " .. line)
@@ -214,11 +215,11 @@ function syscall:addFunc(line, words)
 		if self.rettype == nil then
 			self.rettype = "int"
         end
-    
+
 	    self.name = words[2]:match("([%w_]+)%(")
 	    if words[2]:match("%);$") then
             -- now we're looking for ending curly brace
-	    	self.expect_rbrace = true
+            self.expect_rbrace = true
 	    end
         return true
     end
@@ -230,13 +231,13 @@ end
 function syscall:addArgs(line)
 	if not self.expect_rbrace then
 	    if line:match("%);$") then
-	    	self.expect_rbrace = true
-	    	return true
+            self.expect_rbrace = true
+            return true
 	    end
 	    local arg = scarg:new({}, line)
-        -- We don't want to add this argument if it doesn't process. 
+        -- We don't want to add this argument if it doesn't process.
         -- scarg:process() handles those conditions.
-        if arg:process() then 
+        if arg:process() then
             arg:append(self.args)
             -- Grab ABI change information for this argument.
             self.changes_abi = arg:changesAbi()
@@ -250,7 +251,7 @@ end
 function syscall:isAdded(line)
     if self.expect_rbrace then
 	    if not line:match("}$") then
-	    	util.abort(1, "Expected '}' found '" .. line .. "' instead.")
+            util.abort(1, "Expected '}' found '" .. line .. "' instead.")
 	    end
         self:finalize()
         return true
@@ -260,7 +261,7 @@ end
 
 -- Once we have a good syscall, add some final information to it.
 function syscall:finalize()
-    -- These may be changed by processChangesAbi(), or they'll remain empty for 
+    -- These may be changed by processChangesAbi(), or they'll remain empty for
     -- native.
     self.prefix = ""
     self.arg_prefix = ""
@@ -281,22 +282,21 @@ function syscall:finalize()
 
     -- Assign argument alias.
     if self.arg_alias == nil and self.name ~= nil then
-        -- Symbol will either be: (native) the same as the system call name, or 
+        -- Symbol will either be: (native) the same as the system call name, or
         -- (non-native) the correct modified symbol for the arg_alias.
         self.arg_alias = self:symbol() .. "_args"
-    elseif self.arg_alias ~= nil then 
+    elseif self.arg_alias ~= nil then
         self.arg_alias = self.arg_prefix .. self.arg_alias
     end
 end
 
 -- Interface to add this system call to the master system call table.
--- The system call is built up one line at a time. The states describe the 
+-- The system call is built up one line at a time. The states describe the
 -- current parsing state.
 -- Returns TRUE when ready to add and FALSE while still parsing.
 function syscall:add(line)
-    local words = util.split(line, "%S+")
-    if self:addDef(line, words) then
-        -- Cases where the syscalls.master entry is one line; we just want to 
+    if self:addDef(line) then
+        -- Cases where the syscalls.master entry is one line; we just want to
         -- exit and add:
         if self.name ~= "{" then
             -- A NIL name should be written as an empty string.
@@ -309,7 +309,7 @@ function syscall:add(line)
             if tonumber(self.num) == nil then
                 return true
             -- This system call is a loadable system call.
-            elseif self.altname ~= nil and self.alttag ~= nil and 
+            elseif self.altname ~= nil and self.alttag ~= nil and
                    self.rettype ~= nil then
                 self.cap = "0"
                 self.thr = "SY_THR_ABSENT"
@@ -323,7 +323,7 @@ function syscall:add(line)
         end
         return false -- Otherwise, definition added; keep going.
     end
-    if self:addFunc(line, words) then
+    if self:addFunc(line) then
         return false -- Function added; keep going.
     end
     if self:addArgs(line) then
@@ -336,7 +336,7 @@ end
 -- NOTE: The other system call names are also treated as native, so that's why
 -- they're being allowed in here.
 function syscall:native()
-    return self:compat_level() == native or self.name == "lkmnosys" or 
+    return self:compat_level() == native or self.name == "lkmnosys" or
            self.name == "sysarch"
 end
 
@@ -352,11 +352,11 @@ function syscall:new(obj)
 	return obj
 end
 
--- Make a shallow copy of `self` and replace the system call number with num 
+-- Make a shallow copy of `self` and replace the system call number with num
 -- (which should be a number).
 -- For system call ranges.
 function syscall:shallowCopy(num)
-	local obj = syscall:new(obj)
+	local obj = syscall:new()
 
 	-- shallow copy
 	for k, v in pairs(self) do
@@ -373,7 +373,7 @@ local function deepCopy(orig)
     local type = type(orig)
     local copy
 
-    if orig_type == 'table' then
+    if type == 'table' then
         copy = {}
         for orig_key, orig_value in next, orig, nil do
             copy[deepCopy(orig_key)] = deepCopy(orig_value)

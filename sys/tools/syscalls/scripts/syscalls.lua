@@ -14,97 +14,89 @@
 
 -- Setup to be a module, or ran as its own script.
 local syscalls = {}
+local script = not pcall(debug.getlocal, 4, 1) -- TRUE if script.
+if script then
+    -- Add library root to the package path.
+    local path = arg[0]:gsub("/[^/]+.lua$", "")
+    package.path = package.path .. ";" .. path .. "/../?.lua"
+end
 
-local config = require("config")
 local FreeBSDSyscall = require("core.freebsd-syscall")
-local util = require("tools.util")
-local bsdio = require("tools.generator")
+local generator = require("tools.generator")
 
--- Globals
 -- File has not been decided yet; config will decide file. Default defined as
 -- null
 syscalls.file = "/dev/null"
 
 function syscalls.generate(tbl, config, fh)
-    -- Grab the master syscalls table, and prepare bookkeeping for the max
-    -- syscall number.
+    -- Grab the master system calls table.
     local s = tbl.syscalls
-    local max = 0
 
-    -- Init the bsdio object, has macros and procedures for LSG specific io.
-    local bio = bsdio:new({ }, fh) 
+    -- Bind the generator to the parameter file.
+    local gen = generator:new({}, fh)
 
-    -- Write the generated tag.
-	bio:generated("System call names.")
+    -- Write the generated preamble.
+	gen:preamble("System call names.")
 
-    bio:write(string.format("const char *%s[] = {\n", config.namesname))
+    gen:write(string.format("const char *%s[] = {\n", config.namesname))
 
-	for k, v in pairs(s) do
+	for _, v in pairs(s) do
 		local c = v:compat_level()
-		if v.num > max then
-			max = v.num
-		end
-
         if v:native() then
-            bio:write(string.format("\t\"%s\",\t\t\t/* %d = %s */\n",
+            gen:write(string.format("\t\"%s\",\t\t\t/* %d = %s */\n",
 	            v.alias, v.num, v.alias))
 		elseif c >= 3 then
             -- Lookup the info for this specific compat option.
-            local flag, descr = ""
-            for k, v in pairs(config.compat_options) do
-                if v.compatlevel == c then
-                    flag = v.flag
+            local flag, descr
+            for _, opt in pairs(config.compat_options) do
+                if opt.compatlevel == c then
+                    flag = opt.flag
                     flag = flag:lower()
-                    descr = v.descr
+                    descr = opt.descr
+                    break
                 end
             end
 
-			bio:write(string.format("\t\"%s.%s\",\t\t/* %d = %s %s */\n",
+			gen:write(string.format("\t\"%s.%s\",\t\t/* %d = %s %s */\n",
 	            flag, v.alias, v.num, descr, v.alias))
 		elseif v.type.RESERVED then
-			bio:write(string.format(
+			gen:write(string.format(
                 "\t\"#%d\",\t\t\t/* %d = reserved for local use */\n",
 	            v.num, v.num))
 		elseif v.type.UNIMPL then
-            local comment = ""
-            comment = v.name -- xxx this is sometimes different
-			bio:write(string.format("\t\"#%d\",\t\t\t/* %d = %s */\n",
+            local comment = v.name -- xxx this is sometimes different
+			gen:write(string.format("\t\"#%d\",\t\t\t/* %d = %s */\n",
 		    v.num, v.num, comment))
         elseif v.type.OBSOL then
-            bio:write(string.format(
+            gen:write(string.format(
                 "\t\"obs_%s\",\t\t\t/* %d = obsolete %s */\n",
 	            v.name, v.num, v.name))
-		else -- do nothing
 		end
 	end
-
     -- End
-    bio:write("};\n")
+    gen:write("};\n")
 end
 
--- Check if this script is run directly.
-if not pcall(debug.getlocal, 4, 1) then
-    -- Entry of script:
-    -- Use syscalls root as the package path.
-    local path = arg[0]:gsub("/[^/]+.lua$", "")
-    package.path = package.path .. ";" .. path .. "/../?.lua"  
+-- Entry of script:
+if script then
+    local config = require("config")
 
     if #arg < 1 or #arg > 2 then
-    	error("usage: " .. arg[0] .. " syscall.master")
+        error("usage: " .. arg[0] .. " syscall.master")
     end
-    
+
     local sysfile, configfile = arg[1], arg[2]
-    
+
     config.merge(configfile)
     config.mergeCompat()
     config.mergeCapability()
-    
+
     -- The parsed syscall table
     local tbl = FreeBSDSyscall:new{sysfile = sysfile, config = config}
-    
+
     syscalls.file = config.sysnames -- change file here
     syscalls.generate(tbl, config, syscalls.file)
 end
 
--- Return the module
+-- Return the module.
 return syscalls

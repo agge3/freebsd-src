@@ -13,24 +13,24 @@
 
 local util = require("tools/util")
 
--- 
+--
 -- Global config map.
--- Default configuration is native (amd64). Any of these may get replaced by an 
+-- Default configuration is native (amd64). Any of these may get replaced by an
 -- optionally specified configuration file.
 --
-config = {
+local config = {
     sysnames = "syscalls.c",
     syshdr = "../sys/syscall.h",
     sysmk = "/dev/null",
     syssw = "init_sysent.c",
     systrace = "systrace_args.c",
-    sysproto = "sysproto.h",
+    sysproto = "../sys/sysproto.h",
     libsysmap = "/dev/null",
     libsys_h = "/dev/null",
     sysproto_h = "_SYS_SYSPROTO_H_",
     syscallprefix = "SYS_",
-    switchname = "sysent",   
-    namesname = "syscallnames", 
+    switchname = "sysent",
+    namesname = "syscallnames",
     abi_flags = {},
     abi_func_prefix = "",
     abi_type_suffix = "",
@@ -42,8 +42,8 @@ config = {
     abi_headers = "",
     abi_intptr_t = "intptr_t",
     ptr_intptr_t_cast = "intptr_t",
-    obsol = {},    
-    unimpl = {},    
+    obsol = {},
+    unimpl = {},
     capabilities_conf = "capabilities.conf",
     compat_set = "native",
     mincompat = 0,
@@ -52,17 +52,15 @@ config = {
     syscall_abi_change = {},
     -- System calls that appear to require handling, but don't
     syscall_no_abi_change = {},
+    -- Keep track of modifications if there are.
+    modifications = {},
+    -- Stores compat_sets from syscalls.conf; config.mergeCompat() instantiates.
+    compat_options = {},
 }
 
--- Keep track of modifications if there are.
-config.mod = {}
-
--- Stores compat_sets from syscalls.conf; config.mergeCompat() instantiates.
-config.compat_options = {}
-
--- For each entry, the ABI flag is the key. One may also optionally provide an 
--- expr, which are contained in an array associated with each key; expr gets 
--- applied to each argument type to indicate whether this argument is subject to 
+-- For each entry, the ABI flag is the key. One may also optionally provide an
+-- expr, which are contained in an array associated with each key; expr gets
+-- applied to each argument type to indicate whether this argument is subject to
 -- ABI change given the configured flags.
 config.known_abi_flags = {
 	long_size = {
@@ -167,7 +165,7 @@ function config.process(file)
 				trailing_context = util.trim(trailing_context)
 				if trailing_context ~= "" then
 					print(trailing_context)
-					abort(1, "Malformed line: " .. nextline)
+					util.abort(1, "Malformed line: " .. nextline)
 				end
 
 				value = util.trim(value, delim)
@@ -177,7 +175,7 @@ function config.process(file)
 				-- Strip off any padding whitespace
 				value = util.trim(value)
 				if value:match("%s") then
-					abort(1, "Malformed config line: " ..
+					util.abort(1, "Malformed config line: " ..
 					    nextline)
 				end
 			end
@@ -186,7 +184,7 @@ function config.process(file)
 			-- Make sure format violations don't get overlooked
 			-- here, but ignore blank lines.  Comments are already
 			-- stripped above.
-			abort(1, "Malformed config line: " .. nextline)
+			util.abort(1, "Malformed config line: " .. nextline)
 		end
 	end
 
@@ -198,10 +196,10 @@ end
 -- or returns NIL and a message.
 function config.merge(fh)
     if fh ~= nil then
-    	local res = assert(config.process(fh))
-    
-    	for k, v in pairs(res) do
-    		if v ~= config[k] then
+        local res = assert(config.process(fh))
+
+        for k, v in pairs(res) do
+            if v ~= config[k] then
                 -- handling of sets
                 if v:find("abi_flags") then
                     -- match for pipe, that's how abi_flags is formatted
@@ -214,17 +212,17 @@ function config.merge(fh)
                     -- match for space, that's how these are formatted
                     table.insert(config[k], util.setFromString(v, "[^ ]+"))
                 else
-    			    config[k] = v
+                    config[k] = v
                 end
                 -- construct config modified table as config is processed
-                config.mod[k] = true
-    		end
-            config.mod[k] = false  -- config wasn't modified
-    	end
+                config.modifications[k] = true
+            end
+            config.modifications[k] = false  -- config wasn't modified
+        end
     end
 end
 
--- Returns TRUE if there are ABI changes from native for the provided ABI flag. 
+-- Returns TRUE if there are ABI changes from native for the provided ABI flag.
 function config.abiChanges(name)
 	if config.known_abi_flags[name] == nil then
 		util.abort(1, "abi_changes: unknown flag: " .. name)
@@ -235,15 +233,15 @@ end
 -- Instantiates config.compat_options.
 function config.mergeCompat()
     if config.compat_set ~= "" then
-    	if not compat_option_sets[config.compat_set] then
-    		util.abort(1, "Undefined compat set: " .. compat_set)
-    	end
-    
-    	config.compat_options = compat_option_sets[config.compat_set]
+        if not compat_option_sets[config.compat_set] then
+            util.abort(1, "Undefined compat set: " .. config.compat_set)
+        end
+
+        config.compat_options = compat_option_sets[config.compat_set]
     end
 end
 
--- Parses the provided capabilities.conf. Returns a string (comma separated 
+-- Parses the provided capabilities.conf. Returns a string (comma separated
 -- list) as its formatted in capabilities.conf.
 local function grabCapenabled(file, open_fail_ok)
 	local capentries = {}
@@ -257,7 +255,7 @@ local function grabCapenabled(file, open_fail_ok)
 	local fh = io.open(file)
 	if fh == nil then
 		if not open_fail_ok then
-			abort(1, "Failed to open " .. file)
+			util.abort(1, "Failed to open " .. file)
 		end
 		return {}
 	end
@@ -277,11 +275,11 @@ end
 -- Merge capability (Capsicum) configuration into the global config.
 function config.mergeCapability()
     -- We ignore errors here if we're relying on the default configuration.
-    if not config.mod.capenabled then
-    	config.capenabled = grabCapenabled(config.capabilities_conf,
-    	    config.mod.capabilities_conf == nil)
+    if not config.modifications.capenabled then
+        config.capenabled = grabCapenabled(config.capabilities_conf,
+            config.modifications.capabilities_conf == nil)
     elseif config.capenabled ~= "" then
-        -- We have a comma separated list from the format of capabilities.conf, 
+        -- We have a comma separated list from the format of capabilities.conf,
         -- split it into a set with boolean values for each key.
         config.capenabled = util.setFromString(config.capenabled, "[^,]+")
     end

@@ -2,7 +2,7 @@
 
 ## Usage
 `main.lua` generates all files.
-Files are associated with their respective modules, and modules can be run as 
+Files are associated with their respective modules, and modules can be run as
 standalone scripts to generate specific files.
 
 ### Examples
@@ -15,16 +15,16 @@ standalone scripts to generate specific files.
 ## Organization
 * `root`
   * `main.lua` - Main entry point that calls all scripts.
-  * `config.lua` - Contains the global configuration table and associated 
+  * `config.lua` - Contains the global configuration table and associated
                    configuration functions.
-   
+
   * `core` (Core Classes)
-    * `syscall.lua` - Packages each system call entry from `syscalls.master` 
+    * `syscall.lua` - Packages each system call entry from `syscalls.master`
                       into a system call object.
     * `scarg.lua` - Packages each argument for the system call into an argument
                     object.
     * `scret.lua` - An object for the return value of the system call.
-    * `freebsd-syscall.lua` - Contains the master system call table after 
+    * `freebsd-syscall.lua` - Contains the master system call table after
                               processing.
 
   * `scripts`
@@ -37,4 +37,4 @@ standalone scripts to generate specific files.
 
   * `tools`
     * `util.lua` - Contains utility functions.
-    * `generator.lua` (was `bsdio.lua`) - Handles file generation for the library.
+    * `generator.lua` - Handles file generation for the library.

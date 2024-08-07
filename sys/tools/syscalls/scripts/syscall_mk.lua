@@ -15,21 +15,17 @@
 -- Setup to be a module, or ran as its own script.
 local syscall_mk = {}
 local script = not pcall(debug.getlocal, 4, 1) -- TRUE if script.
-
 if script then
     -- Add library root to the package path.
     local path = arg[0]:gsub("/[^/]+.lua$", "")
-    package.path = package.path .. ";" .. path .. "/../?.lua"  
+    package.path = package.path .. ";" .. path .. "/../?.lua"
 end
 
-local config = require("config")
 local FreeBSDSyscall = require("core.freebsd-syscall")
-local util = require("tools.util")
-local bsdio = require("tools.generator")
+local generator = require("tools.generator")
 
--- Globals
 -- File has not been decided yet; config will decide file. Default defined as
--- null
+-- null.
 syscall_mk.file = "/dev/null"
 
 -- Libc has all the STD, NOSTD and SYSMUX system calls in it, as well as
@@ -38,32 +34,46 @@ syscall_mk.file = "/dev/null"
 function syscall_mk.generate(tbl, config, fh)
     -- Grab the master system calls table.
     local s = tbl.syscalls
-    -- Bookkeeping for keeping track of when we're at the last system call (no 
+    -- Bookkeeping for keeping track of when we're at the last system call (no
     -- backslash).
     local size = #s
     local idx = 0
 
-    -- Init the bsdio object, has macros and procedures for LSG specific io.
-    local bio = bsdio:new({}, fh) 
+    -- Bind the generator to the parameter file.
+    local gen = generator:new({}, fh)
 
-    -- Write the generated tag.
-    bio:generated("FreeBSD system call object files.", "#")
+    -- Write the generated preamble.
+    gen:preamble("FreeBSD system call object files.", "#")
 
-    bio:write("MIASM =  \\\n") -- preamble
-	for k, v in pairs(s) do
+    gen:write("MIASM =  \\\n") -- preamble
+	for _, v in pairs(s) do
         local c = v:compat_level()
         idx = idx + 1
-		if v.type.STD or
-		   v.type.NOSTD or
-		   v.type.SYSMUX or
-		   c >= 7
-		then
+		if v:native() and not v.type.NODEF then
             if idx >= size then
-                -- At last system call, no backslash
-			    bio:write(string.format("\t%s.o\n", v:symbol()))
-            else 
-                -- Normal behavior
-			    bio:write(string.format("\t%s.o \\\n", v:symbol()))
+                -- At last system call, no backslash.
+			    gen:write(string.format("\t%s.o\n", v:symbol()))
+            else
+                -- Normal behavior.
+			    gen:write(string.format("\t%s.o \\\n", v:symbol()))
+            end
+        -- Handle compat (everything >= FREEBSD3):
+        elseif c >= 3 and not v.type.NODEF then
+            -- Lookup the info for this specific compat option.
+            local prefix
+            for _, opt in pairs(config.compat_options) do
+                if opt.compatlevel == c then
+                    prefix = opt.prefix
+                    break
+                end
+            end
+            -- xxx do like makesyscalls.lua, it's a better way
+            if idx >= size then
+                -- At last system call, no backslash.
+			    gen:write(string.format("\t%s.o\n", v:symbol()))
+            else
+                -- Normal behavior.
+			    gen:write(string.format("\t%s%s.o \\\n", prefix, v:symbol()))
             end
         end
     end
@@ -71,19 +81,21 @@ end
 
 -- Entry of script:
 if script then
+    local config = require("config")
+
     if #arg < 1 or #arg > 2 then
-    	error("usage: " .. arg[0] .. " syscall.master")
+        error("usage: " .. arg[0] .. " syscall.master")
     end
-    
+
     local sysfile, configfile = arg[1], arg[2]
-    
+
     config.merge(configfile)
     config.mergeCompat()
     config.mergeCapability()
-    
+
     -- The parsed syscall table
     local tbl = FreeBSDSyscall:new{sysfile = sysfile, config = config}
-   
+
     syscall_mk.file = config.sysmk -- change file here
     syscall_mk.generate(tbl, config, syscall_mk.file)
 end
