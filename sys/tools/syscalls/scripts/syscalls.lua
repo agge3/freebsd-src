@@ -32,7 +32,7 @@ function syscalls.generate(tbl, config, fh)
     local max = 0
 
     -- Init the bsdio object, has macros and procedures for LSG specific io.
-    local bio = bsdio:new({ }, fh) 
+    local bio = bsdio:new({ }, fh)
 
     -- Write the generated tag.
 	bio:generated("System call names.")
@@ -87,21 +87,21 @@ if not pcall(debug.getlocal, 4, 1) then
     -- Entry of script:
     -- Use syscalls root as the package path.
     local path = arg[0]:gsub("/[^/]+.lua$", "")
-    package.path = package.path .. ";" .. path .. "/../?.lua"  
+    package.path = package.path .. ";" .. path .. "/../?.lua"
 
     if #arg < 1 or #arg > 2 then
     	error("usage: " .. arg[0] .. " syscall.master")
     end
-    
+
     local sysfile, configfile = arg[1], arg[2]
-    
+
     config.merge(configfile)
     config.mergeCompat()
     config.mergeCapability()
-    
+
     -- The parsed syscall table
     local tbl = FreeBSDSyscall:new{sysfile = sysfile, config = config}
-    
+
     syscalls.file = config.sysnames -- change file here
     syscalls.generate(tbl, config, syscalls.file)
 end

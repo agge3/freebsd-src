@@ -13,7 +13,7 @@ local FreeBSDSyscall = {}
 
 FreeBSDSyscall.__index = FreeBSDSyscall
 
--- For each compat option in the provided config table, process them and insert 
+-- For each compat option in the provided config table, process them and insert
 -- them into known_flags for class syscall.
 function FreeBSDSyscall:processCompat()
 	for _, v in pairs(self.config.compat_options) do
@@ -36,7 +36,7 @@ function FreeBSDSyscall:parseSysfile()
 	local config = self.config
 	local commentExpr = "^%s*;.*"
 
-    -- Keep track of the system call numbers and make sure there's no skipped 
+    -- Keep track of the system call numbers and make sure there's no skipped
     -- system calls.
     local num = 0
 
@@ -120,7 +120,7 @@ function FreeBSDSyscall:new(obj)
 	obj = obj or {}
 	setmetatable(obj, self)
 	self.__index = self
-    
+
     obj:processCompat()
 	obj:parseSysfile()
 

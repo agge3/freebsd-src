@@ -6,13 +6,14 @@
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
 --
 
+local config = require("config")
 local util = require("tools.util")
 
 local scarg = {}
 
 scarg.__index = scarg
 
--- Check this argument against config for ABI changes from native. Return TRUE 
+-- Check this argument against config for ABI changes from native. Return TRUE
 -- if there are.
 local function checkAbiChanges(arg)
 	for k, v in pairs(config.known_abi_flags) do
@@ -42,11 +43,11 @@ function scarg:init()
     self.scarg = stripArgAnnotations(self.scarg)
     self.scarg = util.trim(self.scarg, ',')
     self.name = self.scarg:match("([^* ]+)$")
-    self.type = util.trim(self.scarg:gsub(self.name .. "$", ""), nil) 
+    self.type = util.trim(self.scarg:gsub(self.name .. "$", ""), nil)
 end
 
 -- Processes this argument.
--- Flags if there's ABI changes from native, converts this argument to the 
+-- Flags if there's ABI changes from native, converts this argument to the
 -- target ABI, and handles 64-bit argument pairing.
 -- Returns TRUE if this argument is processed and ready to add.
 -- Returns FALSE if it shouldn't be added (the argument type is void).
@@ -54,7 +55,7 @@ function scarg:process()
     if self.type ~= "" and self.name ~= "void" then
 		-- util.is64bitType() needs a bare type so check it after argname
 		-- is removed
-		self.changes_abi = config.abiChanges("pair_64bit") and 
+		self.changes_abi = config.abiChanges("pair_64bit") and
                                   util.is64bitType(self.type)
 
 		self.type = self.type:gsub("intptr_t", config.abi_intptr_t)
@@ -64,7 +65,7 @@ function scarg:process()
 			self.type = self.type:gsub("size_t", config.abi_size_t)
 			self.type = self.type:gsub("^long", config.abi_long)
 			self.type = self.type:gsub("^u_long", config.abi_u_long)
-			self.type = self.type:gsub("^const u_long", "const " 
+			self.type = self.type:gsub("^const u_long", "const "
                     .. config.abi_u_long)
 		elseif self.type:find("^long$") then
 			self.type = config.abi_long
@@ -109,35 +110,35 @@ function scarg:append(tbl)
     if config.abiChanges("pair_64bit") and util.is64bitType(self.type) then
         self:pad(tbl)
     	table.insert(tbl, {
-    		type = "uint32_t",
-    		name = self.name .. "1",
-    	})
-    	table.insert(tbl, {
-    		type = "uint32_t",
-    		name = self.name .. "2",
+            type = "uint32_t",
+            name = self.name .. "1",
+        })
+        table.insert(tbl, {
+            type = "uint32_t",
+            name = self.name .. "2",
     	})
         return true
     else
-    	table.insert(tbl, {
-    		type = self.type,
-    		name = self.name,
-    	})
+        table.insert(tbl, {
+            type = self.type,
+            name = self.name,
+        })
         return true
     end
     return false
 end
 
--- Returns TRUE if this argument has ABI changes from native. 
+-- Returns TRUE if this argument has ABI changes from native.
 -- EXAMPLE: 32-bit argument for freebsd32
 function scarg:changesAbi()
     return self.changes_abi
 end
-        
+
 function scarg:new(obj, line)
 	obj = obj or { }
 	setmetatable(obj, self)
 	self.__index = self
-    
+
     self.scarg = line
     -- ABI changes that we only want in this scope.
 	self.arg_abi_change = false

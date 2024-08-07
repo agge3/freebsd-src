@@ -19,15 +19,13 @@ local script = not pcall(debug.getlocal, 4, 1) -- TRUE if script.
 if script then
     -- Add library root to the package path.
     local path = arg[0]:gsub("/[^/]+.lua$", "")
-    package.path = package.path .. ";" .. path .. "/../?.lua"  
+    package.path = package.path .. ";" .. path .. "/../?.lua"
 end
 
-local config = require("config")
 local FreeBSDSyscall = require("core.freebsd-syscall")
 local util = require("tools.util")
-local bsdio = require("tools.generator")
+local generator = require("tools.generator")
 
--- Globals
 -- File has not been decided yet; config will decide file. Default defined as
 -- null.
 syscall_h.file = "/dev/null"
@@ -36,18 +34,18 @@ syscall_h.file = "/dev/null"
 -- replaced system calls dating back to FreeBSD 7. We are lucky that the
 -- system call filename is just the base symbol name for it.
 function syscall_h.generate(tbl, config, fh)
-    -- Grab the master syscalls table, and prepare bookkeeping for the max
-    -- syscall number.
+    -- Grab the master system calls table, and prepare bookkeeping for the max
+    -- system call number.
     local s = tbl.syscalls
     local max = 0
 
-    -- Init the bsdio object, has macros and procedures for LSG specific io.
-    local bio = bsdio:new({}, fh) 
+    -- Bind the generator to the parameter file.
+    local gen = generator:new({}, fh)
 
-    -- Write the generated tag.
-	bio:generated("System call numbers.")
+    -- Write the generated preamble.
+	gen:preamble("System call numbers.")
 
-	for k, v in pairs(s) do
+	for _, v in pairs(s) do
 		local c = v:compat_level()
 		if v.num > max then
 			max = v.num
@@ -56,7 +54,7 @@ function syscall_h.generate(tbl, config, fh)
 			v.type.NOSTD or
 			v.type.SYSMUX or
 			c >= 7 then
-			bio:write(string.format("#define\t%s%s\t%d\n", 
+			gen:write(string.format("#define\t%s%s\t%d\n",
                 config.syscallprefix, v:symbol(), v.num))
 		elseif c >= 0 then
 			local s
@@ -67,38 +65,39 @@ function syscall_h.generate(tbl, config, fh)
 			else
 				s = "freebsd" .. c
 			end
-			bio:write(string.format("\t\t\t\t/* %d is %s %s */\n", 
+			gen:write(string.format("\t\t\t\t/* %d is %s %s */\n",
                 v.num, s, v.name))
 		elseif v.type.RESERVED then
-			bio:write(string.format("\t\t\t\t/* %d is reserved */\n", v.num))
+			gen:write(string.format("\t\t\t\t/* %d is reserved */\n", v.num))
 		elseif v.type.UNIMPL then
-			bio:write(string.format("\t\t\t\t/* %d is unimplemented %s */\n", 
+			gen:write(string.format("\t\t\t\t/* %d is unimplemented %s */\n",
                 v.num, v.name))
-		else -- do nothing
 		end
 	end
-	bio:write(string.format("#define\t%sMAXSYSCALL\t%d\n", 
+	gen:write(string.format("#define\t%sMAXSYSCALL\t%d\n",
         config.syscallprefix, max + 1))
 end
 
 -- Entry of script:
 if script then
+    local config = require("config")
+
     if #arg < 1 or #arg > 2 then
     	error("usage: " .. arg[0] .. " syscall.master")
     end
-    
+
     local sysfile, configfile = arg[1], arg[2]
-    
+
     config.merge(configfile)
     config.mergeCompat()
     config.mergeCapability()
-    
-    -- The parsed syscall table
+
+    -- The parsed system call table.
     local tbl = FreeBSDSyscall:new{sysfile = sysfile, config = config}
-   
+
     syscall_h.file = config.syshdr -- change file here
     syscall_h.generate(tbl, config, syscall_h.file)
 end
 
--- Return the module
+-- Return the module.
 return syscall_h

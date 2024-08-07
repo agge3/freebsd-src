@@ -24,7 +24,7 @@ function scret:process()
 		words[2] = words[2]:sub(2)
 		self.scret = self.scret .. " "
     end
-end   
+end
 
 -- To add this return type to the system call.
 function scret:add()

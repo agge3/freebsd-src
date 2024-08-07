@@ -19,7 +19,7 @@ local script = not pcall(debug.getlocal, 4, 1) -- TRUE if script.
 if script then
     -- Add library root to the package path.
     local path = arg[0]:gsub("/[^/]+.lua$", "")
-    package.path = package.path .. ";" .. path .. "/../?.lua"  
+    package.path = package.path .. ";" .. path .. "/../?.lua"
 end
 
 local config = require("config")
@@ -38,13 +38,13 @@ syscall_mk.file = "/dev/null"
 function syscall_mk.generate(tbl, config, fh)
     -- Grab the master system calls table.
     local s = tbl.syscalls
-    -- Bookkeeping for keeping track of when we're at the last system call (no 
+    -- Bookkeeping for keeping track of when we're at the last system call (no
     -- backslash).
     local size = #s
     local idx = 0
 
     -- Init the bsdio object, has macros and procedures for LSG specific io.
-    local bio = bsdio:new({}, fh) 
+    local bio = bsdio:new({}, fh)
 
     -- Write the generated tag.
     bio:generated("FreeBSD system call object files.", "#")
@@ -61,7 +61,7 @@ function syscall_mk.generate(tbl, config, fh)
             if idx >= size then
                 -- At last system call, no backslash
 			    bio:write(string.format("\t%s.o\n", v:symbol()))
-            else 
+            else
                 -- Normal behavior
 			    bio:write(string.format("\t%s.o \\\n", v:symbol()))
             end
@@ -74,16 +74,16 @@ if script then
     if #arg < 1 or #arg > 2 then
     	error("usage: " .. arg[0] .. " syscall.master")
     end
-    
+
     local sysfile, configfile = arg[1], arg[2]
-    
+
     config.merge(configfile)
     config.mergeCompat()
     config.mergeCapability()
-    
+
     -- The parsed syscall table
     local tbl = FreeBSDSyscall:new{sysfile = sysfile, config = config}
-   
+
     syscall_mk.file = config.sysmk -- change file here
     syscall_mk.generate(tbl, config, syscall_mk.file)
 end
