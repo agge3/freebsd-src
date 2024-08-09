@@ -37,7 +37,7 @@ function sysproto_h.generate(tbl, config, fh)
     gen.storage_levels = {} -- make sure storage is clear
 
     -- Write the generated preamble.
-    gen:generated("System call prototypes.")
+    gen:preamble("System call prototypes.")
 
     -- Write out all the preprocessor directives.
     gen:write(string.format([[
