@@ -54,12 +54,9 @@ function FreeBSDSyscall:parseSysfile()
 	local s
 	for line in fh:lines() do
 		line = line:gsub(commentExpr, "") -- Strip any comments
-
 		-- NOTE: Can't use pure pattern matching here because of the 's' test
 		-- and this is shorter than a generic pattern matching pattern
-		if line == nil or line == "" then
-            print("Blank line or EOF.") -- do nothing and print
-		elseif s ~= nil then
+		if s ~= nil then
 			-- If we have a partial system call object
 			-- s, then feed it one more line
 			if s:add(line) then
