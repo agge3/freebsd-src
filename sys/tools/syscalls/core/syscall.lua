@@ -182,8 +182,9 @@ end
 
 -- Adds the definition for this system call. Guarded by whether we already have
 -- a system call number or not.
-function syscall:addDef(line, words)
+function syscall:addDef(line)
     if self.num == nil then
+        local words = util.split(line, "%S+")
 	    self.num = words[1]
 	    self.audit = words[2]
 	    self.type = util.setFromString(words[3], "[^|]+")
@@ -200,8 +201,9 @@ end
 
 -- Adds the function declaration for this system call. If addDef() found an
 -- opening curly brace, then we're looking for a function declaration.
-function syscall:addFunc(line, words)
+function syscall:addFunc(line)
     if self.name == "{" then
+        local words = util.split(line, "%S+")
 	    -- Expect line is "type syscall(" or "type syscall(void);"
         if #words ~= 2 then
             util.abort(1, "Malformed line " .. line)
@@ -293,8 +295,7 @@ end
 -- current parsing state.
 -- Returns TRUE when ready to add and FALSE while still parsing.
 function syscall:add(line)
-    local words = util.split(line, "%S+")
-    if self:addDef(line, words) then
+    if self:addDef(line) then
         -- Cases where the syscalls.master entry is one line; we just want to
         -- exit and add:
         if self.name ~= "{" then
@@ -322,7 +323,7 @@ function syscall:add(line)
         end
         return false -- Otherwise, definition added; keep going.
     end
-    if self:addFunc(line, words) then
+    if self:addFunc(line) then
         return false -- Function added; keep going.
     end
     if self:addArgs(line) then
