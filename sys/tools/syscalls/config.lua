@@ -277,7 +277,7 @@ function config.mergeCapability()
     -- We ignore errors here if we're relying on the default configuration.
     if not config.modifications.capenabled then
         config.capenabled = grabCapenabled(config.capabilities_conf,
-            config.mod.capabilities_conf == nil)
+            config.modifications.capabilities_conf == nil)
     elseif config.capenabled ~= "" then
         -- We have a comma separated list from the format of capabilities.conf,
         -- split it into a set with boolean values for each key.
