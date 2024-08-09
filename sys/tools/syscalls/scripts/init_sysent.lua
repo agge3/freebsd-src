@@ -76,6 +76,7 @@ struct sysent %s[] = {
 
     -- Handle linux nosys
     if config.syscallprefix:find("LINUX") ~= nil then
+        print("Found linux nosys")
         gen:write("#define nosys   linux_nosys\n")
     end
 
