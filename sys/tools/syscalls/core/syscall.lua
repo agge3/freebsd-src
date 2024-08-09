@@ -348,6 +348,7 @@ function syscall:new(obj)
 	self.expect_rbrace = false
     self.changes_abi = false
 	self.args = {}
+    self.range = false
 
 	return obj
 end
@@ -420,6 +421,7 @@ function syscall:iter()
 	local s = tonumber(self.num)
 	local e
 	if s == nil then
+        self.range = true -- Keep information that this was a range.
 		s, e = string.match(self.num, "(%d+)%-(%d+)")
         s, e = tonumber(s), tonumber(e)
 		return function ()
