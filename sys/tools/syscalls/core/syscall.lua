@@ -187,7 +187,7 @@ function syscall:addDef(line, words)
 	    self.num = words[1]
 	    self.audit = words[2]
 	    self.type = util.setFromString(words[3], "[^|]+")
-	    checkType(line, self.type)
+	    checkType(self.type)
 	    self.name = words[4]
 	    -- These next three are optional, and either all present or all absent
 	    self.altname = words[5]
