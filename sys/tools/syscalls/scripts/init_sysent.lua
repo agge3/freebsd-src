@@ -159,7 +159,7 @@ struct sysent %s[] = {
             comment = "obsolete " .. v.alias
 
         -- Handle unimplemented:
-        elseif v.type.UNIMPL and not v.range then
+        elseif v.type.UNIMPL and config.syscallprefix:find("LINUX") ~= nil then 
 		    str = string.format(
 		        "\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
 		        ".sy_auevent = AUE_NULL, .sy_flags = 0, " ..
