@@ -18,7 +18,7 @@ local util = require("tools/util")
 -- Default configuration is native (amd64). Any of these may get replaced by an
 -- optionally specified configuration file.
 --
-config = {
+local config = {
     sysnames = "syscalls.c",
     syshdr = "../sys/syscall.h",
     sysmk = "/dev/null",
@@ -52,13 +52,11 @@ config = {
     syscall_abi_change = {},
     -- System calls that appear to require handling, but don't
     syscall_no_abi_change = {},
+    -- Keep track of modifications if there are.
+    modifications = {},
+    -- Stores compat_sets from syscalls.conf; config.mergeCompat() instantiates.
+    compat_options = {},
 }
-
--- Keep track of modifications if there are.
-config.mod = {}
-
--- Stores compat_sets from syscalls.conf; config.mergeCompat() instantiates.
-config.compat_options = {}
 
 -- For each entry, the ABI flag is the key. One may also optionally provide an
 -- expr, which are contained in an array associated with each key; expr gets
@@ -200,7 +198,7 @@ function config.merge(fh)
     if fh ~= nil then
         local res = assert(config.process(fh))
 
-    	for k, v in pairs(res) do
+        for k, v in pairs(res) do
             if v ~= config[k] then
                 -- handling of sets
                 if v:find("abi_flags") then
@@ -236,8 +234,8 @@ end
 function config.mergeCompat()
     if config.compat_set ~= "" then
         if not compat_option_sets[config.compat_set] then
-    		util.abort(1, "Undefined compat set: " .. compat_set)
-    	end
+            util.abort(1, "Undefined compat set: " .. config.compat_set)
+        end
 
         config.compat_options = compat_option_sets[config.compat_set]
     end
@@ -278,7 +276,7 @@ end
 function config.mergeCapability()
     -- We ignore errors here if we're relying on the default configuration.
     if not config.mod.capenabled then
-    	config.capenabled = grabCapenabled(config.capabilities_conf,
+        config.capenabled = grabCapenabled(config.capabilities_conf,
             config.mod.capabilities_conf == nil)
     elseif config.capenabled ~= "" then
         -- We have a comma separated list from the format of capabilities.conf,

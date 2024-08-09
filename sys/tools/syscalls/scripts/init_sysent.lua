@@ -14,9 +14,7 @@
 
 -- Setup to be a module, or ran as its own script.
 local init_sysent = {}
-
 local script = not pcall(debug.getlocal, 4, 1) -- TRUE if script.
-
 if script then
     -- Add library root to the package path.
     local path = arg[0]:gsub("/[^/]+.lua$", "")

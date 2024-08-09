@@ -65,7 +65,7 @@ end
 
 -- Check that this system call has a known type.
 local function checkType(type)
-	for k, v in pairs(type) do
+	for k, _ in pairs(type) do
 	    if not syscall.known_flags[k] and not
             k:match("^COMPAT") then
 			util.abort(1, "Bad type: " .. k)
@@ -90,7 +90,7 @@ function syscall:processChangesAbi()
         self.changes_abi = false
     end
     if config.abiChanges("pointer_args") then
-	    for _, v in ipairs(self.args) do
+        for _, v in ipairs(self.args) do
             if util.isPtrType(v.type) then
                 if config.syscall_no_abi_change[self.name] then
                     print("WARNING: " .. self.name ..
@@ -217,7 +217,7 @@ function syscall:addFunc(line, words)
 	    self.name = words[2]:match("([%w_]+)%(")
 	    if words[2]:match("%);$") then
             -- now we're looking for ending curly brace
-	    	self.expect_rbrace = true
+            self.expect_rbrace = true
 	    end
         return true
     end
@@ -355,7 +355,7 @@ end
 -- (which should be a number).
 -- For system call ranges.
 function syscall:shallowCopy(num)
-	local obj = syscall:new(obj)
+	local obj = syscall:new()
 
 	-- shallow copy
 	for k, v in pairs(self) do

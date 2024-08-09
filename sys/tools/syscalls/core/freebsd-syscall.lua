@@ -36,10 +36,6 @@ function FreeBSDSyscall:parseSysfile()
 	local config = self.config
 	local commentExpr = "^%s*;.*"
 
-    -- Keep track of the system call numbers and make sure there's no skipped
-    -- system calls.
-    local num = 0
-
 	if file == nil then
 		print "No file"
 		return
@@ -62,19 +58,19 @@ function FreeBSDSyscall:parseSysfile()
 		-- NOTE: Can't use pure pattern matching here because of the 's' test
 		-- and this is shorter than a generic pattern matching pattern
 		if line == nil or line == "" then
-			-- nothing blank line or end of file
+            print("Blank line or EOF.") -- do nothing and print
 		elseif s ~= nil then
 			-- If we have a partial system call object
 			-- s, then feed it one more line
 			if s:add(line) then
-				-- append to syscall list
+				-- Append to system call list.
 				for t in s:iter() do
 					table.insert(self.syscalls, t)
 				end
 				s = nil
 			end
 		elseif line:match("^%s*%$") then
-			-- nothing, obsolete $FreeBSD$ thing
+			print("Obsolete $FreeBSD$ tag.") -- do nothing and print
 		elseif line:match("^#%s*include") then
 			incs = incs .. line .. "\n"
 		elseif line:match("%%ABI_HEADERS%%") then
@@ -89,7 +85,7 @@ function FreeBSDSyscall:parseSysfile()
 		else
 			s = syscall:new()
 			if s:add(line) then
-				-- append to syscall list
+				-- Append to system call list.
 				for t in s:iter() do
                     if t:validate(t.num - 1) then
 					    table.insert(self.syscalls, t)

@@ -5,7 +5,7 @@
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
 --
 
-util = require("tools.util")
+local util = require("tools.util")
 
 local generator = {}
 
@@ -13,7 +13,7 @@ generator.__index = generator
 
 -- Wrapper for lua write() best practice. For a simpler write call.
 function generator:write(line)
-	assert(self.bsdio:write(line))
+	assert(self.gen:write(line))
 end
 
 --
@@ -50,9 +50,9 @@ end
 -- Write all storage in the order it was stored.
 function generator:writeStorage()
     if self.storage_levels ~= nil then
-        for k, v in util.ipairs_sparse(self.storage_levels) do
+        for _, v in util.ipairs_sparse(self.storage_levels) do
             for _, line in ipairs(v) do
-                bsdio:write(line)
+                generator:write(line)
             end
         end
     end
@@ -102,14 +102,13 @@ function generator:preamble(str, comment)
     end
 end
 
--- File is part of bsdio's identity. Different objects with different identities
--- (files) can be behave differently in a module.
+-- generator binds to the parameter file.
 function generator:new(obj, fh)
     obj = obj or { }
     setmetatable(obj, self)
     self.__index = self
 
-    self.bsdio = assert(io.open(fh, "w+"))
+    self.gen = assert(io.open(fh, "w+"))
     self.tag = "@" .. "generated"
 
     return obj

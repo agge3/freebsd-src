@@ -15,7 +15,6 @@
 -- Setup to be a module, or ran as its own script.
 local syscall_h = {}
 local script = not pcall(debug.getlocal, 4, 1) -- TRUE if script.
-
 if script then
     -- Add library root to the package path.
     local path = arg[0]:gsub("/[^/]+.lua$", "")
@@ -23,7 +22,6 @@ if script then
 end
 
 local FreeBSDSyscall = require("core.freebsd-syscall")
-local util = require("tools.util")
 local generator = require("tools.generator")
 
 -- File has not been decided yet; config will decide file. Default defined as
@@ -57,16 +55,16 @@ function syscall_h.generate(tbl, config, fh)
 			gen:write(string.format("#define\t%s%s\t%d\n",
                 config.syscallprefix, v:symbol(), v.num))
 		elseif c >= 0 then
-			local s
+			local comment
 			if c == 0 then
-				s = "obsolete"
+				comment = "obsolete"
 			elseif c == 3 then
-				s = "old"
+				comment = "old"
 			else
-				s = "freebsd" .. c
+				comment = "freebsd" .. c
 			end
 			gen:write(string.format("\t\t\t\t/* %d is %s %s */\n",
-                v.num, s, v.name))
+                v.num, comment, v.name))
 		elseif v.type.RESERVED then
 			gen:write(string.format("\t\t\t\t/* %d is reserved */\n", v.num))
 		elseif v.type.UNIMPL then
@@ -83,7 +81,7 @@ if script then
     local config = require("config")
 
     if #arg < 1 or #arg > 2 then
-    	error("usage: " .. arg[0] .. " syscall.master")
+        error("usage: " .. arg[0] .. " syscall.master")
     end
 
     local sysfile, configfile = arg[1], arg[2]

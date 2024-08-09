@@ -80,7 +80,6 @@ function scarg:process()
 
 		-- XX TODO: Forward declarations? See: sysstubfwd in CheriBSD
 		if self.arg_abi_change then
-			local abi_type_suffix = config.abi_type_suffix
 			self.type = self.type:gsub("(struct [^ ]*)", "%1" ..
 			    config.abi_type_suffix)
 			self.type = self.type:gsub("(union [^ ]*)", "%1" ..
@@ -93,7 +92,7 @@ end
 
 -- For pairing 64-bit arguments, pad if necessary.
 -- Returns TRUE if this argument was padded.
-function scarg:pad(tbl)
+local function pad(tbl)
     if #tbl % 2 == 1 then
         table.insert(tbl, {
             type = "int",
@@ -105,27 +104,23 @@ function scarg:pad(tbl)
 end
 
 -- To append to the system call's argument table. Appends to the end.
--- Returns TRUE if successful.
 function scarg:append(tbl)
     if config.abiChanges("pair_64bit") and util.is64bitType(self.type) then
-        self:pad(tbl)
-    	table.insert(tbl, {
+        pad(tbl)
+        table.insert(tbl, {
             type = "uint32_t",
             name = self.name .. "1",
         })
         table.insert(tbl, {
             type = "uint32_t",
             name = self.name .. "2",
-    	})
-        return true
+        })
     else
         table.insert(tbl, {
             type = self.type,
             name = self.name,
         })
-        return true
     end
-    return false
 end
 
 -- Returns TRUE if this argument has ABI changes from native.
