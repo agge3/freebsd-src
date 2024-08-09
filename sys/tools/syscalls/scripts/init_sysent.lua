@@ -74,12 +74,6 @@ function init_sysent.generate(tbl, config, fh)
 struct sysent %s[] = {
 ]], config.switchname))
 
-    -- Handle linux nosys
-    if config.syscallprefix:find("LINUX") ~= nil then
-        print("Found linux nosys")
-        gen:write("#define nosys   linux_nosys\n")
-    end
-
     for _, v in pairs(s) do
         local c = v:compat_level()
         local argssize = util.processArgsize(v)
