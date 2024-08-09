@@ -215,9 +215,9 @@ function config.merge(fh)
                     config[k] = v
                 end
                 -- construct config modified table as config is processed
-                config.mod[k] = true
+                config.modifications[k] = true
             end
-            config.mod[k] = false  -- config wasn't modified
+            config.modifications[k] = false  -- config wasn't modified
         end
     end
 end
@@ -275,7 +275,7 @@ end
 -- Merge capability (Capsicum) configuration into the global config.
 function config.mergeCapability()
     -- We ignore errors here if we're relying on the default configuration.
-    if not config.mod.capenabled then
+    if not config.modifications.capenabled then
         config.capenabled = grabCapenabled(config.capabilities_conf,
             config.mod.capabilities_conf == nil)
     elseif config.capenabled ~= "" then
