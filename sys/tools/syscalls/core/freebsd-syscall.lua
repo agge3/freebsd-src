@@ -53,10 +53,12 @@ function FreeBSDSyscall:parseSysfile()
 	local defs = ""
 	local s
 	for line in fh:lines() do
-		line = line:gsub(commentExpr, "") -- Strip any comments
+		line = line:gsub(commentExpr, "") -- Strip any comments.
 		-- NOTE: Can't use pure pattern matching here because of the 's' test
 		-- and this is shorter than a generic pattern matching pattern
-		if s ~= nil then
+		if line == nil or line == "" then
+            goto skip -- Blank line, skip this line.
+        elseif s ~= nil then
 			-- If we have a partial system call object
 			-- s, then feed it one more line
 			if s:add(line) then
@@ -93,6 +95,7 @@ function FreeBSDSyscall:parseSysfile()
 				s = nil
             end
 		end
+        ::skip::
 	end
 
     -- special handling for linux nosys
