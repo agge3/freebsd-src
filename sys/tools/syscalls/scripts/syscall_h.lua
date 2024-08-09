@@ -53,7 +53,7 @@ function syscall_h.generate(tbl, config, fh)
 			v.type.SYSMUX or
 			c >= 7 then
 			gen:write(string.format("#define\t%s%s\t%d\n",
-                config.syscallprefix, v:symbol(), v.num))
+                config.syscallprefix, v.alias, v.num))
 		elseif c >= 0 then
 			local comment
 			if c == 0 then
@@ -67,9 +67,6 @@ function syscall_h.generate(tbl, config, fh)
                 v.num, comment, v.name))
 		elseif v.type.RESERVED then
 			gen:write(string.format("\t\t\t\t/* %d is reserved */\n", v.num))
-		elseif v.type.UNIMPL then
-			gen:write(string.format("\t\t\t\t/* %d is unimplemented %s */\n",
-                v.num, v.name))
 		end
 	end
 	gen:write(string.format("#define\t%sMAXSYSCALL\t%d\n",
