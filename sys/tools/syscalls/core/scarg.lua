@@ -41,7 +41,7 @@ function scarg:init()
     self.arg_abi_change = checkAbiChanges(self.scarg)
     self.changes_abi = self.changes_abi or self.arg_abi_change
     self.scarg = stripArgAnnotations(self.scarg)
-    self.scarg = util.trim(self.scarg, ',')
+    self.scarg = util.trim(self.scarg, ',') -- trim trailing comma
     self.name = self.scarg:match("([^* ]+)$")
     self.type = util.trim(self.scarg:gsub(self.name .. "$", ""), nil)
 end
@@ -55,8 +55,8 @@ function scarg:process()
     if self.type ~= "" and self.name ~= "void" then
 		-- util.is64bitType() needs a bare type so check it after argname
 		-- is removed
-		self.changes_abi = config.abiChanges("pair_64bit") and
-                                  util.is64bitType(self.type)
+		self.changes_abi = self.changes_abi or
+			(config.abiChanges("pair_64bit") and util.is64bitType(self.type))
 
 		self.type = self.type:gsub("intptr_t", config.abi_intptr_t)
 		self.type = self.type:gsub("semid_t", config.abi_semid_t)
@@ -65,8 +65,8 @@ function scarg:process()
 			self.type = self.type:gsub("size_t", config.abi_size_t)
 			self.type = self.type:gsub("^long", config.abi_long)
 			self.type = self.type:gsub("^u_long", config.abi_u_long)
-			self.type = self.type:gsub("^const u_long", "const "
-                    .. config.abi_u_long)
+			self.type = self.type:gsub("^const u_long", "const " ..
+				config.abi_u_long)
 		elseif self.type:find("^long$") then
 			self.type = config.abi_long
 		end
@@ -75,7 +75,8 @@ function scarg:process()
 			-- `* const *` -> `**`
             self.type = self.type:gsub("[*][ ]*const[ ]*[*]", "**")
 			-- e.g., `struct aiocb **` -> `uint32_t *`
-			self.type = self.type:gsub("[^*]*[*]", config.abi_ptr_array_t .. " ", 1)
+			self.type = self.type:gsub("[^*]*[*]",
+				config.abi_ptr_array_t .. " ", 1)
 		end
 
 		-- XX TODO: Forward declarations? See: sysstubfwd in CheriBSD
@@ -103,10 +104,10 @@ local function pad(tbl)
     return false
 end
 
--- To append to the system call's argument table. Appends to the end.
+-- To append to a system call's argument table. Appends to the end.
 function scarg:append(tbl)
     if config.abiChanges("pair_64bit") and util.is64bitType(self.type) then
-        pad(tbl)
+        pad(tbl) -- needs argument padding
         table.insert(tbl, {
             type = "uint32_t",
             name = self.name .. "1",

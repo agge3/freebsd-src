@@ -37,16 +37,14 @@ function FreeBSDSyscall:parseSysfile()
 	local commentExpr = "^%s*;.*"
 
 	if file == nil then
-		print "No file"
-		return
+		return nil, "No file given"
 	end
 
 	self.syscalls = {}
 
-	local fh = io.open(file)
+	local fh, msg = io.open(file)
 	if fh == nil then
-		print("Failed to open " .. file)
-		return {}
+		return nil, msg
 	end
 
 	local incs = ""

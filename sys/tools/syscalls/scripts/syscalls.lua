@@ -7,11 +7,6 @@
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
 --
 
--- We generally assume that this script will be run by flua, however we've
--- carefully crafted modules for it that mimic interfaces provided by modules
--- available in ports.  Currently, this script is compatible with lua from
--- ports along with the compatible luafilesystem and lua-posix modules.
-
 -- Setup to be a module, or ran as its own script.
 local syscalls = {}
 local script = not pcall(debug.getlocal, 4, 1) -- TRUE if script.
@@ -41,7 +36,7 @@ function syscalls.generate(tbl, config, fh)
     gen:write(string.format("const char *%s[] = {\n", config.namesname))
 
 	for _, v in pairs(s) do
-		local c = v:compat_level()
+		local c = v:compatLevel()
         if v:native() then
             gen:write(string.format("\t\"%s\",\t\t\t/* %d = %s */\n",
 	            v.alias, v.num, v.alias))

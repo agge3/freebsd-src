@@ -7,11 +7,6 @@
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
 --
 
--- We generally assume that this script will be run by flua, however we've
--- carefully crafted modules for it that mimic interfaces provided by modules
--- available in ports.  Currently, this script is compatible with lua from
--- ports along with the compatible luafilesystem and lua-posix modules.
-
 -- Setup to be a module, or ran as its own script.
 local syscall_h = {}
 local script = not pcall(debug.getlocal, 4, 1) -- TRUE if script.
@@ -44,7 +39,7 @@ function syscall_h.generate(tbl, config, fh)
 	gen:preamble("System call numbers.")
 
 	for _, v in pairs(s) do
-		local c = v:compat_level()
+		local c = v:compatLevel()
 		if v.num > max then
 			max = v.num
 		end

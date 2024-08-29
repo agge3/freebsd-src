@@ -29,6 +29,10 @@ syscall.known_flags = util.set {
 	"SYSMUX",
 }
 
+-- Native is an arbitrarily large number to have a constant and not
+-- interfere with compat numbers.
+local native = 1000000
+
 --
 -- Processes the thread flag for this system call.
 -- RETURN: String thr, the appropriate thread flag
@@ -50,8 +54,8 @@ end
 local function processCap(name, prefix, type)
     local str = "0"
     local stripped = util.stripAbiPrefix(name, prefix)
-    if config.capenabled[name] ~= nil or
-       config.capenabled[stripped] ~= nil then
+    if config.capenabled ~= nil and (config.capenabled[name] ~= nil or
+		config.capenabled[stripped] ~= nil) then
         str = "SYF_CAPENABLED"
     else
         for k, _ in pairs(type) do
@@ -73,6 +77,42 @@ local function checkType(type)
 	end
 end
 
+-- If there are ABI changes from native, process this system call to match the
+-- target ABI.
+-- RETURN: TRUE if any modifications were done. FALSE if no modifications were
+-- done
+function syscall:processChangesAbi()
+    -- First, confirm we want to uphold our changes_abi flag.
+    if config.sys_no_abi_change[self.name] then
+        self.changes_abi = false
+    end
+    if config.abiChanges("pointer_args") then
+        for _, v in ipairs(self.args) do
+            if util.isPtrType(v.type) then
+                if config.sys_no_abi_change[self.name] then
+                    print("WARNING: " .. self.name ..
+                        " in syscall_no_abi_change, but pointers args are present")
+                end
+                self.changes_abi = true
+                goto ptrfound
+            end
+	    end
+		::ptrfound::
+    end
+	if config.sys_abi_change[self.name] then
+		self.changes_abi = true
+	end
+
+    -- If there are ABI changes from native, assign the correct prefixes.
+    if self.changes_abi then
+        self.arg_prefix = config.abi_func_prefix
+        self.prefix = config.abi_func_prefix
+		self.noproto = false
+        return true
+    end
+    return false
+end
+
 -- Validate that we're not skipping system calls by comparing this system call
 -- number to the previous system call number. Called higher up the call stack by
 -- class FreeBSDSyscall.
@@ -80,69 +120,36 @@ function syscall:validate(prev)
     return prev + 1 == self.num
 end
 
--- If there are ABI changes from native, process this system call to match the
--- target ABI.
--- RETURN: TRUE if any modifications were done. FALSE if no modifications were
--- done
-function syscall:processChangesAbi()
-    -- First, confirm we have a valid changes_abi flag.
-    if config.syscall_no_abi_change[self.name] then
-        self.changes_abi = false
-    end
-    if config.abiChanges("pointer_args") then
-        for _, v in ipairs(self.args) do
-            if util.isPtrType(v.type) then
-                if config.syscall_no_abi_change[self.name] then
-                    print("WARNING: " .. self.name ..
-                        " in syscall_no_abi_change, but pointers args are present")
-                end
-                self.changes_abi = true
-                break
-            end
-	    end
-    end
-
-    -- If there are ABI changes from native:
-    if self.changes_abi then
-        -- argalias should be:
-        --   COMPAT_PREFIX + ABI Prefix + funcname
-        self.arg_prefix = config.abi_func_prefix
-        self.prefix = config.abi_func_prefix
-        self.arg_alias = self.prefix .. self.name
-        return true
-    end
-    return false
+-- Return the compat prefix for this system call.
+function syscall:compatPrefix()
+	local c = self:compatLevel()
+	if self.type.OBSOL then
+		return "obs_"
+	end
+	if self.type.RESERVED then
+		return "reserved #"
+	end
+	if self.type.UNIMPL then
+		return "unimp_"
+	end
+	if c == 3 then
+		return "o"
+	end
+	if c < native then
+		return "freebsd" .. tostring(c) .. "_"
+	end
+	return ""
 end
-
--- Native is an arbitrarily large number to have a constant and not
--- interfere with compat numbers.
-local native = 1000000
 
 -- Return the symbol name for this system call.
 function syscall:symbol()
-	local c = self:compat_level()
-	if self.type.OBSOL then
-		return "obs_" .. self.name
-	end
-	if self.type.RESERVED then
-		return "reserved #" .. tostring(self.num)
-	end
-	if self.type.UNIMPL then
-		return "unimp_" .. self.name
-	end
-	if c == 3 then
-		return "o" .. self.name
-	end
-	if c < native then
-		return "freebsd" .. tostring(c) .. "_" .. self.name
-	end
-	return self.name
+	return self:compatPrefix() .. self.name
 end
 
 -- Return the comment for this system call.
 -- TODO: Incomplete/unused
 function syscall:comment()
-    --local c = self:compat_level()
+    --local c = self:compatLevel()
     if self.type.OBSOL then
         return "/* obsolete " .. self.alias .. " */"
     end
@@ -163,7 +170,7 @@ end
 -- 3 is 4.3BSD in theory, but anything before FreeBSD 4
 -- >= 4 FreeBSD version this system call was replaced with a new version
 --
-function syscall:compat_level()
+function syscall:compatLevel()
 	if self.type.UNIMPL or self.type.RESERVED or self.type.NODEF then
 		return -1
 	elseif self.type.OBSOL then
@@ -261,32 +268,38 @@ end
 
 -- Once we have a good syscall, add some final information to it.
 function syscall:finalize()
+	self.noproto = config.abi_flags ~= "" and not self.changes_abi
     -- These may be changed by processChangesAbi(), or they'll remain empty for
     -- native.
     self.prefix = ""
     self.arg_prefix = ""
     self:processChangesAbi()
+	if self.noproto and self.type.SYSMUX then
+		-- Add the NOPROTO flag to this system call's type.
+		self.type.NOPROTO = true
+	end
 
     -- These need to be done before modifying self.name.
     self.cap = processCap(self.name, self.prefix, self.type) -- capability flag
     self.thr = processThr(self.type) -- thread flag
 
+    -- Assign argument alias.
+    if self.arg_alias == nil and self.name ~= nil then
+        -- argalias should be:
+        --   COMPAT_PREFIX + ABI Prefix + funcname
+		self.arg_alias  = self:compatPrefix() .. self.arg_prefix .. self.name ..
+			"_args"
+    elseif self.arg_alias ~= nil then
+        self.arg_alias = self.arg_prefix .. self.arg_alias
+    end
+
     -- An empty string would not want a prefix; in that case we want to keep the
     -- empty string.
-    if self.name ~= "" then
+    if self.name ~= nil and self.name ~= "" then
         self.name = self.prefix .. self.name
     end
     if self.alias == nil or self.alias == "" then
         self.alias = self.name
-    end
-
-    -- Assign argument alias.
-    if self.arg_alias == nil and self.name ~= nil then
-        -- Symbol will either be: (native) the same as the system call name, or
-        -- (non-native) the correct modified symbol for the arg_alias.
-        self.arg_alias = self:symbol() .. "_args"
-    elseif self.arg_alias ~= nil then
-        self.arg_alias = self.arg_prefix .. self.arg_alias
     end
 end
 
@@ -336,20 +349,8 @@ end
 -- NOTE: The other system call names are also treated as native, so that's why
 -- they're being allowed in here.
 function syscall:native()
-    return self:compat_level() == native or self.name == "lkmnosys" or
+    return self:compatLevel() == native or self.name == "lkmnosys" or
            self.name == "sysarch"
-end
-
-function syscall:new(obj)
-	obj = obj or { }
-	setmetatable(obj, self)
-	self.__index = self
-
-	self.expect_rbrace = false
-    self.changes_abi = false
-	self.args = {}
-
-	return obj
 end
 
 -- Make a shallow copy of `self` and replace the system call number with num
@@ -366,29 +367,11 @@ function syscall:shallowCopy(num)
 	return obj
 end
 
--- Make a deep copy of the parameter object.
+-- Make a deep copy of the parameter object. Save copied tables in `copies`,
+-- indexed by original table.
 -- CREDIT: http://lua-users.org/wiki/CopyTable
 -- For a full system call (the nested arguments table should be a deep copy).
-local function deepCopy(orig)
-    local type = type(orig)
-    local copy
-
-    if type == 'table' then
-        copy = {}
-        for orig_key, orig_value in next, orig, nil do
-            copy[deepCopy(orig_key)] = deepCopy(orig_value)
-        end
-        setmetatable(copy, deepCopy(getmetatable(orig)))
-    else -- number, string, boolean, etc
-        copy = orig
-    end
-
-    return copy
-end
-
--- CREDIT: http://lua-users.org/wiki/CopyTable
--- Save copied tables in `copies`, indexed by original table.
-function deepCopy(orig, copies)
+local function deepCopy(orig, copies)
     copies = copies or {}
     local orig_type = type(orig)
     local copy
@@ -410,11 +393,16 @@ function deepCopy(orig, copies)
 end
 
 --
--- As we're parsing the system calls, there's two types. Either we have a
--- specific one, that's a assigned a number, or we have a range for things like
--- reseved system calls. this function deals with both knowing that the specific
--- ones are more copy and so we should just return the object we just made w/o
--- an extra clone.
+-- In syscalls.master, system calls come in two types: (1) a fully defined
+-- system call with function declaration, with a distinct number for each system
+-- call; or (2) a one-line entry, sometimes with a distinct number and sometimes
+-- with a range of numbers. One-line entries are obsolete, reserved, etc.
+--
+-- This function provides the iterator to traverse system calls by number. If
+-- the entry is a fully defined system call with a distinct number, the iterator
+-- creates a deep copy and captures any nested objects; if the entry is a range
+-- of numbers, the iterator creates shallow copies from the start of the range
+-- to the end of the range.
 --
 function syscall:iter()
 	local s = tonumber(self.num)
@@ -439,6 +427,19 @@ function syscall:iter()
 			end
 		end
 	end
+end
+
+function syscall:new(obj)
+	obj = obj or { }
+	setmetatable(obj, self)
+	self.__index = self
+
+	self.expect_rbrace = false
+    self.changes_abi = false
+	self.noproto = false
+	self.args = {}
+
+	return obj
 end
 
 return syscall

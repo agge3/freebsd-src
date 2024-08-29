@@ -57,7 +57,7 @@ sysproto_h.file = config.sysproto
 
 syscalls.generate(tbl, config, syscalls.file)
 syscall_h.generate(tbl, config, syscall_h.file)
-syscall_mk.generate(tbl, config, syscall_mk.file)
+syscall_mk.generate(tbl, syscall_mk.file)
 init_sysent.generate(tbl, config, init_sysent.file)
 systrace_args.generate(tbl, config, systrace_args.file)
 sysproto_h.generate(tbl, config, sysproto_h.file)

@@ -6,56 +6,60 @@
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
 --
 
+--
 -- Code to read in the config file that drives this. Since we inherit from the
 -- FreeBSD makesyscall.sh legacy, all config is done through a config file that
--- sets a number of varibale (as noted below, it used to be a .sh file that was
--- sourced in. This dodges the need to write a command line parser.
+-- sets a number of variables (as noted below); it used to be a .sh file that
+-- was sourced in. This dodges the need to write a command line parser.
+--
 
-local util = require("tools/util")
+local util = require("tools.util")
 
 --
 -- Global config map.
--- Default configuration is native (amd64). Any of these may get replaced by an
+-- Default configuration is native. Any of these may get replaced by an
 -- optionally specified configuration file.
 --
 local config = {
-    sysnames = "syscalls.c",
-    syshdr = "../sys/syscall.h",
-    sysmk = "/dev/null",
-    syssw = "init_sysent.c",
-    systrace = "systrace_args.c",
-    sysproto = "../sys/sysproto.h",
-    libsysmap = "/dev/null",
-    libsys_h = "/dev/null",
-    sysproto_h = "_SYS_SYSPROTO_H_",
-    syscallprefix = "SYS_",
-    switchname = "sysent",
-    namesname = "syscallnames",
-    abi_flags = {},
-    abi_func_prefix = "",
-    abi_type_suffix = "",
-    abi_long = "long",
-    abi_u_long = "u_long",
-    abi_semid_t = "semid_t",
-    abi_size_t = "size_t",
-    abi_ptr_array_t = "",
-    abi_headers = "",
-    abi_intptr_t = "intptr_t",
-    ptr_intptr_t_cast = "intptr_t",
-    obsol = {},
-    unimpl = {},
-    capabilities_conf = "capabilities.conf",
-    compat_set = "native",
-    mincompat = 0,
-    capenabled = {},
-    -- System calls that require ABI-specific handling
-    syscall_abi_change = {},
-    -- System calls that appear to require handling, but don't
-    syscall_no_abi_change = {},
-    -- Keep track of modifications if there are.
-    modifications = {},
-    -- Stores compat_sets from syscalls.conf; config.mergeCompat() instantiates.
-    compat_options = {},
+	sysnames = "syscalls.c",
+	syshdr = "../sys/syscall.h",
+	sysmk = "/dev/null",
+	syssw = "init_sysent.c",
+	systrace = "systrace_args.c",
+	sysproto = "../sys/sysproto.h",
+	libsysmap = "/dev/null",
+	libsys_h = "/dev/null",
+	sysproto_h = "_SYS_SYSPROTO_H_",
+	syscallprefix = "SYS_",
+	switchname = "sysent",
+	namesname = "syscallnames",
+	abi_flags = {},
+	abi_func_prefix = "",
+	abi_type_suffix = "",
+	abi_long = "long",
+	abi_u_long = "u_long",
+	abi_semid_t = "semid_t",
+	abi_size_t = "size_t",
+	abi_ptr_array_t = "",
+	abi_headers = "",
+	abi_intptr_t = "intptr_t",
+	ptr_intptr_t_cast = "intptr_t",
+	obsol = {},
+	unimpl = {},
+	capabilities_conf = "capabilities.conf",
+	compat_set = "native",
+	mincompat = 0,
+	capenabled = {},
+	-- System calls that require ABI-specific handling
+	syscall_abi_change = "",
+	sys_abi_change = {},
+	-- System calls that appear to require handling, but don't
+	syscall_no_abi_change = "",
+	sys_no_abi_change = {},
+	-- Keep track of modifications if there are.
+	modifications = {},
+	-- Stores compat_sets from syscalls.conf; config.mergeCompat() instantiates.
+	compat_options = {},
 }
 
 -- For each entry, the ABI flag is the key. One may also optionally provide an
@@ -192,6 +196,17 @@ function config.process(file)
 	return cfg
 end
 
+-- Processes syscall_abi_change and syscall_no_abi_change in syscalls.conf, and
+-- inserts the system call(s) as a set into sys_abi_change and
+-- sys_no_abi_change. We can index those tables later for handling the system
+-- call's ABI changes.
+local function processSyscallAbiChange()
+	config.sys_abi_change = util.setFromString(
+		config.syscall_abi_change, "[^ ]+")
+	config.sys_no_abi_change = util.setFromString(
+		config.syscall_no_abi_change, "[^ ]+")
+end
+
 -- Merges processed configuration file into the global config map (see above),
 -- or returns NIL and a message.
 function config.merge(fh)
@@ -200,25 +215,27 @@ function config.merge(fh)
 
         for k, v in pairs(res) do
             if v ~= config[k] then
-                -- handling of sets
-                if v:find("abi_flags") then
-                    -- match for pipe, that's how abi_flags is formatted
-                    table.insert(config[k], util.setFromString(v, "[^|]+"))
-                elseif v:find("capenabled") or
-                       v:find("syscall_abi_change") or
-                       v:find("syscall_no_abi_change") or
-                       v:find("obsol") or
-                       v:find("unimpl") then
-                    -- match for space, that's how these are formatted
-                    table.insert(config[k], util.setFromString(v, "[^ ]+"))
+                -- Handling of string lists:
+                if k:find("abi_flags") then
+                    -- Match for pipe, that's how abi_flags is formatted.
+                    config[k] = util.setFromString(v, "[^|]+")
+                elseif k:find("capenabled") or
+                       k:find("sys_abi_change") or
+                       k:find("sys_no_abi_change") or
+                       k:find("obsol") or
+                       k:find("unimpl") then
+                    -- Match for space, that's how these are formatted.
+                    config[k] = util.setFromString(v, "[^ ]+")
                 else
                     config[k] = v
                 end
-                -- construct config modified table as config is processed
+                -- Construct config modified table as config is processed.
                 config.modifications[k] = true
             end
             config.modifications[k] = false  -- config wasn't modified
         end
+		-- Instantiate ABI and no ABI change dictionaries.
+		processSyscallAbiChange()
     end
 end
 
@@ -248,16 +265,15 @@ local function grabCapenabled(file, open_fail_ok)
 	local commentExpr = "#.*"
 
 	if file == nil then
-		print "No file"
-		return {}
+		return nil, "No file given"
 	end
 
-	local fh = io.open(file)
+	local fh, msg, errno = io.open(file)
 	if fh == nil then
 		if not open_fail_ok then
-			util.abort(1, "Failed to open " .. file)
+			util.abort(errno, msg)
 		end
-		return {}
+		return nil, msg
 	end
 
 	for nextline in fh:lines() do

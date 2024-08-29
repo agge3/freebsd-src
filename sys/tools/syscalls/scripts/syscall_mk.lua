@@ -7,11 +7,6 @@
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
 --
 
--- We generally assume that this script will be run by flua, however we've
--- carefully crafted modules for it that mimic interfaces provided by modules
--- available in ports.  Currently, this script is compatible with lua from
--- ports along with the compatible luafilesystem and lua-posix modules.
-
 -- Setup to be a module, or ran as its own script.
 local syscall_mk = {}
 local script = not pcall(debug.getlocal, 4, 1) -- TRUE if script.
@@ -31,7 +26,7 @@ syscall_mk.file = "/dev/null"
 -- Libc has all the STD, NOSTD and SYSMUX system calls in it, as well as
 -- replaced system calls dating back to FreeBSD 7. We are lucky that the
 -- system call filename is just the base symbol name for it.
-function syscall_mk.generate(tbl, config, fh)
+function syscall_mk.generate(tbl, fh)
     -- Grab the master system calls table.
     local s = tbl.syscalls
     -- Bookkeeping for keeping track of when we're at the last system call (no
@@ -47,7 +42,7 @@ function syscall_mk.generate(tbl, config, fh)
 
     gen:write("MIASM =  \\\n") -- preamble
 	for _, v in pairs(s) do
-        local c = v:compat_level()
+        local c = v:compatLevel()
         idx = idx + 1
 		if v:native() and not v.type.NODEF then
             if idx >= size then
@@ -59,21 +54,13 @@ function syscall_mk.generate(tbl, config, fh)
             end
         -- Handle compat (everything >= FREEBSD3):
         elseif c >= 3 and not v.type.NODEF then
-            -- Lookup the info for this specific compat option.
-            local prefix
-            for _, opt in pairs(config.compat_options) do
-                if opt.compatlevel == c then
-                    prefix = opt.prefix
-                    break
-                end
-            end
             -- xxx do like makesyscalls.lua, it's a better way
             if idx >= size then
                 -- At last system call, no backslash.
 			    gen:write(string.format("\t%s.o\n", v:symbol()))
             else
                 -- Normal behavior.
-			    gen:write(string.format("\t%s%s.o \\\n", prefix, v:symbol()))
+			    gen:write(string.format("\t%s.o \\\n", v:symbol()))
             end
         end
     end
@@ -97,7 +84,7 @@ if script then
     local tbl = FreeBSDSyscall:new{sysfile = sysfile, config = config}
 
     syscall_mk.file = config.sysmk -- change file here
-    syscall_mk.generate(tbl, config, syscall_mk.file)
+    syscall_mk.generate(tbl, syscall_mk.file)
 end
 
 -- Return the module
