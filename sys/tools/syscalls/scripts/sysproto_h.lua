@@ -97,9 +97,8 @@ struct thread;
         if v:native() then
             -- All these negation conditions are because (in general) these are
             -- cases where code for sysproto.h is not generated.
-            if not v.type.NOARGS and
-               not v.type.NOPROTO and
-               not v.type.NODEF then
+            if not v.type.NOARGS and not v.type.NOPROTO and
+				not v.type.NODEF then
                 if #v.args > 0 then
                     gen:write(string.format("struct %s {\n", v.arg_alias))
                     for _, arg in ipairs(v.args) do
@@ -124,8 +123,7 @@ struct thread;
                         v.arg_alias))
                 end
             end
-            if not v.type.NOPROTO and
-               not v.type.NODEF then
+            if not v.type.NOPROTO and not v.type.NODEF then
                 local sys_prefix = "sys_"
                 if v.name == "nosys" or v.name == "lkmnosys" or
                    v.name == "sysarch" or v.name:find("^freebsd") or
@@ -142,9 +140,8 @@ struct thread;
         -- Handle compat (everything >= FREEBSD3):
         elseif c >= 3 then
             local idx = c * 10
-            if not v.type.NOPROTO and
-               not v.type.NODEF and
-               not v.type.NOARGS then
+            if not v.type.NOARGS and not v.type.NOPROTO and
+				not v.type.NODEF then
                 if #v.args > 0 then
                     gen:store(string.format("struct %s {\n", v.arg_alias), idx)
                     for _, arg in ipairs(v.args) do
@@ -163,14 +160,13 @@ struct thread;
                          v.arg_alias))
                 end
             end
-            if not v.type.NOPROTO and
-               not v.type.NODEF then
+            if not v.type.NOPROTO and not v.type.NODEF then
 		        gen:store(string.format(
 		            "%s\t%s%s(struct thread *, struct %s *);\n",
-		            v.rettype, v.prefix, v.name, v.arg_alias), idx + 1)
+		            v.rettype, v:compatPrefix(), v.name, v.arg_alias), idx + 1)
 		        gen:store(string.format(
 		            "#define\t%sAUE_%s%s\t%s\n", config.syscallprefix,
-		            v.prefix, v:symbol(), v.audit), audit_idx)
+		            v:compatPrefix(), v.name, v.audit), audit_idx)
             end
         end
         -- Do nothing for obsolete, unimplemented, and reserved.

@@ -158,7 +158,7 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 		if (ndx == 0 || ndx == 1)
 			p = "%s";
 		break;
-]], v.rettype), 2)
+]], v.ret), 2)
         end
 
 	    gen:write(string.format(

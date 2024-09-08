@@ -47,8 +47,8 @@ function syscall_h.generate(tbl, config, fh)
 			v.type.NOSTD or
 			v.type.SYSMUX or
 			c >= 7 then
-			gen:write(string.format("#define\t%s%s\t%d\n",
-                config.syscallprefix, v.alias, v.num))
+			gen:write(string.format("#define\t%s%s%s\t%d\n",
+                config.syscallprefix, v:compatPrefix(), v.name, v.num))
 		elseif c >= 0 then
 			local comment
 			if c == 0 then
@@ -61,7 +61,7 @@ function syscall_h.generate(tbl, config, fh)
 			gen:write(string.format("\t\t\t\t/* %d is %s %s */\n",
                 v.num, comment, v.name))
 		elseif v.type.RESERVED then
-			gen:write(string.format("\t\t\t\t/* %d is reserved */\n", v.num))
+			--gen:write(string.format("\t\t\t\t/* %d is reserved */\n", v.num))
 		end
 	end
 	gen:write(string.format("#define\t%sMAXSYSCALL\t%d\n",

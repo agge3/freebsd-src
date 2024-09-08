@@ -64,6 +64,27 @@ function util.setFromString(str, re)
 	return s
 end
 
+function util.isEmpty(tbl)
+	if tbl ~= nil then
+		if next(tbl) == nil then
+			return true
+		end
+		return false
+	end
+	return true
+end
+
+function util.mergeSets(set1, set2)
+	local result_set = {}
+	for k in pairs(set1) do
+		result_set[k] = true
+	end
+	for k in pairs(set2) do
+		result_set[k] = true
+	end
+	return result_set
+end
+
 --
 --  Iterator that traverses a table following the order of its keys.
 --  An optional parameter f allows the specification of an alternative order.

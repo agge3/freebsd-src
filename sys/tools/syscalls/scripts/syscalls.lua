@@ -39,7 +39,7 @@ function syscalls.generate(tbl, config, fh)
 		local c = v:compatLevel()
         if v:native() then
             gen:write(string.format("\t\"%s\",\t\t\t/* %d = %s */\n",
-	            v.alias, v.num, v.alias))
+	            v.name, v.num, v.name))
 		elseif c >= 3 then
             -- Lookup the info for this specific compat option.
             local flag, descr
@@ -53,13 +53,13 @@ function syscalls.generate(tbl, config, fh)
             end
 
 			gen:write(string.format("\t\"%s.%s\",\t\t/* %d = %s %s */\n",
-	            flag, v.alias, v.num, descr, v.alias))
+	            flag, v.name, v.num, descr, v.name))
 		elseif v.type.RESERVED then
 			gen:write(string.format(
                 "\t\"#%d\",\t\t\t/* %d = reserved for local use */\n",
 	            v.num, v.num))
 		elseif v.type.UNIMPL then
-            local comment = v.name -- xxx this is sometimes different
+            local comment = v.alias -- xxx this is sometimes different
 			gen:write(string.format("\t\"#%d\",\t\t\t/* %d = %s */\n",
 		    v.num, v.num, comment))
         elseif v.type.OBSOL then

@@ -77,15 +77,30 @@ local function checkType(type)
 	end
 end
 
+function syscall:processFlags()
+	if config.obsol[self.name] then
+		self.args = nil
+		self.type.OBSOL = true
+	end
+	if config.unimpl[self.name] then
+		self.type.UNIMPL = true
+	end
+	if self.noproto or self.type.SYSMUX then
+		self.type.NOPROTO = true
+	end
+	if self.type.NODEF then
+		self.audit = "AUE_NULL"
+	end
+end
+
 -- If there are ABI changes from native, process this system call to match the
 -- target ABI.
--- RETURN: TRUE if any modifications were done. FALSE if no modifications were
--- done
 function syscall:processChangesAbi()
     -- First, confirm we want to uphold our changes_abi flag.
     if config.sys_no_abi_change[self.name] then
         self.changes_abi = false
     end
+	self.noproto = not util.isEmpty(config.abi_flags) and not self.changes_abi
     if config.abiChanges("pointer_args") then
         for _, v in ipairs(self.args) do
             if util.isPtrType(v.type) then
@@ -102,12 +117,22 @@ function syscall:processChangesAbi()
 	if config.sys_abi_change[self.name] then
 		self.changes_abi = true
 	end
-
-    -- If there are ABI changes from native, assign the correct prefixes.
     if self.changes_abi then
         self.arg_prefix = config.abi_func_prefix
         self.prefix = config.abi_func_prefix
 		self.noproto = false
+    end
+end
+
+-- XXX Incomplete/unused.
+-- Returns TRUE if prefix and arg_prefix are assigned; FALSE if they're left
+-- unassigned. Relies on a valid changes_abi flag, so should be called AFTER
+-- processChangesAbi().
+function syscall:processPrefix()
+    -- If there are ABI changes from native, assign the correct prefixes.
+    if self.changes_abi then
+        self.arg_prefix = config.abi_func_prefix
+        self.prefix = config.abi_func_prefix
         return true
     end
     return false
@@ -146,8 +171,8 @@ function syscall:symbol()
 	return self:compatPrefix() .. self.name
 end
 
+-- XXX Incomplete/unused.
 -- Return the comment for this system call.
--- TODO: Incomplete/unused
 function syscall:comment()
     --local c = self:compatLevel()
     if self.type.OBSOL then
@@ -246,42 +271,40 @@ function syscall:addArgs(line)
         -- scarg:process() handles those conditions.
         if arg:process() then
             arg:append(self.args)
-            -- Grab ABI change information for this argument.
-            self.changes_abi = arg:changesAbi()
         end
+		-- Grab ABI change information for this argument.
+		self.changes_abi = arg:changesAbi()
         return true
     end
     return false
 end
 
--- Returns TRUE if this system call was added succesfully.
-function syscall:isAdded(line)
-    if self.expect_rbrace then
-	    if not line:match("}$") then
-            util.abort(1, "Expected '}' found '" .. line .. "' instead.")
-	    end
-        self:finalize()
-        return true
-    end
-    return false
+-- XXX Incomplete/unused.
+-- Decides if the NOPROTO flag should be added to this system call. Should be
+-- called after processChangesAbi() so that there is a valid changes_abi flag
+-- (an invalid flag may assign an invalid NOPROTO flag).
+local function processNoproto()
+	-- xxx
 end
 
 -- Once we have a good syscall, add some final information to it.
 function syscall:finalize()
-	self.noproto = config.abi_flags ~= "" and not self.changes_abi
+	if self.name == nil then
+		self.name = ""
+    end
+
     -- These may be changed by processChangesAbi(), or they'll remain empty for
     -- native.
     self.prefix = ""
     self.arg_prefix = ""
     self:processChangesAbi()
-	if self.noproto and self.type.SYSMUX then
-		-- Add the NOPROTO flag to this system call's type.
-		self.type.NOPROTO = true
-	end
+	self:processFlags()
 
     -- These need to be done before modifying self.name.
     self.cap = processCap(self.name, self.prefix, self.type) -- capability flag
     self.thr = processThr(self.type) -- thread flag
+	-- Preserve the original name as the alias.
+    self.alias = self.name
 
     -- Assign argument alias.
     if self.arg_alias == nil and self.name ~= nil then
@@ -298,9 +321,6 @@ function syscall:finalize()
     if self.name ~= nil and self.name ~= "" then
         self.name = self.prefix .. self.name
     end
-    if self.alias == nil or self.alias == "" then
-        self.alias = self.name
-    end
 end
 
 -- Interface to add this system call to the master system call table.
@@ -309,32 +329,7 @@ end
 -- Returns TRUE when ready to add and FALSE while still parsing.
 function syscall:add(line)
     if self:addDef(line) then
-        -- Cases where the syscalls.master entry is one line; we just want to
-        -- exit and add:
-        if self.name ~= "{" then
-            -- A NIL name should be written as an empty string.
-            if self.name == nil then
-                self.name = ""
-            end
-            self.alias = self.name -- set for all cases
-
-            -- This system call is a range.
-            if tonumber(self.num) == nil then
-                return true
-            -- This system call is a loadable system call.
-            elseif self.altname ~= nil and self.alttag ~= nil and
-                   self.rettype ~= nil then
-                self.cap = "0"
-                self.thr = "SY_THR_ABSENT"
-                self.arg_alias = self:symbol() .. "_args"
-                self.ret = self.rettype
-                return true
-            -- This system call is some other one line entry.
-            else
-                return true
-            end
-        end
-        return false -- Otherwise, definition added; keep going.
+		return self:isAdded(line)
     end
     if self:addFunc(line) then
         return false -- Function added; keep going.
@@ -343,6 +338,44 @@ function syscall:add(line)
         return false -- Arguments added; keep going.
     end
     return self:isAdded(line) -- Final validation, before adding.
+end
+
+-- Returns TRUE if this system call was succesfully added. There's two entry
+-- points to this function: (1) the entry in syscalls.master is one-line, or (2)
+-- the entry is a full system call. This function handles those cases and
+-- decides whether to exit early for (1) or validate a full system call for (2).
+-- This function also handles cases where we don't want to add, and instead want
+-- to abort.
+function syscall:isAdded(line)
+	-- This system call is a range - exit early.
+	if tonumber(self.num) == nil then
+		-- The only allowed types are RESERVED and UNIMPL.
+		if not (self.type.RESERVED or self.type.UNIMPL) then
+			util.abort(1, "Range only allowed with RESERVED and UNIMPL: " ..
+				line)
+		end
+		self:finalize()
+		return true
+	-- This system call is a loadable system call - exit early.
+    elseif self.altname ~= nil and self.alttag ~= nil and
+           self.rettype ~= nil then
+		self:finalize()
+		return true
+	-- This system call is only one line, and should only be one line (we didn't
+	-- make it to addFunc()) - exit early.
+	elseif self.name ~= "{"  and self.ret == nil then
+		self:finalize()
+		return true
+	-- This is a full system call and we've passed multiple states to get here -
+	-- final exit.
+	elseif self.expect_rbrace then
+	    if not line:match("}$") then
+			util.abort(1, "Expected '}' found '" .. line .. "' instead.")
+	    end
+        self:finalize()
+        return true
+    end
+    return false
 end
 
 -- Return TRUE if this system call is native.
@@ -396,7 +429,8 @@ end
 -- In syscalls.master, system calls come in two types: (1) a fully defined
 -- system call with function declaration, with a distinct number for each system
 -- call; or (2) a one-line entry, sometimes with a distinct number and sometimes
--- with a range of numbers. One-line entries are obsolete, reserved, etc.
+-- with a range of numbers. One-line entries are obsolete, reserved, etc. Ranges
+-- are only allowed for reserved and unimplemented.
 --
 -- This function provides the iterator to traverse system calls by number. If
 -- the entry is a fully defined system call with a distinct number, the iterator
@@ -436,8 +470,8 @@ function syscall:new(obj)
 
 	self.expect_rbrace = false
     self.changes_abi = false
-	self.noproto = false
 	self.args = {}
+	self.noproto = false
 
 	return obj
 end

@@ -53,7 +53,7 @@ function syscall_mk.generate(tbl, fh)
 			    gen:write(string.format("\t%s.o \\\n", v:symbol()))
             end
         -- Handle compat (everything >= FREEBSD3):
-        elseif c >= 3 and not v.type.NODEF then
+        elseif c > 3 and not v.type.NODEF then
             -- xxx do like makesyscalls.lua, it's a better way
             if idx >= size then
                 -- At last system call, no backslash.

@@ -51,7 +51,10 @@ local tbl = FreeBSDSyscall:new{sysfile = sysfile, config = config}
 syscalls.file = config.sysnames
 syscall_h.file = config.syshdr
 syscall_mk.file = config.sysmk
-init_sysent.file = config.syssw
+--init_sysent.file = config.syssw
+-- Not going to output switch table, until makesyscalls.lua has column aligning
+-- removed. Too many diffs caused by that.
+init_sysent.file = "/dev/null"
 systrace_args.file = config.systrace
 sysproto_h.file = config.sysproto
 

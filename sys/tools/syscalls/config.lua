@@ -201,10 +201,12 @@ end
 -- sys_no_abi_change. We can index those tables later for handling the system
 -- call's ABI changes.
 local function processSyscallAbiChange()
-	config.sys_abi_change = util.setFromString(
-		config.syscall_abi_change, "[^ ]+")
-	config.sys_no_abi_change = util.setFromString(
-		config.syscall_no_abi_change, "[^ ]+")
+	-- These should be merged, because we may already have non-empty tables
+	-- earlier in the call-stack.
+	util.mergeSets(config.sys_abi_change,
+		util.setFromString(config.syscall_abi_change, "[^ ]+"))
+	util.mergeSets(config.sys_no_abi_change,
+		util.setFromString(config.syscall_no_abi_change, "[^ ]+"))
 end
 
 -- Merges processed configuration file into the global config map (see above),
