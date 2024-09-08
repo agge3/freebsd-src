@@ -97,14 +97,14 @@ end
 -- target ABI.
 function syscall:processChangesAbi()
     -- First, confirm we want to uphold our changes_abi flag.
-    if config.sys_no_abi_change[self.name] then
+    if config.syscall_no_abi_change[self.name] then
         self.changes_abi = false
     end
 	self.noproto = not util.isEmpty(config.abi_flags) and not self.changes_abi
     if config.abiChanges("pointer_args") then
         for _, v in ipairs(self.args) do
             if util.isPtrType(v.type) then
-                if config.sys_no_abi_change[self.name] then
+                if config.syscall_no_abi_change[self.name] then
                     print("WARNING: " .. self.name ..
                         " in syscall_no_abi_change, but pointers args are present")
                 end
@@ -114,7 +114,7 @@ function syscall:processChangesAbi()
 	    end
 		::ptrfound::
     end
-	if config.sys_abi_change[self.name] then
+	if config.syscall_abi_change[self.name] then
 		self.changes_abi = true
 	end
     if self.changes_abi then
@@ -272,8 +272,8 @@ function syscall:addArgs(line)
         if arg:process() then
             arg:append(self.args)
         end
-		-- Grab ABI change information for this argument.
-		self.changes_abi = arg:changesAbi()
+		-- If this argument has ABI changes, set globally for this system call.
+		self.changes_abi = self.changes_abi or arg:changesAbi()
         return true
     end
     return false

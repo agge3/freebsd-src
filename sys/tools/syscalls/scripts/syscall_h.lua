@@ -43,10 +43,11 @@ function syscall_h.generate(tbl, config, fh)
 		if v.num > max then
 			max = v.num
 		end
-		if  v.type.STD or
-			v.type.NOSTD or
-			v.type.SYSMUX or
-			c >= 7 then
+		if v.type.UNIMPL then
+			goto skip
+		elseif v.type.RESERVED then
+			goto skip
+		elseif v.type.STD or v.type.NOSTD or v.type.SYSMUX or c >= 7 then
 			gen:write(string.format("#define\t%s%s%s\t%d\n",
                 config.syscallprefix, v:compatPrefix(), v.name, v.num))
 		elseif c >= 0 then
@@ -60,9 +61,8 @@ function syscall_h.generate(tbl, config, fh)
 			end
 			gen:write(string.format("\t\t\t\t/* %d is %s %s */\n",
                 v.num, comment, v.name))
-		elseif v.type.RESERVED then
-			--gen:write(string.format("\t\t\t\t/* %d is reserved */\n", v.num))
 		end
+		::skip::
 	end
 	gen:write(string.format("#define\t%sMAXSYSCALL\t%d\n",
         config.syscallprefix, max + 1))

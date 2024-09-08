@@ -19,6 +19,9 @@ local function checkAbiChanges(arg)
 	for k, v in pairs(config.known_abi_flags) do
 		if config.abiChanges(k) and v ~= nil then
 			for _, e in pairs(v) do
+				-- Trim whitespace or the indentation will mess with our
+				-- known_abi_flag patterns.
+				arg = util.trim(arg)
 				if arg:find(e) then
 					return true
 				end
@@ -39,7 +42,7 @@ end
 -- Preprocessing of this argument.
 function scarg:init()
     self.arg_abi_change = checkAbiChanges(self.scarg)
-    self.changes_abi = self.changes_abi or self.arg_abi_change
+    self.changes_abi = self.arg_abi_change
     self.scarg = stripArgAnnotations(self.scarg)
     self.scarg = util.trim(self.scarg, ',') -- trim trailing comma
     self.name = self.scarg:match("([^* ]+)$")

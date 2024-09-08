@@ -51,11 +51,9 @@ local config = {
 	mincompat = 0,
 	capenabled = {},
 	-- System calls that require ABI-specific handling
-	syscall_abi_change = "",
-	sys_abi_change = {},
+	syscall_abi_change = {},
 	-- System calls that appear to require handling, but don't
-	syscall_no_abi_change = "",
-	sys_no_abi_change = {},
+	syscall_no_abi_change = {},
 	-- Keep track of modifications if there are.
 	modifications = {},
 	-- Stores compat_sets from syscalls.conf; config.mergeCompat() instantiates.
@@ -196,19 +194,6 @@ function config.process(file)
 	return cfg
 end
 
--- Processes syscall_abi_change and syscall_no_abi_change in syscalls.conf, and
--- inserts the system call(s) as a set into sys_abi_change and
--- sys_no_abi_change. We can index those tables later for handling the system
--- call's ABI changes.
-local function processSyscallAbiChange()
-	-- These should be merged, because we may already have non-empty tables
-	-- earlier in the call-stack.
-	util.mergeSets(config.sys_abi_change,
-		util.setFromString(config.syscall_abi_change, "[^ ]+"))
-	util.mergeSets(config.sys_no_abi_change,
-		util.setFromString(config.syscall_no_abi_change, "[^ ]+"))
-end
-
 -- Merges processed configuration file into the global config map (see above),
 -- or returns NIL and a message.
 function config.merge(fh)
@@ -221,11 +206,9 @@ function config.merge(fh)
                 if k:find("abi_flags") then
                     -- Match for pipe, that's how abi_flags is formatted.
                     config[k] = util.setFromString(v, "[^|]+")
-                elseif k:find("capenabled") or
-                       k:find("sys_abi_change") or
-                       k:find("sys_no_abi_change") or
-                       k:find("obsol") or
-                       k:find("unimpl") then
+				elseif k:find("capenabled") or k:find("syscall_abi_change") or
+					k:find("syscall_no_abi_change") or k:find("obsol") or
+					k:find("unimpl") then
                     -- Match for space, that's how these are formatted.
                     config[k] = util.setFromString(v, "[^ ]+")
                 else
@@ -236,8 +219,6 @@ function config.merge(fh)
             end
             config.modifications[k] = false  -- config wasn't modified
         end
-		-- Instantiate ABI and no ABI change dictionaries.
-		processSyscallAbiChange()
     end
 end
 
