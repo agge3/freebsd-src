@@ -47,6 +47,8 @@ function syscall_h.generate(tbl, config, fh)
 			goto skip
 		elseif v.type.RESERVED then
 			goto skip
+		elseif v.type.NODEF then
+			goto skip
 		elseif v.type.STD or v.type.NOSTD or v.type.SYSMUX or c >= 7 then
 			gen:write(string.format("#define\t%s%s%s\t%d\n",
                 config.syscallprefix, v:compatPrefix(), v.name, v.num))

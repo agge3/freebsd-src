@@ -33,38 +33,31 @@ syscall.known_flags = util.set {
 -- interfere with compat numbers.
 local native = 1000000
 
---
--- Processes the thread flag for this system call.
--- RETURN: String thr, the appropriate thread flag
---
-local function processThr(type)
-    local str = "SY_THR_STATIC"
-    for k, _ in pairs(type) do
+-- Processes and assigns the appropriate thread flag for this system call.
+function syscall:processThr()
+    self.thr = "SY_THR_STATIC"
+    for k, _ in pairs(self.type) do
         if k == "NOTSTATIC" then
-            str = "SY_THR_ABSENT"
+            self.thr = "SY_THR_ABSENT"
         end
     end
-    return str
 end
 
---
--- Processes the capability flag for this system call.
--- RETURN: String cap, "SYF_CAPENABLED" for capability enabled, "0" if not
---
-local function processCap(name, prefix, type)
-    local str = "0"
-    local stripped = util.stripAbiPrefix(name, prefix)
-    if config.capenabled ~= nil and (config.capenabled[name] ~= nil or
+-- Processes and assigns the appropriate capability flag for this system call.
+-- "SYF_CAPENABLED" for capability enabled; "0" for NOT capability enabled.
+function syscall:processCap()
+    self.cap = "0"
+    local stripped = util.stripAbiPrefix(self.name, self.prefix)
+    if config.capenabled ~= nil and (config.capenabled[self.name] ~= nil or
 		config.capenabled[stripped] ~= nil) then
-        str = "SYF_CAPENABLED"
+        self.cap = "SYF_CAPENABLED"
     else
-        for k, _ in pairs(type) do
+        for k, _ in pairs(self.type) do
             if k == "CAPENABLED" then
-                str = "SYF_CAPENABLED"
+                self.cap = "SYF_CAPENABLED"
             end
         end
     end
-    return str
 end
 
 -- Check that this system call has a known type.
@@ -74,22 +67,6 @@ local function checkType(type)
             k:match("^COMPAT") then
 			util.abort(1, "Bad type: " .. k)
 		end
-	end
-end
-
-function syscall:processFlags()
-	if config.obsol[self.name] then
-		self.args = nil
-		self.type.OBSOL = true
-	end
-	if config.unimpl[self.name] then
-		self.type.UNIMPL = true
-	end
-	if self.noproto or self.type.SYSMUX then
-		self.type.NOPROTO = true
-	end
-	if self.type.NODEF then
-		self.audit = "AUE_NULL"
 	end
 end
 
@@ -117,14 +94,31 @@ function syscall:processChangesAbi()
 	if config.syscall_abi_change[self.name] then
 		self.changes_abi = true
 	end
-    if self.changes_abi then
-        self.arg_prefix = config.abi_func_prefix
-        self.prefix = config.abi_func_prefix
+	if self.changes_abi then
 		self.noproto = false
-    end
+	end
 end
 
--- XXX Incomplete/unused.
+-- Final processing of flags. Process any flags that haven't already been
+-- processed (e.g., dictionaries from syscalls.conf).
+function syscall:processFlags()
+	if config.obsol[self.name] then
+		self.args = nil
+		self.type.OBSOL = true
+		-- Don't apply any ABI handling, declared as obsolete.
+		self.changes_abi = false
+	end
+	if config.unimpl[self.name] then
+		self.type.UNIMPL = true
+	end
+	if self.noproto or self.type.SYSMUX then
+		self.type.NOPROTO = true
+	end
+	if self.type.NODEF then
+		self.audit = "AUE_NULL"
+	end
+end
+
 -- Returns TRUE if prefix and arg_prefix are assigned; FALSE if they're left
 -- unassigned. Relies on a valid changes_abi flag, so should be called AFTER
 -- processChangesAbi().
@@ -133,9 +127,9 @@ function syscall:processPrefix()
     if self.changes_abi then
         self.arg_prefix = config.abi_func_prefix
         self.prefix = config.abi_func_prefix
-        return true
-    end
-    return false
+		return true
+	end
+	return false
 end
 
 -- Validate that we're not skipping system calls by comparing this system call
@@ -174,17 +168,13 @@ end
 -- XXX Incomplete/unused.
 -- Return the comment for this system call.
 function syscall:comment()
-    --local c = self:compatLevel()
     if self.type.OBSOL then
-        return "/* obsolete " .. self.alias .. " */"
-    end
-    if self.type.RESERVED then
-        return "/* reserved for local use */"
+        return self:compatPrefix() .. self.alias
     end
     if self.type.UNIMPL then
-        return "" -- xxx
+        return self.alias
     else
-        return "/* " .. self.num .. " = " .. self.alias .. " */"
+		return self.name
     end
 end
 
@@ -196,7 +186,7 @@ end
 -- >= 4 FreeBSD version this system call was replaced with a new version
 --
 function syscall:compatLevel()
-	if self.type.UNIMPL or self.type.RESERVED or self.type.NODEF then
+	if self.type.UNIMPL or self.type.RESERVED then
 		return -1
 	elseif self.type.OBSOL then
 		return 0
@@ -279,32 +269,26 @@ function syscall:addArgs(line)
     return false
 end
 
--- XXX Incomplete/unused.
--- Decides if the NOPROTO flag should be added to this system call. Should be
--- called after processChangesAbi() so that there is a valid changes_abi flag
--- (an invalid flag may assign an invalid NOPROTO flag).
-local function processNoproto()
-	-- xxx
-end
-
 -- Once we have a good syscall, add some final information to it.
 function syscall:finalize()
 	if self.name == nil then
 		self.name = ""
     end
 
-    -- These may be changed by processChangesAbi(), or they'll remain empty for
-    -- native.
-    self.prefix = ""
-    self.arg_prefix = ""
-    self:processChangesAbi()
-	self:processFlags()
-
-    -- These need to be done before modifying self.name.
-    self.cap = processCap(self.name, self.prefix, self.type) -- capability flag
-    self.thr = processThr(self.type) -- thread flag
 	-- Preserve the original name as the alias.
     self.alias = self.name
+
+    self:processChangesAbi()	-- process changes to the ABI
+	self:processFlags()		-- process any unprocessed flags
+
+	-- If there's changes to the ABI, these prefixes will be changed by 
+	-- processPrefix(); otherwise, they'll remain empty.
+    self.prefix = ""
+    self.arg_prefix = ""
+	self:processPrefix()
+
+    self:processCap()	-- capability flag
+    self:processThr()	-- thread flag
 
     -- Assign argument alias.
     if self.arg_alias == nil and self.name ~= nil then
@@ -316,8 +300,8 @@ function syscall:finalize()
         self.arg_alias = self.arg_prefix .. self.arg_alias
     end
 
-    -- An empty string would not want a prefix; in that case we want to keep the
-    -- empty string.
+    -- An empty string would not want a prefix; the entry doesn't have a name
+	-- so we want to keep the empty string.
     if self.name ~= nil and self.name ~= "" then
         self.name = self.prefix .. self.name
     end
@@ -382,8 +366,7 @@ end
 -- NOTE: The other system call names are also treated as native, so that's why
 -- they're being allowed in here.
 function syscall:native()
-    return self:compatLevel() == native or self.name == "lkmnosys" or
-           self.name == "sysarch"
+    return self:compatLevel() == native
 end
 
 -- Make a shallow copy of `self` and replace the system call number with num
