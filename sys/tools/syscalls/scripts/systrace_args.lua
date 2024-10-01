@@ -37,6 +37,7 @@ function systrace_args.generate(tbl, config, fh)
 
 	-- Write the generated preamble.
 	gen:preamble("System call argument to DTrace register array converstion.\n"
+				  .. "\n"
 				  .. "This file is part of the DTrace syscall provider.")
 
 	gen:write(string.format([[
