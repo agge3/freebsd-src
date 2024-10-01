@@ -69,16 +69,16 @@ end
 --
 function generator:preamble(str, comment)
 	local comment_start = comment or "/*"
-	local comment_middle = comment or "*"
-	local comment_end = comment or "*/"
+	local comment_middle = comment or " *"
+	local comment_end = comment or " */"
 
 	-- Don't enter loop if it's the simple case.
 	if str:find("\n") == nil then
 		self:write(string.format([[%s
- %s %s
- %s
- %s DO NOT EDIT-- this file is automatically %s.
- %s
+%s %s
+%s
+%s DO NOT EDIT-- this file is automatically %s.
+%s
 
 ]], comment_start, comment_middle, str, comment_middle, comment_middle,
 			self.tag, comment_end))
@@ -86,17 +86,21 @@ function generator:preamble(str, comment)
 	-- For multi-line comments - expects newline as delimiter.
 	else
 		self:write(string.format("%s\n", comment_start)) -- "/*"
-		for line in str:gmatch("[^\n]+") do
-			if line ~= nil then
-				-- Write each line with proper comment indentation (strip
-				-- newline), and tag a newline to the end.
-				self:write(string.format(" %s %s\n", comment_middle, line))
+		for line in str:gmatch("[^\n]*") do
+			local space
+			if line ~= "" then
+				space = " "
+			else
+				space = ""
 			end
+			-- Write each line with proper comment indentation (strip
+			-- newline), and tag a newline to the end.
+			self:write(string.format("%s%s%s\n", comment_middle, space,  line))
 		end
 		-- Continue as normal...
-		self:write(string.format([[ %s
- %s DO NOT EDIT-- this file is automatically %s
- %s
+		self:write(string.format([[%s
+%s DO NOT EDIT-- this file is automatically %s.
+%s
 
 ]], comment_middle, comment_middle, self.tag, comment_end))
 	end
