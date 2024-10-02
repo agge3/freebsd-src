@@ -118,6 +118,27 @@ function util.is64bitType(type)
 end
 
 --
+-- Returns the name of the struct pointed to by the argument or nil.
+--
+-- PARAM: type, the type to check
+--
+function util.structName(type)
+	if util.isPtrType(type) then
+		local is_struct = false
+		for word in type:gmatch("[^ *]+") do
+			if is_struct then
+				return word
+			end
+			if word == "struct" then
+				-- next word is the struct name
+				is_struct = true
+			end
+		end
+	end
+	return nil
+end
+
+--
 -- Strip the ABI function prefix if it exists (e.g., "freebsd32_").
 --
 -- RETURN: The original function name, or the function name with the ABI prefix

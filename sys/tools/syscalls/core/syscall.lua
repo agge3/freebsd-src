@@ -308,6 +308,7 @@ function syscall:finalize()
 		self.name = self.prefix .. self.name
 	end
 
+	self:processArgstrings()
 	self:processArgsize()
 end
 
@@ -321,6 +322,30 @@ function syscall:processArgsize()
 	else
 		self.args_size = "0"
 	end
+end
+
+-- Constructs argstr_* strings for generated declerations/wrappers
+function syscall:processArgstrings()
+	local type = ""
+	local type_var = ""
+	local var = ""
+	local comma = ""
+
+	for _, v in ipairs(self.args) do
+		local argname, argtype = v.name, v.type
+		type = type .. comma .. argtype
+		type_var = type_var .. comma .. argtype ..  " " .. argname
+		var = var .. comma .. argname
+		comma = ", "
+	end
+	if type == "" then
+		type = "void"
+		type_var = "void"
+	end
+
+	self.argstr_type = type
+	self.argstr_type_var = type_var
+	self.argstr_var = var
 end
 
 -- Interface to add this system call to the master system call table.

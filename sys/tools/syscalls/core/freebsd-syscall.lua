@@ -110,6 +110,21 @@ function FreeBSDSyscall:parseSysfile()
 	self.defines = defs
 end
 
+function FreeBSDSyscall:findStructs()
+	self.structs = {}
+
+	for _, s in pairs(self.syscalls) do
+		if s:native() and not s.type.NODEF then
+			for _, v in ipairs(s.args) do
+				local name = util.structName(v.type)
+				if name ~= nil then
+					self.structs[name] = name
+				end
+			end
+		end
+	end
+end
+
 function FreeBSDSyscall:new(obj)
 	obj = obj or {}
 	setmetatable(obj, self)
@@ -117,6 +132,7 @@ function FreeBSDSyscall:new(obj)
 
 	obj:processCompat()
 	obj:parseSysfile()
+	obj:findStructs()
 
 	return obj
 end
