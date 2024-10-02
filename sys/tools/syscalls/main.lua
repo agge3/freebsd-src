@@ -22,12 +22,12 @@ local config = require("config")
 local FreeBSDSyscall = require("core.freebsd-syscall")
 
 -- Modules for each file:
-local syscalls = require("scripts.syscalls")
+local init_sysent = require("scripts.init_sysent")
 local syscall_h = require("scripts.syscall_h")
 local syscall_mk = require("scripts.syscall_mk")
-local init_sysent = require("scripts.init_sysent")
-local systrace_args = require("scripts.systrace_args")
+local syscalls = require("scripts.syscalls")
 local sysproto_h = require("scripts.sysproto_h")
+local systrace_args = require("scripts.systrace_args")
 
 -- Entry
 if #arg < 1 or #arg > 2 then
@@ -43,16 +43,16 @@ config.mergeCapability()
 local tbl = FreeBSDSyscall:new{sysfile = sysfile, config = config}
 
 -- Output files
-syscalls.file = config.sysnames
+init_sysent.file = config.syssw
 syscall_h.file = config.syshdr
 syscall_mk.file = config.sysmk
-init_sysent.file = config.syssw
-systrace_args.file = config.systrace
+syscalls.file = config.sysnames
 sysproto_h.file = config.sysproto
+systrace_args.file = config.systrace
 
-syscalls.generate(tbl, config, syscalls.file)
+init_sysent.generate(tbl, config, init_sysent.file)
 syscall_h.generate(tbl, config, syscall_h.file)
 syscall_mk.generate(tbl, syscall_mk.file)
-init_sysent.generate(tbl, config, init_sysent.file)
-systrace_args.generate(tbl, config, systrace_args.file)
+syscalls.generate(tbl, config, syscalls.file)
 sysproto_h.generate(tbl, config, sysproto_h.file)
+systrace_args.generate(tbl, config, systrace_args.file)
