@@ -26,6 +26,7 @@ local init_sysent = require("scripts.init_sysent")
 local syscall_h = require("scripts.syscall_h")
 local syscall_mk = require("scripts.syscall_mk")
 local syscalls = require("scripts.syscalls")
+local syscalls_map = require("scripts.syscalls_map")
 local sysproto_h = require("scripts.sysproto_h")
 local systrace_args = require("scripts.systrace_args")
 
@@ -47,6 +48,7 @@ init_sysent.file = config.syssw
 syscall_h.file = config.syshdr
 syscall_mk.file = config.sysmk
 syscalls.file = config.sysnames
+syscalls_map.file = config.libsysmap
 sysproto_h.file = config.sysproto
 systrace_args.file = config.systrace
 
@@ -54,5 +56,6 @@ init_sysent.generate(tbl, config, init_sysent.file)
 syscall_h.generate(tbl, config, syscall_h.file)
 syscall_mk.generate(tbl, syscall_mk.file)
 syscalls.generate(tbl, config, syscalls.file)
+syscalls_map.generate(tbl, config, syscalls_map.file)
 sysproto_h.generate(tbl, config, sysproto_h.file)
 systrace_args.generate(tbl, config, systrace_args.file)
