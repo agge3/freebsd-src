@@ -103,7 +103,7 @@ end
 -- PARAM: abi, nil or optional ABI-specified intptr_t.
 --
 function util.isPtrType(type, abi)
-	local default = "intptr_t" or abi
+	local default = abi or "intptr_t"
 	return type:find("*") or type:find("caddr_t") or type:find(default)
 end
 
