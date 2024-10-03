@@ -102,7 +102,8 @@ end
 -- Final processing of flags. Process any flags that haven't already been
 -- processed (e.g., dictionaries from syscalls.conf).
 function syscall:processFlags()
-	if config.obsol[self.name] then
+	if config.obsol[self.name] or (self:compatLevel() > 0 and
+	    self:compatLevel() < tonumber(config.mincompat)) then
 		self.args = nil
 		self.type.OBSOL = true
 		-- Don't apply any ABI handling, declared as obsolete.
