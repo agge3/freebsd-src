@@ -119,7 +119,8 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 							"#define _P_ 0\n#else\n#define _P_ 1\n#endif\n", 1)
 					end
 
-					if util.isPtrType(argtype) then
+					if util.isPtrType(argtype,
+					    config.abi_intptr_t) then
 						gen:write(string.format(
 							"\t\tuarg[a++] = (%s)p->%s; /* %s */\n",
 							config.ptr_intptr_t_cast, arg.name, argtype))
