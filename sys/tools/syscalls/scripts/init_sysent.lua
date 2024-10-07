@@ -23,11 +23,6 @@ local generator = require("tools.generator")
 -- null
 init_sysent.file = "/dev/null"
 
--- Should be the same as makesyscalls.lua generates, except that we don't bother
--- to align the system call stuff... it's badly broken anyway and looks like crap
--- so we're declaring that a bug and removing all that crazy book-keeping to.
--- If we need to do it, and I hope we don't, I'll just create a string and do
--- #str to figure out how many tabs to add
 function init_sysent.generate(tbl, config, fh)
 	-- Grab the master system calls table.
 	local s = tbl.syscalls
@@ -66,44 +61,41 @@ struct sysent %s[] = {
 
 	for _, v in pairs(s) do
 		local c = v:compatLevel()
-		-- Comment is the function alias by default, but may change based on the
+		-- Comment is the function name by default, but may change based on the
 		-- type of system call.
 		local comment = v.name
-		-- Creating a string first, to allow lengthing the string to align
-		-- comments.
-		local str
 
 		-- Handle non-compat:
 		if v:native() then
-			str = string.format(
+			gen:write(string.format(
 				"\t{ .sy_narg = %s, .sy_call = (sy_call_t *)",
-				v.args_size)
+				v.args_size))
 			-- Handle SYSMUX flag:
 			if v.type.SYSMUX then
-				str = str .. string.format(
+				gen:write(string.format(
 					"nosys, .sy_auevent = AUE_NULL, " ..
 					".sy_flags = %s, .sy_thrcnt = SY_THR_STATIC },",
-					v.cap)
+					v.cap))
 			-- Handle NOSTD flag:
 			elseif v.type.NOSTD then
-				str = str .. string.format(
+				gen:write(string.format(
 					"lkmressys, .sy_auevent = AUE_NULL, " ..
 					".sy_flags = %s, .sy_thrcnt = SY_THR_ABSENT },",
-					v.cap)
+					v.cap))
 			-- Handle rest of non-compat:
 			else
 				if v.name == "nosys" or v.name == "lkmnosys" or
 				   v.name == "sysarch" or v.name:find("^freebsd") or
 				   v.name:find("^linux") then
-					str = str .. string.format(
+					gen:write(string.format(
 						"%s, .sy_auevent = %s, .sy_flags = %s, " ..
 						".sy_thrcnt = %s },",
-						v:symbol(), v.audit, v.cap, v.thr)
+						v:symbol(), v.audit, v.cap, v.thr))
 				else
-					str = str .. string.format(
+					gen:write(string.format(
 						"sys_%s, .sy_auevent = %s, .sy_flags = %s, " ..
 						".sy_thrcnt = %s },",
-						v:symbol(), v.audit, v.cap, v.thr)
+						v:symbol(), v.audit, v.cap, v.thr))
 				end
 			end
 
@@ -121,49 +113,42 @@ struct sysent %s[] = {
 			end
 
 			if v.type.NOSTD then
-				str = string.format(
+				gen:write(string.format(
 					"\t{ .sy_narg = %s, .sy_call = (sy_call_t *)%s, " ..
 					".sy_auevent = %s, .sy_flags = 0, " ..
 					".sy_thrcnt = SY_THR_ABSENT },",
-					"0", "lkmressys", "AUE_NULL")
+					"0", "lkmressys", "AUE_NULL"))
 			else
-				str = string.format(
+				gen:write(string.format(
 					"\t{ %s(%s,%s), .sy_auevent = %s, .sy_flags = %s, " ..
 					".sy_thrcnt = %s },",
-					flag, v.args_size, v.name, v.audit, v.cap, v.thr)
+					flag, v.args_size, v.name, v.audit, v.cap, v.thr))
 			end
 			comment = descr .. " " .. v.name
 
 		-- Handle obsolete:
 		elseif v.type.OBSOL then
-			str = "\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
+			gen:write("\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
 				".sy_auevent = AUE_NULL, .sy_flags = 0, " ..
-				".sy_thrcnt = SY_THR_ABSENT },"
+				".sy_thrcnt = SY_THR_ABSENT },")
 			comment = "obsolete " .. v.name
 
 		-- Handle unimplemented:
 		elseif v.type.UNIMPL then
-			str = "\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
+			gen:write("\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
 				".sy_auevent = AUE_NULL, .sy_flags = 0, " ..
-				".sy_thrcnt = SY_THR_ABSENT },"
+				".sy_thrcnt = SY_THR_ABSENT },")
 			-- UNIMPL comment is not different in sysent.
 
 		-- Handle reserved:
 		elseif v.type.RESERVED then
-			str = "\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
+			gen:write("\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
 				".sy_auevent = AUE_NULL, .sy_flags = 0, " ..
-				".sy_thrcnt = SY_THR_ABSENT },"
+				".sy_thrcnt = SY_THR_ABSENT },")
 			comment = "reserved for local use"
 		end
 
-		-- If string is NIL, we don't write.
-		if str ~= nil then
-			-- Append the comment. Comments are not aligned; they're just tabbed
-			-- from the end.
-			str = str .. string.format("\t/* %d = %s */\n", v.num, comment)
-			-- Finally, write out the string we've built up.
-			gen:write(str)
-		end
+		gen:write(string.format("\t/* %d = %s */\n", v.num, comment))
 	end
 
 	-- End

@@ -1,6 +1,7 @@
 --
 -- SPDX-License-Identifier: BSD-2-Clause
 --
+-- Copyright (c) 2021-2024 SRI International
 -- Copyright (c) 2024 Tyler Baxter <agge@FreeBSD.org>
 -- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>

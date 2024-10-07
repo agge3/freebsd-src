@@ -1,6 +1,7 @@
 --
 -- SPDX-License-Identifier: BSD-2-Clause
 --
+-- Copyright (c) 2021-2024 SRI International
 -- Copyright (c) 2024 Tyler Baxter <agge@FreeBSD.org>
 -- Copyright (c) 2023 Warner Losh <imp@bsdimp.com>
 -- Copyright (c) 2019 Kyle Evans <kevans@FreeBSD.org>
@@ -37,17 +38,26 @@ local function stripArgAnnotations(arg)
 end
 
 -- Preprocessing of this argument.
-function scarg:init()
+function scarg:init(line)
 	-- Trim whitespace and trailing comma. We don't want them here; these can
 	-- mess with our processing of this argument.
-	self.scarg = util.trim(self.scarg)
-	self.scarg = util.trim(self.scarg, ',')
+	line = util.trim(line)	-- This provides a clearer abort error.
+	self.scarg = util.trim(line, ',')
 
 	self.arg_abi_change = checkAbiChanges(self.scarg)
 	self.changes_abi = self.arg_abi_change
 	self.scarg = stripArgAnnotations(self.scarg)
+	
 	self.name = self.scarg:match("([^* ]+)$")
-	self.type = util.trim(self.scarg:gsub(self.name .. "$", ""), nil)
+	-- Our pattern might produce a Lua escape sequence; that's a malformed 
+	-- declaration.
+	local status, type = pcall(function()
+		return util.trim(self.scarg:gsub(self.name .. "$", ""), nil)
+	end)
+	if not status then
+		util.abort(1, "Malformed argument line: " .. line)
+	end
+	self.type = type
 end
 
 -- Processes this argument.
@@ -139,13 +149,12 @@ function scarg:new(obj, line)
 	setmetatable(obj, self)
 	self.__index = self
 
-	self.scarg = line
 	-- ABI changes that we only want in this scope.
 	self.arg_abi_change = false
 	-- ABI changes that we want the system call object to see.
 	self.changes_abi = false
 
-	obj:init()
+	obj:init(line)
 
 	return obj
 end

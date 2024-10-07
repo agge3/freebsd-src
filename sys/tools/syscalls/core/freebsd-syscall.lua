@@ -66,8 +66,6 @@ function FreeBSDSyscall:parseSysfile()
 				end
 				s = nil
 			end
-		elseif line:match("^%s*%$") then
-			goto skip	-- Obsolete $FreeBSD$ tag, skip this line.
 		elseif line:match("^#%s*include") then
 			incs = incs .. line .. "\n"
 		elseif line:match("%%ABI_HEADERS%%") then
