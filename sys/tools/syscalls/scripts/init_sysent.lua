@@ -67,18 +67,18 @@ struct sysent %s[] = {
 
 		-- Handle non-compat:
 		if v:native() then
-			gen.write(string.format(
+			gen:write(string.format(
 				"\t{ .sy_narg = %s, .sy_call = (sy_call_t *)",
 				v.args_size))
 			-- Handle SYSMUX flag:
 			if v.type.SYSMUX then
-				gen.write(string.format(
+				gen:write(string.format(
 					"nosys, .sy_auevent = AUE_NULL, " ..
 					".sy_flags = %s, .sy_thrcnt = SY_THR_STATIC },",
 					v.cap))
 			-- Handle NOSTD flag:
 			elseif v.type.NOSTD then
-				gen.write(string.format(
+				gen:write(string.format(
 					"lkmressys, .sy_auevent = AUE_NULL, " ..
 					".sy_flags = %s, .sy_thrcnt = SY_THR_ABSENT },",
 					v.cap))
@@ -87,12 +87,12 @@ struct sysent %s[] = {
 				if v.name == "nosys" or v.name == "lkmnosys" or
 				   v.name == "sysarch" or v.name:find("^freebsd") or
 				   v.name:find("^linux") then
-					gen.write(string.format(
+					gen:write(string.format(
 						"%s, .sy_auevent = %s, .sy_flags = %s, " ..
 						".sy_thrcnt = %s },",
 						v:symbol(), v.audit, v.cap, v.thr))
 				else
-					gen.write(string.format(
+					gen:write(string.format(
 						"sys_%s, .sy_auevent = %s, .sy_flags = %s, " ..
 						".sy_thrcnt = %s },",
 						v:symbol(), v.audit, v.cap, v.thr))
@@ -113,13 +113,13 @@ struct sysent %s[] = {
 			end
 
 			if v.type.NOSTD then
-				gen.write(string.format(
+				gen:write(string.format(
 					"\t{ .sy_narg = %s, .sy_call = (sy_call_t *)%s, " ..
 					".sy_auevent = %s, .sy_flags = 0, " ..
 					".sy_thrcnt = SY_THR_ABSENT },",
 					"0", "lkmressys", "AUE_NULL"))
 			else
-				gen.wirte(string.format(
+				gen:write(string.format(
 					"\t{ %s(%s,%s), .sy_auevent = %s, .sy_flags = %s, " ..
 					".sy_thrcnt = %s },",
 					flag, v.args_size, v.name, v.audit, v.cap, v.thr))
@@ -128,27 +128,27 @@ struct sysent %s[] = {
 
 		-- Handle obsolete:
 		elseif v.type.OBSOL then
-			gen.write("\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
+			gen:write("\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
 				".sy_auevent = AUE_NULL, .sy_flags = 0, " ..
 				".sy_thrcnt = SY_THR_ABSENT },")
 			comment = "obsolete " .. v.name
 
 		-- Handle unimplemented:
 		elseif v.type.UNIMPL then
-			gen.write("\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
+			gen:write("\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
 				".sy_auevent = AUE_NULL, .sy_flags = 0, " ..
 				".sy_thrcnt = SY_THR_ABSENT },")
 			-- UNIMPL comment is not different in sysent.
 
 		-- Handle reserved:
 		elseif v.type.RESERVED then
-			gen.write("\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
+			gen:write("\t{ .sy_narg = 0, .sy_call = (sy_call_t *)nosys, " ..
 				".sy_auevent = AUE_NULL, .sy_flags = 0, " ..
 				".sy_thrcnt = SY_THR_ABSENT },")
 			comment = "reserved for local use"
 		end
 
-		gen.write(string.format("\t/* %d = %s */\n", v.num, comment))
+		gen:write(string.format("\t/* %d = %s */\n", v.num, comment))
 	end
 
 	-- End
