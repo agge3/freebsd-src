@@ -107,10 +107,11 @@ struct thread;
 							gen:write("#ifdef PAD64_REQUIRED\n")
 						end
 						gen:write(string.format(
-							"\tchar %s_l_[PADL_(%s)]; %s %s; char %s_r_[PADR_(%s)];\n",
-							arg.name, arg.type,
-							arg.type, arg.name,
-							arg.name, arg.type))
+						    "\tchar %s_l_[PADL_(%s)]; %s %s; " ..
+						    "char %s_r_[PADR_(%s)];\n",
+						    arg.name, arg.type,
+						    arg.type, arg.name,
+						    arg.name, arg.type))
 						if arg.type == "int" and arg.name == "_pad" and
 						   config.abiChanges("pair_64bit") then
 							gen:write("#endif\n")
@@ -119,8 +120,8 @@ struct thread;
 					gen:write("};\n")
 				else
 					gen:write(string.format(
-						"struct %s {\n\tsyscallarg_t dummy;\n};\n",
-						v.arg_alias))
+					    "struct %s {\n\tsyscallarg_t dummy;\n};\n",
+					    v.arg_alias))
 				end
 			end
 			if not v.type.NOPROTO and not v.type.NODEF then
@@ -131,10 +132,10 @@ struct thread;
 					sys_prefix = ""
 				end
 				gen:store(string.format(
-					"%s\t%s%s(struct thread *, struct %s *);\n",
-					v.rettype, sys_prefix, v.name, v.arg_alias), 1)
+				    "%s\t%s%s(struct thread *, struct %s *);\n",
+				    v.rettype, sys_prefix, v.name, v.arg_alias), 1)
 				gen:store(string.format("#define\t%sAUE_%s\t%s\n",
-					config.syscallprefix, v:symbol(), v.audit), audit_idx)
+				    config.syscallprefix, v:symbol(), v.audit), audit_idx)
 			end
 
 		-- Handle compat (everything >= FREEBSD3):
@@ -146,27 +147,27 @@ struct thread;
 					gen:store(string.format("struct %s {\n", v.arg_alias), idx)
 					for _, arg in ipairs(v.args) do
 						gen:store(string.format(
-							"\tchar %s_l_[PADL_(%s)]; %s %s; " ..
-							"char %s_r_[PADR_(%s)];\n",
-							arg.name, arg.type,
-							arg.type, arg.name,
-							arg.name, arg.type), idx)
-					 end
-					 gen:store("};\n", idx)
+						    "\tchar %s_l_[PADL_(%s)]; %s %s; " ..
+						    "char %s_r_[PADR_(%s)];\n",
+						    arg.name, arg.type,
+						    arg.type, arg.name,
+						    arg.name, arg.type), idx)
+					end
+					gen:store("};\n", idx)
 				else
-					 -- Not stored, written on the first run.
-					 gen:write(string.format(
-						 "struct %s {\n\tsyscallarg_t dummy;\n};\n",
-						 v.arg_alias))
+					-- Not stored, written on the first run.
+					gen:write(string.format(
+					    "struct %s {\n\tsyscallarg_t dummy;\n};\n",
+					    v.arg_alias))
 				end
 			end
 			if not v.type.NOPROTO and not v.type.NODEF then
 				gen:store(string.format(
-					"%s\t%s%s(struct thread *, struct %s *);\n",
-					v.rettype, v:compatPrefix(), v.name, v.arg_alias), idx + 1)
+				    "%s\t%s%s(struct thread *, struct %s *);\n",
+				    v.rettype, v:compatPrefix(), v.name, v.arg_alias), idx + 1)
 				gen:store(string.format(
-					"#define\t%sAUE_%s%s\t%s\n", config.syscallprefix,
-					v:compatPrefix(), v.name, v.audit), audit_idx)
+				    "#define\t%sAUE_%s%s\t%s\n", config.syscallprefix,
+				    v:compatPrefix(), v.name, v.audit), audit_idx)
 			end
 		end
 		-- Do nothing for obsolete, unimplemented, and reserved.

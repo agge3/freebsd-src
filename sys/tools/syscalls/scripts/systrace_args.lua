@@ -48,6 +48,7 @@ systrace_args(int sysnum, void *params, uint64_t *uarg, int *n_args)
 	int a = 0;
 	switch (sysnum) {
 ]]))
+
 	gen:store(string.format([[
 static void
 systrace_entry_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
@@ -55,6 +56,7 @@ systrace_entry_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 	const char *p = NULL;
 	switch (sysnum) {
 ]]), 1)
+
 	gen:store(string.format([[
 static void
 systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
@@ -88,8 +90,8 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 			if #v.args > 0 and not v.type.SYSMUX then
 				local padding = ""
 
-				gen:write(string.format(
-					"\t\tstruct %s *p = params;\n", v.arg_alias))
+				gen:write(string.format("\t\tstruct %s *p = params;\n",
+				    v.arg_alias))
 				gen:store("\t\tswitch (ndx) {\n", 1)
 
 				for idx, arg in ipairs(v.args) do
@@ -109,29 +111,29 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 					end
 
 					gen:store(string.format(
-						"\t\tcase %d%s:\n\t\t\tp = \"%s\";\n\t\t\tbreak;\n",
-						idx - 1, padding, desc), 1)
+					    "\t\tcase %d%s:\n\t\t\tp = \"%s\";\n\t\t\tbreak;\n",
+					    idx - 1, padding, desc), 1)
 
 					if argtype == "int" and arg.name == "_pad" and
 					   config.abiChanges("pair_64bit") then
 						padding = " - _P_"
 						gen:store(
-							"#define _P_ 0\n#else\n#define _P_ 1\n#endif\n", 1)
+						    "#define _P_ 0\n#else\n#define _P_ 1\n#endif\n", 1)
 					end
 
 					if util.isPtrType(argtype,
 					    config.abi_intptr_t) then
 						gen:write(string.format(
-							"\t\tuarg[a++] = (%s)p->%s; /* %s */\n",
-							config.ptr_intptr_t_cast, arg.name, argtype))
+						    "\t\tuarg[a++] = (%s)p->%s; /* %s */\n",
+						    config.ptr_intptr_t_cast, arg.name, argtype))
 					elseif argtype == "union l_semun" then
 						gen:write(string.format(
-							"\t\tuarg[a++] = p->%s.buf; /* %s */\n",
-							arg.name, argtype))
+						    "\t\tuarg[a++] = p->%s.buf; /* %s */\n",
+						    arg.name, argtype))
 					elseif argtype:sub(1,1) == "u" or argtype == "size_t" then
 						gen:write(string.format(
-							"\t\tuarg[a++] = p->%s; /* %s */\n",
-							arg.name, argtype))
+						    "\t\tuarg[a++] = p->%s; /* %s */\n",
+						    arg.name, argtype))
 					else
 						if argtype == "int" and arg.name == "_pad" and
 						   config.abiChanges("pair_64bit") then
@@ -139,8 +141,8 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 						end
 
 						gen:write(string.format(
-							"\t\tiarg[a++] = p->%s; /* %s */\n",
-							arg.name, argtype))
+						    "\t\tiarg[a++] = p->%s; /* %s */\n",
+						    arg.name, argtype))
 
 						if argtype == "int" and arg.name == "_pad" and
 						   config.abiChanges("pair_64bit") then
@@ -162,8 +164,8 @@ systrace_return_setargdesc(int sysnum, int ndx, char *desc, size_t descsz)
 ]], v.ret), 2)
 		end
 
-		gen:write(string.format(
-			"\t\t*n_args = %d;\n\t\tbreak;\n\t}\n", n_args))
+		gen:write(string.format("\t\t*n_args = %d;\n\t\tbreak;\n\t}\n",
+		    n_args))
 		gen:store("\t\tbreak;\n", 1)
 
 		-- Handle compat (everything >= FREEBSD3):

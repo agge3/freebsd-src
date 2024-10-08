@@ -83,7 +83,7 @@ function syscall:processChangesAbi()
 			if util.isPtrType(v.type, config.abi_intptr_t) then
 				if config.syscall_no_abi_change[self.name] then
 					print("WARNING: " .. self.name ..
-						" in syscall_no_abi_change, but pointers args are present")
+					    " in syscall_no_abi_change, but pointers args are present")
 				end
 				self.changes_abi = true
 				goto ptrfound
