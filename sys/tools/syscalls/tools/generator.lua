@@ -59,45 +59,34 @@ function generator:writeStorage()
 end
 
 --
--- Writes the generated tag. Default comment is C comments.
+-- Writes the generated preamble. Default comment is C comments.
 --
--- PARAM: String str, the title of the file
+-- PARAM: String str, the title for the file.
 --
--- PARAM: String comment, nil or optional to change comment (e.g., to sh comments).
--- Will still follow C-style indentation.
+-- PARAM: String comment, nil or optional to change comment (e.g., to sh
+-- comments).
+--
 -- SEE: style(9)
 --
 function generator:preamble(str, comment)
-	local comment_start = comment or "/*"
-	local comment_middle = comment or " *"
-	local comment_end = comment or " */"
-
-	-- Don't enter loop if it's the simple case.
-	if str:find("\n") == nil then
-		self:write(string.format([[%s
-%s %s
-%s
-%s DO NOT EDIT-- this file is automatically %s.
-%s
-
-]], comment_start, comment_middle, str, comment_middle, comment_middle,
-			self.tag, comment_end))
-
-	-- For multi-line comments - expects newline as delimiter.
-	else
-		self:write(string.format("%s\n", comment_start)) -- "/*"
+	if str ~= nil then
+		local comment_start = comment or "/*"
+		local comment_middle = comment or " *"
+		local comment_end = comment or " */"
+		self:write(string.format("%s\n", comment_start))
+		-- Splits our string into lines split by newline, or is just the
+		-- original string if there's no newlines.
 		for line in str:gmatch("[^\n]*") do
+			-- Only add a space after the comment if there's text on this line.
 			local space
 			if line ~= "" then
 				space = " "
 			else
 				space = ""
 			end
-			-- Write each line with proper comment indentation (strip
-			-- newline), and tag a newline to the end.
-			self:write(string.format("%s%s%s\n", comment_middle, space,  line))
+			-- Make sure to append the newline back.
+			self:write(string.format("%s%s%s\n", comment_middle, space, line))
 		end
-		-- Continue as normal...
 		self:write(string.format([[%s
 %s DO NOT EDIT-- this file is automatically %s.
 %s
