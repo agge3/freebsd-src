@@ -219,8 +219,9 @@ function config.merge(fh)
 				end
 				-- Construct config modified table as config is processed.
 				config.modifications[k] = true
+			else
+				config.modifications[k] = false  -- config wasn't modified
 			end
-			config.modifications[k] = false  -- config wasn't modified
 		end
 	end
 end
