@@ -58,6 +58,19 @@ function util.set(t)
 	return s
 end
 
+-- Splits pointers that are next to their operand into a string that has a
+-- space between the pointer and its operand.
+function util.splitPointer(s)
+	if s:sub(1,1) == "*" then
+		s = s .. " "
+	end
+	while s:sub(1,1) == "*" do
+		s = s:sub(2)
+		s = s .. "*"
+	end
+	return s
+end
+
 --
 -- Returns a set.
 --

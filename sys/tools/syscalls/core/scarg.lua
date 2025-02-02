@@ -29,12 +29,31 @@ local function checkAbiChanges(arg)
 	return false
 end
 
--- Strips the Microsoft(R) SAL annotations from this argument.
-local function stripArgAnnotations(arg)
-	arg = arg:gsub("_Contains_[^ ]*[_)] ?", "")
-	arg = arg:gsub("_In[^ ]*[_)] ?", "")
-	arg = arg:gsub("_Out[^ ]*[_)] ?", "")
-	return util.trim(arg)
+-- Strips the Microsoft(R) SAL annotations from this argument and stores them
+-- in `scarg.sal`.
+function scarg:processArgAnnotations()
+	self.sal = {}
+
+	-- Extract SAL in the order they appear in this argument's `syscalls.master`
+	-- definition.
+	self.scarg = self.scarg:gsub("_In[^ ]*[_)] ?", function(match)
+		table.insert(self.sal, match)
+		return ""
+	end)
+
+	self.scarg = self.scarg:gsub("_Out[^ ]*[_)] ?", function(match)
+		table.insert(self.sal, match)
+		return ""
+	end)
+
+	self.scarg = self.scarg:gsub("_Contains_[^ ]*[_)] ?", function(match)
+		table.insert(self.sal, match)
+		return ""
+	end)
+
+	for _, v in pairs(self.sal) do
+		v = util.trim(v)
+	end
 end
 
 -- Preprocessing of this argument.
@@ -46,7 +65,8 @@ function scarg:init(line)
 
 	self.arg_abi_change = checkAbiChanges(self.scarg)
 	self.changes_abi = self.arg_abi_change
-	self.scarg = stripArgAnnotations(self.scarg)
+	self:processArgAnnotations()
+	self.scarg = util.trim(self.scarg)
 
 	self.name = self.scarg:match("([^* ]+)$")
 	-- Our pattern might produce a Lua pattern sequence; that's a malformed
@@ -126,15 +146,18 @@ function scarg:append(tbl)
 		table.insert(tbl, {
 			type = "uint32_t",
 			name = self.name .. "1",
+			sal = self.sal
 		})
 		table.insert(tbl, {
 			type = "uint32_t",
 			name = self.name .. "2",
+			sal = self.sal
 		})
 	else
 		table.insert(tbl, {
 			type = self.type,
 			name = self.name,
+			sal = self.sal
 		})
 	end
 end
