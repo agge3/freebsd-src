@@ -16,13 +16,11 @@ scret.__index = scret
 function scret:process()
 	local words = util.split(self.scret, "%S+")
 	self.scret = words[1]
-	-- Pointer incoming.
-	if words[2]:sub(1,1) == "*" then
-		self.scret = self.scret .. " "
-	end
-	while words[2]:sub(1,1) == "*" do
-		words[2] = words[2]:sub(2)
-		self.scret = self.scret .. "*"
+	if words[2]:find("%*") then
+		local s1, s2 = util.splitPointer(words[2])
+		-- We want to retrieve `void *foo` as `void *`, for any amount of
+		-- pointers.
+		self.scret = self.scret .. " " .. s1
 	end
 end
 

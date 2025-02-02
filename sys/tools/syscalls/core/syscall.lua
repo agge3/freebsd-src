@@ -487,6 +487,7 @@ function syscall:new(obj)
 	self.expect_rbrace = false
 	self.changes_abi = false
 	self.args = {}
+	self.sal = {}
 	self.noproto = false
 
 	return obj

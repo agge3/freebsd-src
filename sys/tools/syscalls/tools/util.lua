@@ -58,6 +58,20 @@ function util.set(t)
 	return s
 end
 
+-- Splits pointers that are next to their operand into a string that has a
+-- space between the pointer and its operand.
+function util.splitPointer(s)
+	-- Pointer(s) at beginning.
+	if s:match("^%*+%S+$") then
+		local p, str = s:match("(%*+)(%S+)")
+		return p, str
+	-- Pointer(s) at end.
+	elseif s:match("%S+%*+$") then
+		local str, p = s:match("(%S+)(%*+)")
+		return str, p
+	end
+end
+
 --
 -- Returns a set.
 --
