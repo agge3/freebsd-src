@@ -61,14 +61,17 @@ end
 -- Splits pointers that are next to their operand into a string that has a
 -- space between the pointer and its operand.
 function util.splitPointer(s)
-	if s:sub(1,1) == "*" then
-		s = s .. " "
+	-- Pointer(s) at beginning.
+	if s:match("^%*+%S+$") then
+		--print("XXX BEGIN BEFORE: " .. s)
+		local p, str = s:match("(%*+)(%S+)")
+		--print("XXX BEGIN AFTER: " .. p .. " " .. str)
+		return p, str
+	-- Pointer(s) at end.
+	elseif s:match("%S+%*+$") then
+		local str, p = s:match("(%S+)(%*+)")
+		return str, p
 	end
-	while s:sub(1,1) == "*" do
-		s = s:sub(2)
-		s = s .. "*"
-	end
-	return s
 end
 
 --

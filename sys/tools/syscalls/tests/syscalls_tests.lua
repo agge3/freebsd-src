@@ -2,12 +2,8 @@
 --
 -- SPDX-License-Identifier: BSD-2-Clause
 --
--- Copyright (c) 2024 Tyler Baxter <agge@FreeBSD.org>
+-- Copyright (c) 2025 Tyler Baxter <agge@FreeBSD.org>
 --
-
--- See `install_test_suite.sh` for more information on dependencies.
-
-local syscalls_tests = {}
 
 -- Add library root to the package path.
 local path = arg[0]:gsub("/[^/]+.lua$", "")
@@ -23,28 +19,6 @@ local root = os.getenv("HOME") .. "/projects/freebsd-src"
 local sysfile = root .. "/sys/kern/syscalls.master"
 local configfile = root .. "/sys/kern/syscalls.conf"
 
--- Returns `syscalls.master` as a buffer, without preamble comments.
-local function scmasterBuf()
-	-- xxx change to be more integrated into make
-	local fh = assert(io.open("/sys/kern/syscalls.master", "r"))
-	local scmaster = {}
-	local inserting = false
-
-	for line in fh:lines() do
-		-- Start inserting at system call number zero.
-		if string.match(line, "^0") then
-			inserting = true
-		end
-		if inserting then
-			-- Store in a local buffer.
-			table.insert(scmaster, line)
-		end
-	end
-
-	fh:close()
-	return scmaster
-end
-
 -- Normalize tokens by removing unexpected characters (e.g., whitespace) and
 -- splitting pointers attached to their operand into their own token. Returns
 -- the normalized tokens.
@@ -57,35 +31,23 @@ local function processTokens(words)
 		-- utilities.
 		v = tostring(v)
 
-		-- Remove any special characters.
-		v = v:gsub("[%s%c]", "")
+		-- Strip whitespace and special whitespace. Strip commas too as
+		-- they're only purpose is for argument lists (preserving
+		-- doesn't matter for confirming our tokens match).
+		v = v:gsub("[%s%c,]", "")
 
 		-- xxx can have a better condition for if v is already split.
-		if v:match("^%*+") and v ~= "*" and v ~= "**" then
+		if v ~= "*" and v ~= "**" and
+		    (v:match("^%*+") or v:match("%*+$")) then
 			-- Split pointers into separate tokens.
-			v = util.splitPointer(v)
-
-			-- To keep order with our parsing, we need to insert in
-			-- reverse order of what splitPointer() returns.
-			local w = util.split(v, "%S+")
-			table.insert(new_words, w[2])
-			table.insert(new_words, w[1])
+			local s1, s2 = util.splitPointer(v)
+			table.insert(new_words, s1)
+			table.insert(new_words, s2)
 		else
 		      table.insert(new_words, v)
 		end
 	end
 	return new_words
-end
-
-local function checkType(s1, s2, idx)
-	local w1 = util.setFromString(s1, "[^|]+")
-	local w2 = util.setFromString(s2, "[^|]+")
-
-	for k, _ in pairs(w1) do
-		if not w2[k] then
-			print("Missing types at line " .. idx .. ".\n")
-		end
-	end
 end
 
 local function typeToStr(sc)
@@ -108,6 +70,42 @@ local function typeToStr(sc)
 		end
 	end
 	return type_str
+end
+
+local function checkType(s1, s2, idx)
+	local w1 = util.setFromString(s1, "[^|]+")
+	local w2 = util.setFromString(s2, "[^|]+")
+
+	for k, _ in pairs(w1) do
+		if not w2[k] then
+			print("Missing types at line " .. idx .. ".\n")
+		end
+	end
+end
+
+local function checkMatch(orig_words, new_words, idx)
+	local fail = false
+	for i = 1, #orig_words do
+		-- Construct the debug strings first; it's okay
+		-- if we index NIL in Lua.
+		if orig_words[i] ~= new_words[i] then
+			fail = true
+		end
+	end
+	if fail then
+		local orig_str = ""
+		local new_str = ""
+		for _, v in ipairs(orig_words) do
+			orig_str = orig_str .. v .. " "
+		end
+		for _, v in ipairs(new_words) do
+			new_str = new_str .. v .. " "
+		end
+
+		print("Token mismatch at line " .. idx .. ".")
+		print("Expected: " .. orig_str)
+		print("Actual:   " .. new_str .. "\n")
+	end
 end
 
 -- This test works by reconstructing `syscalls.master`. We should be able to
@@ -218,31 +216,6 @@ local function genScmasterNative(tbl)
 	return scmaster
 end
 
-local function checkMatch(orig_words, new_words, idx)
-	local fail = false
-	for i = 1, #orig_words do
-		-- Construct the debug strings first; it's okay
-		-- if we index NIL in Lua.
-		if orig_words[i] ~= new_words[i] then
-			fail = true
-		end
-	end
-	if fail then
-		local orig_str = ""
-		local new_str = ""
-		for _, v in ipairs(orig_words) do
-			orig_str = orig_str .. v .. " "
-		end
-		for _, v in ipairs(new_words) do
-			new_str = new_str .. v .. " "
-		end
-
-		print("Token mismatch at line " .. idx .. ".")
-		print("Expected: " .. orig_str)
-		print("Actual:   " .. new_str .. "\n")
-	end
-end
-
 local function cmpScmasterNative(tbl)
 	-- xxx change to be more integrated into make
 	local fh = assert(io.open(sysfile, "r"))
@@ -317,25 +290,19 @@ local function cmpScmasterNative(tbl)
 	fh:close()
 end
 
-local function main()
-	if not debug then
-		if #arg < 1 or #arg > 2 then
-			error("usage: " .. arg[0] .. " syscall.master")
-			sysfile, configfile = arg[1], arg[2]
-		end
+-- Main entry:
+if not debug then
+	if #arg < 1 or #arg > 2 then
+		error("usage: " .. arg[0] .. " syscall.master")
+		sysfile, configfile = arg[1], arg[2]
 	end
-
-	config.merge(configfile)
-	config.mergeCompat()
-
-	local tbl = FreeBSDSyscall:new({ sysfile = sysfile, config = config })
-
-	cmpScmasterNative(tbl)
 end
 
--- Main entry:
-main()
+config.merge(configfile)
+config.mergeCompat()
 
-return syscalls_tests
+local tbl = FreeBSDSyscall:new({ sysfile = sysfile, config = config })
+
+cmpScmasterNative(tbl)
 
 -- vim: filetype=lua:noexpandtab:shiftwidth=8:tabstop=8:softtabstop=8:textwidth=80
